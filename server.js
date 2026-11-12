@@ -170,4 +170,4 @@ if (require.main === module) {
   const port = process.env.PORT || 3000;
   server.listen(port, '0.0.0.0', () => console.log(`Phase 10 → http://localhost:${port}`));
 }
-module.exports = server;
+module.exports = Object.assign(server, { rooms }); // rooms 只給測試改狀態用

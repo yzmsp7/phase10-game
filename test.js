@@ -371,6 +371,12 @@ for (let np = 2; np <= 6; np++) {
   assert.equal((await post('act', { ...host, action: { type: 'draw', from: 'pile' } })).status === 200 || true, true);
   assert.equal((await post('act', { code: host.code, token: 'bad', action: {} })).status, 404);
   assert.equal((await post('leave', guests[0])).status, 400, '遊戲進行中不能離開（結束後才放行）');
+  const room = server.rooms.get(host.code);
+  room.game.status = 'over';
+  assert.equal((await post('leave', guests[0])).status, 200, '遊戲結束後非房主可以離開');
+  assert.equal(room.players.length, 5);
+  assert.ok(!room.players.some((p) => p.token === guests[0].token), '離開的人要從房間移除');
+  assert.equal(room.players.find((p) => p.id === room.host).token, host.token, '非房主離開不影響房主');
   server.close();
   console.log('✅ 全部測試通過');
   process.exit(0);
