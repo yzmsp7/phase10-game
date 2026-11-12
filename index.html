@@ -21,6 +21,7 @@ input,select{background:#0c2f23;color:var(--ink);border:1px solid #2f7d5f}
 .mute{color:var(--mute)}.big{font-size:32px;letter-spacing:6px;font-weight:700}
 .player{background:var(--panel2);border-radius:10px;padding:8px 12px;min-width:120px;flex:1;border:2px solid transparent}
 .player.turn{border-color:var(--accent)}.player.out{opacity:.4}
+.pick{margin-top:4px;font-size:13px;display:flex;align-items:center;gap:6px}.pick .card{box-shadow:none}
 .player b{display:block}.player small{color:var(--mute)}
 .table{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start}
 .piles{display:flex;gap:12px}
@@ -35,6 +36,10 @@ input,select{background:#0c2f23;color:var(--ink);border:1px solid #2f7d5f}
 .card.R{background:var(--R)}.card.B{background:var(--B)}.card.G{background:var(--G)}.card.Y{background:var(--Y);color:#2a2200}
 .card.W{background:conic-gradient(var(--R),var(--Y),var(--G),var(--B),var(--R))}.card.W b,.card.W i,.card.W u{text-shadow:0 0 4px #000,0 0 2px #000}
 .card.S{background:#222}.card.back{background:repeating-linear-gradient(45deg,#7b2d8f,#7b2d8f 6px,#5d2070 6px,#5d2070 12px);font-size:11px}
+.card.new{outline:3px solid #fff;box-shadow:0 0 12px 3px var(--accent)}
+.card.new::after{content:'新';position:absolute;top:-10px;left:-6px;background:var(--accent);color:#2a2200;font-size:11px;line-height:16px;border-radius:8px;padding:0 6px}
+.card.pop{animation:pop .7s cubic-bezier(.2,1.4,.4,1)}
+@keyframes pop{from{transform:translateY(-110px) scale(.4) rotate(-20deg);opacity:0}to{transform:none;opacity:1}}
 .card.sel{transform:translateY(-12px);outline:3px solid var(--accent)}
 .card.empty{background:transparent;border:2px dashed var(--mute);color:var(--mute);box-shadow:none}
 .hand{display:flex;flex-wrap:wrap;gap:6px;padding:16px 0 4px}
@@ -63,7 +68,7 @@ const store = {
   set(v) { try { v ? localStorage.setItem('p10', JSON.stringify(v)) : localStorage.removeItem('p10'); } catch {} },
 };
 const urlRoom = (new URLSearchParams(location.search).get('room') || '').toUpperCase();
-let sess = store.get(), snap = null, es = null, sel = new Set(), slots = {}, rulesOpen = true; // 每次 render 會重建 DOM，展開狀態要存在這
+let sess = store.get(), snap = null, es = null, sel = new Set(), slots = {}, seen = null, rulesOpen = true; // 每次 render 會重建 DOM，展開狀態要存在這
 if (sess && urlRoom && sess.code !== urlRoom) sess = null; // 邀請連結指向另一間房 → 先顯示加入畫面
 
 function toast(m) {
@@ -133,6 +138,12 @@ function game() {
   const ids = new Set(g.hand.map((c) => c.id));
   sel.forEach((id) => ids.has(id) || sel.delete(id));
   Object.keys(slots).forEach((id) => ids.has(+id) || delete slots[id]);
+  // 抽牌動畫：手牌比上次多出來的牌 = 剛抽到的（只在該次 render 播動畫），標記「新」直到我棄牌結束回合
+  if (seen?.round !== g.round) seen = { round: g.round, ids: null, drawn: null }; // 新回合發牌不算抽牌
+  const fresh = seen.ids ? [...ids].filter((id) => !seen.ids.has(id)) : [];
+  seen.ids = ids;
+  if (!canAct || !ids.has(seen.drawn)) seen.drawn = null;
+  if (fresh.length === 1) seen.drawn = fresh[0];
   const rank = (c) => (c.t === 'n' ? c.n * 4 + 'RBGY'.indexOf(c.c) : c.t === 'w' ? 100 : 101);
   const hand = [...g.hand].sort((a, b) => rank(a) - rank(b));
   const req = g.phases[mine.phase - 1] || [];
@@ -141,7 +152,8 @@ function game() {
 
   const players = g.players.map((p) => `<div class="player ${g.turn === p.id ? 'turn' : ''} ${p.in ? '' : 'out'}">
     <b>${esc(p.name)}${p.id === me ? '（你）' : ''} ${online[p.id] ? '' : '💤'}</b>
-    <small>階段 ${p.phase > 10 ? 10 : p.phase} ${p.laid ? '✅' : ''} · ${p.n} 張 · ${p.score} 分${p.skip === 1 ? ' · ⏭將被跳過' : ''}</small></div>`).join('');
+    <small>階段 ${p.phase > 10 ? 10 : p.phase} ${p.laid ? '✅' : ''} · ${p.n} 張 · ${p.score} 分${p.skip === 1 ? ' · ⏭將被跳過' : ''}</small>
+    ${p.id === me || !p.pick ? '' : `<div class="pick">${p.pick.from === 'pile' ? '🂠 抽牌堆' : `♻ 撿棄牌 ${card(p.pick.card, { tag: 'span', cls: 'sm' })}`}</div>`}</div>`).join('');
 
   // 排名：先比階段（高者優先）再比分數（低者優先）。同條件並列同名次。
   const cmp = (a, b) => b.phase - a.phase || a.score - b.score;
@@ -193,7 +205,7 @@ function game() {
     <h2>你的階段 ${mine.phase}：${req.map(lab).join(' ＋ ')} ${mine.laid ? '✅ 已完成' : ''}</h2>
     <div><b>${status}</b></div>
     ${layUI}
-    <div class="hand">${free.map((c) => card(c, { cls: sel.has(c.id) ? 'sel' : '', attrs: `data-a="card" data-v="${c.id}"` })).join('')}</div>
+    <div class="hand">${free.map((c) => card(c, { cls: `${sel.has(c.id) ? 'sel' : ''} ${c.id === seen.drawn ? 'new' : ''} ${fresh.includes(c.id) ? 'pop' : ''}`, attrs: `data-a="card" data-v="${c.id}"` })).join('')}</div>
     ${discard}
   </div>
   <div class="log">${g.log.map(esc).join('<br>')}</div>
@@ -216,6 +228,7 @@ function overlay(g, s) {
 
 function render() {
   const keep = $('#name')?.value;
+  if (!snap?.game) seen = null; // 離開／重開一場遊戲後不要沿用舊手牌
   $('#app').innerHTML = !sess ? lobby() : !snap ? '<p>連線中…</p>' : snap.game ? game() : room();
   if (keep !== undefined && $('#name')) $('#name').value = keep;
 }

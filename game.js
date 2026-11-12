@@ -109,7 +109,7 @@ function startRound(g) {
   const d = shuffle(deck());
   for (const p of g.players) {
     p.in = !g.playoff || g.playoff.includes(p.id);
-    p.laid = false; p.skip = 0;
+    p.laid = false; p.skip = 0; p.pick = null;
     p.hand = p.in ? d.splice(0, HAND) : [];
   }
   g.disc = [d.pop()];
@@ -178,10 +178,12 @@ function act(g, pid, a) {
         const top = g.disc.at(-1);
         if (!top || top.t === 's') err('跳過牌不能撿');
         p.hand.push(g.disc.pop());
+        p.pick = { from: 'discard', card: p.hand.at(-1) }; // 棄牌堆頂本來就公開，所以連牌面一起給別人看
       } else {
         if (!g.draw.length) { const top = g.disc.pop(); g.draw = shuffle(g.disc); g.disc = [top]; }
         if (!g.draw.length) err('牌堆已空，請改拿棄牌');
         p.hand.push(g.draw.pop());
+        p.pick = { from: 'pile' }; // 牌堆抽的牌不公開
       }
       g.stage = 'act';
       return;
@@ -248,7 +250,7 @@ function view(g, pid) {
     target: g.target, round: g.round, status: g.status, stage: g.stage, playoff: !!g.playoff,
     turn: g.status === 'play' ? g.players[g.turn].id : null,
     drawCount: g.draw.length, top: g.disc.at(-1) || null,
-    players: g.players.map((p) => ({ id: p.id, name: p.name, phase: p.phase, score: p.score, laid: p.laid, n: p.hand.length, skip: p.skip, in: p.in })),
+    players: g.players.map((p) => ({ id: p.id, name: p.name, phase: p.phase, score: p.score, laid: p.laid, n: p.hand.length, skip: p.skip, in: p.in, pick: p.pick })),
     groups: g.groups, hand: me.hand, phases: PHASES, log: g.log.slice(-8),
     summary: g.summary, winners: g.winners,
   };

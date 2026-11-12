@@ -123,8 +123,12 @@ const plain = (p) => p.hand.find((x) => x.t !== 's').id;
   assert.equal(a.hand.length, 1);
   // b 抽完、c 抽完
   G.act(g, b.id, { type: 'draw', from: 'discard' }); // 撿到 1
+  const pk = (id) => G.view(g, a.id).players.find((p) => p.id === id).pick;
+  assert.equal(pk(b.id).from, 'discard');
+  assert.equal(pk(b.id).card.n, 1, '撿棄牌：大家看得到撿了哪張');
   G.act(g, b.id, { type: 'discard', card: b.hand.find((x) => x.t === 'n' && x.n === 3).id });
   G.act(g, c.id, { type: 'draw', from: 'pile' });
+  assert.deepEqual(pk(c.id), { from: 'pile' }, '抽牌堆：只知道來源，不洩漏牌面');
   G.act(g, c.id, { type: 'discard', card: plain(c) });
   // a 再抽，棄掉最後一張 → 出完
   G.act(g, a.id, { type: 'draw', from: 'pile' });
