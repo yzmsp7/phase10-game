@@ -471,6 +471,23 @@ for (let np = 2; np <= 6; np++) {
   assert.equal((await post('leave', g2)).status, 200, '遊戲結束後非房主可以離開');
   assert.equal(room2.players.length, 1);
   assert.ok(!room2.game.players.some((p) => p.left), '結束後離開不標記 left');
+  // 回合倒數：建房可設秒數（10–600，預設 60），超時（連線中的玩家也一樣）自動代打換人
+  assert.equal(room2.settings.turn, 60, '預設 60 秒');
+  assert.equal((await post('create', { name: 'x', turn: 5 })).status, 400, '秒數太小');
+  assert.equal((await post('create', { name: 'x', turn: 601 })).status, 400, '秒數太大');
+  assert.equal((await post('create', { name: 'x', turn: 'a' })).status, 400, '秒數不是整數');
+  const h3 = (await post('create', { name: 'H3', turn: 30 })).json;
+  await post('join', { code: h3.code, name: 'G3' });
+  const room3 = server.rooms.get(h3.code);
+  assert.equal(room3.settings.turn, 30);
+  room3.settings.turn = 0.3; // 測試用：直接改成 0.3 秒，不然要等 10 秒以上
+  const ac3 = new AbortController();
+  await fetch(`${base}/api/events?code=${h3.code}&token=${h3.token}`, { signal: ac3.signal }); // 要有人連線倒數才會跑
+  await post('start', h3);
+  const no0 = room3.game.turnNo;
+  await new Promise((res) => setTimeout(res, 800));
+  assert.ok(room3.game.turnNo > no0, '超時自動代打、換人');
+  ac3.abort();
   server.close();
   console.log('✅ 全部測試通過');
   process.exit(0);

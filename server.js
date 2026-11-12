@@ -6,14 +6,14 @@ const path = require('node:path');
 const { randomInt, randomUUID } = require('node:crypto');
 const G = require('./game');
 
-const MAX = 6, MIN = 2, AFK_MS = 60_000; // 手機切去 LINE 回訊息再回來要來得及，所以不能太短
+const MAX = 6, MIN = 2, TURN_SEC = 60; // 每回合預設秒數；建房時可改（10–600），手機切去 LINE 回訊息再回來要來得及，所以下限不能太短
 const rooms = new Map();
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
 
-function newRoom() {
+function newRoom(turn) {
   let code;
   do { code = Array.from({ length: 4 }, () => CODE_CHARS[randomInt(CODE_CHARS.length)]).join(''); } while (rooms.has(code));
-  const r = { code, players: [], host: null, settings: { target: 10 }, game: null, clients: new Map(), touched: Date.now(), timer: null };
+  const r = { code, players: [], host: null, settings: { target: 10, turn }, game: null, clients: new Map(), touched: Date.now(), timer: null, dl: null };
   rooms.set(code, r);
   return r;
 }
@@ -33,6 +33,7 @@ const online = (room, id) => (room.clients.get(id)?.size ?? 0) > 0;
 function snapshot(room, pid) {
   return {
     code: room.code, me: pid, host: room.host, settings: room.settings,
+    turnLeft: room.dl && Math.max(0, room.dl.at - Date.now()), // 剩餘毫秒（不傳絕對時間，免得被手機時鐘誤差影響）
     players: room.players.map((p) => ({ id: p.id, name: p.name, online: online(room, p.id) })),
     game: room.game ? G.view(room.game, pid) : null,
   };
@@ -40,26 +41,27 @@ function snapshot(room, pid) {
 
 function broadcast(room) {
   room.touched = Date.now();
+  watch(room); // 先定好期限，快照才帶得到剩餘秒數
   for (const [pid, set] of room.clients) {
     const data = `data: ${JSON.stringify(snapshot(room, pid))}\n\n`;
     for (const res of set) res.write(data);
   }
-  watch(room);
 }
 
-// 輪到離線玩家時，等 AFK_MS 後自動代打（抽牌堆、棄最大張）。
-// ponytail: 只處理離線；在線但發呆的玩家不會被代打，需要時加回合計時器。
+// 回合倒數：每個回合（g.turnNo）開始時定下期限，其餘廣播只重掛 timer 不重設；
+// 時間到就代打（抽牌堆、棄最大張）。沒在玩或全員離線就凍結，有人回來時重新計時。
 function watch(room) {
   clearTimeout(room.timer);
   const g = room.game;
-  if (!g || g.status !== 'play') return;
-  const cur = g.players[g.turn].id;
-  if (online(room, cur) || ![...room.clients.values()].some((s) => s.size)) return; // 全員離線就凍結
+  if (!g || g.status !== 'play' || ![...room.clients.values()].some((s) => s.size)) { room.dl = null; return; }
+  const no = g.turnNo, cur = g.players[g.turn].id;
+  if (room.dl?.no !== no) room.dl = { no, at: Date.now() + room.settings.turn * 1000 };
   room.timer = setTimeout(() => {
-    if (room.game !== g || g.status !== 'play' || g.players[g.turn].id !== cur || online(room, cur)) return;
+    if (room.game !== g || g.status !== 'play' || g.turnNo !== no) return;
+    room.dl = null; // 代打若失敗（牌堆空）也會重新倒數，不會空轉
     try { G.autoPlay(g, cur); } catch (e) { console.error(e); }
     broadcast(room);
-  }, AFK_MS);
+  }, Math.max(0, room.dl.at - Date.now()));
   room.timer.unref();
 }
 
@@ -144,8 +146,11 @@ const server = http.createServer(async (req, res) => {
       const b = await body(req), name = url.pathname.slice(5);
       if (name === 'create' || name === 'join') {
         let room;
-        if (name === 'create') room = newRoom();
-        else {
+        if (name === 'create') {
+          const turn = b.turn ?? TURN_SEC;
+          if (!Number.isInteger(turn) || turn < 10 || turn > 600) G.err('每回合秒數要在 10–600 之間');
+          room = newRoom(turn);
+        } else {
           room = rooms.get(String(b.code ?? '').toUpperCase());
           if (!room) G.err('找不到這個房間');
           if (room.game) G.err('遊戲已經開始，無法加入');

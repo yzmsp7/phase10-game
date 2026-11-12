@@ -123,6 +123,7 @@ function startRound(g) {
 
 // 回合開始：處理被跳過的玩家。skip 狀態 0=正常 1=等著被跳過 2=剛被跳過（下一個正常回合前不能再被跳）
 function begin(g) {
+  g.turnNo = (g.turnNo || 0) + 1; // 每次換人 +1，伺服器靠它判斷「新回合」該重設倒數
   for (let p = g.players[g.turn]; p.skip === 1; p = g.players[g.turn]) {
     p.skip = 2; log(g, `${p.name} 被跳過一回合`); g.turn = nextIn(g, g.turn);
   }

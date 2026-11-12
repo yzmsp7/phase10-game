@@ -102,7 +102,7 @@ const store = {
   set(v) { try { v ? localStorage.setItem('p10', JSON.stringify(v)) : localStorage.removeItem('p10'); } catch {} },
 };
 const urlRoom = (new URLSearchParams(location.search).get('room') || '').toUpperCase();
-let sess = store.get(), snap = null, es = null, sel = new Set(), slots = {}, seen = null, sheet = false, endFor = null, actSlot = null; // 每次 render 會重建 DOM，UI 狀態要存在這：sheet = 底部資訊面板開著；endFor = 正在選「接前/接後」的順子；actSlot = 放階段時作用中的那一組
+let dl = null, sess = store.get(), snap = null, es = null, sel = new Set(), slots = {}, seen = null, sheet = false, endFor = null, actSlot = null; // 每次 render 會重建 DOM，UI 狀態要存在這：sheet = 底部資訊面板開著；endFor = 正在選「接前/接後」的順子；actSlot = 放階段時作用中的那一組
 if (sess && urlRoom && sess.code !== urlRoom) sess = null; // 邀請連結指向另一間房 → 先顯示加入畫面
 
 function toast(m) {
@@ -124,7 +124,8 @@ function connect() {
   es.onmessage = (e) => {
     const d = JSON.parse(e.data);
     if (d.closed) { exit(); return toast(d.closed); } // 房間被關（遊戲中只剩一人）→ 回首頁並說明原因
-    snap = d; if (!document.activeElement?.matches?.('select')) render();
+    snap = d; dl = d.turnLeft == null ? null : Date.now() + d.turnLeft; // 伺服器傳剩餘毫秒，用本機時鐘算期限
+    if (!document.activeElement?.matches?.('select')) render(); else tick();
   };
   es.onerror = () => { if (es.readyState === EventSource.CLOSED) { toast('連線中斷或房間已過期'); exit(); } };
 }
@@ -150,7 +151,8 @@ const card = (c, o = {}) => {
 function lobby() {
   return `<h1>🃏 Phase 10 線上</h1>
   <div class="panel"><h2>你的名字</h2><input id="name" maxlength="12" placeholder="最多 12 字" value="${esc(localStorage.getItem('p10name') || '')}"></div>
-  ${urlRoom ? '' : `<div class="panel"><h2>開新房間</h2><button data-a="create">建立房間</button></div>`}
+  ${urlRoom ? '' : `<div class="panel"><h2>開新房間</h2><div class="row"><label for="turn">每回合秒數</label><input id="turn" type="number" inputmode="numeric" min="10" max="600" value="60" style="width:96px"><button data-a="create">建立房間</button></div>
+    <p class="mute" style="margin:8px 0 0">時間到會自動代打（抽牌堆、棄最大張）。10–600 秒。</p></div>`}
   <div class="panel"><h2>${urlRoom ? '你被邀請加入房間' : '加入房間'}</h2>
     <div class="row"><input id="code" maxlength="4" size="6" placeholder="房間代碼" value="${esc(urlRoom)}" style="text-transform:uppercase" autocapitalize="characters" autocorrect="off" autocomplete="off" spellcheck="false"><button data-a="join">加入</button>
     ${urlRoom ? '<button class="ghost" data-a="home">改為開新房間</button>' : ''}</div></div>
@@ -168,6 +170,7 @@ function room() {
   <div class="panel"><h2>玩家（${n}/6）</h2>
     ${s.players.map((p) => `<div><span class="dot ${p.online ? 'on' : ''}"></span>${esc(p.name)} ${p.id === s.host ? '<span class="crown">👑 房主</span>' : ''} ${p.id === s.me ? '<span class="mute">（你）</span>' : ''}</div>`).join('')}</div>
   <div class="panel"><h2>規則</h2>${set}
+    <p>每回合 ${st.turn} 秒，超時自動代打。</p>
     <p class="mute">每人發 10 張牌。只有完成當前階段的人，下一回合才能進下一階段；沒完成就繼續挑戰同一階段。有人完成目標階段後，該回合結束時比總分（低者勝）。</p></div>
   <div class="row">${host ? `<button data-a="start" ${n < 2 ? 'disabled' : ''}>開始遊戲</button>${n < 2 ? '<span class="mute">至少需要 2 人</span>' : ''}` : '<span class="mute">等待房主開始…</span>'}
   <button class="ghost" data-a="leave">離開房間</button></div>`;
@@ -253,7 +256,7 @@ function game() {
     <button class="ghost" data-a="leave" style="width:100%;margin-top:16px">離開房間</button></div></div>` : '';
 
   return `<div class="row"><b style="flex:1">房間 ${s.code} · 第 ${g.round} 回合${g.playoff ? '（加賽）' : ''}</b>
-    <span class="mute">目標：階段 ${g.target}</span><button class="ghost ic" data-a="sheet" aria-label="排名、階段表、動態">📋</button></div>
+    <span class="mute">目標：階段 ${g.target}</span><b class="cd" aria-live="off"></b><button class="ghost ic" data-a="sheet" aria-label="排名、階段表、動態">📋</button></div>
   <div class="row players">${players}</div>
   <div class="panel table">
     <div class="piles">
@@ -295,10 +298,19 @@ function render() {
   if (!snap?.game) seen = null; // 離開／重開一場遊戲後不要沿用舊手牌
   $('#app').innerHTML = !sess ? lobby() : !snap ? '<p>連線中…</p>' : snap.game ? game() : room();
   if (keep !== undefined && $('#name')) $('#name').value = keep;
+  tick();
 }
+// 倒數只改文字，不重繪 DOM；最後 10 秒變紅
+function tick() {
+  const el = $('.cd'); if (!el) return;
+  const s = dl == null ? null : Math.max(0, Math.ceil((dl - Date.now()) / 1000));
+  el.textContent = s == null ? '' : `⏱ ${s}`;
+  el.style.color = s != null && s <= 10 ? '#ff8a80' : '';
+}
+setInterval(tick, 250);
 
 const A = {
-  async create() { const r = await post('create', { name: $('#name').value }).catch((e) => toast(e.message)); if (r) { localStorage.setItem('p10name', $('#name').value); enter(r); } },
+  async create() { const r = await post('create', { name: $('#name').value, turn: +$('#turn').value }).catch((e) => toast(e.message)); if (r) { localStorage.setItem('p10name', $('#name').value); enter(r); } },
   async join() { const r = await post('join', { name: $('#name').value, code: $('#code').value }).catch((e) => toast(e.message)); if (r) { localStorage.setItem('p10name', $('#name').value); enter(r); } },
   home() { history.replaceState(null, '', '/'); location.reload(); },
   async copy() {
