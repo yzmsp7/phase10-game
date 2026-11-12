@@ -339,9 +339,16 @@ for (let np = 2; np <= 6; np++) {
     const ac = new AbortController();
     const r = await fetch(`${base}/api/events?code=${a.code}&token=${a.token}`, { signal: ac.signal });
     const reader = r.body.getReader();
-    const { value } = await reader.read();
+    // 一個 chunk 可能含多個事件（前一條連線關閉也會觸發廣播），或事件被切開：讀到完整第一筆再解析
+    let buf = '';
+    const dec = new TextDecoder();
+    while (!buf.includes('\n\n')) {
+      const { value, done } = await reader.read();
+      if (done) throw new Error('SSE 在收到完整事件前就被關閉');
+      buf += dec.decode(value, { stream: true });
+    }
     ac.abort();
-    return JSON.parse(new TextDecoder().decode(value).replace(/^data: /, ''));
+    return JSON.parse(buf.split('\n\n')[0].replace(/^data: /, ''));
   };
   let v = await sseOnce(host);
   assert.equal(v.players.length, 6);
