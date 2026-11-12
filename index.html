@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Phase 10 線上</title>
+<style>
+:root{--bg:#0f3d2e;--panel:#165740;--panel2:#1d6a4f;--ink:#f6f3ea;--mute:#a8c7b8;--accent:#f6c945;--R:#d64545;--B:#3b73d4;--G:#2e9e5b;--Y:#e0b020}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.4 system-ui,-apple-system,"Noto Sans TC",sans-serif}
+#app{max-width:1000px;margin:0 auto;padding:12px 16px 40px}
+h1{margin:8px 0 16px;font-size:26px;letter-spacing:.5px}h2{font-size:16px;margin:0 0 8px;color:var(--mute);font-weight:600}
+.panel{background:var(--panel);border-radius:12px;padding:14px;margin-bottom:12px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+button,select,input{font:inherit;border-radius:8px;border:0;padding:8px 14px}
+button{background:var(--accent);color:#2a2200;font-weight:600;cursor:pointer}
+button:disabled{opacity:.4;cursor:not-allowed}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--mute)}
+input,select{background:#0c2f23;color:var(--ink);border:1px solid #2f7d5f}
+.mute{color:var(--mute)}.big{font-size:32px;letter-spacing:6px;font-weight:700}
+.player{background:var(--panel2);border-radius:10px;padding:8px 12px;min-width:120px;flex:1;border:2px solid transparent}
+.player.turn{border-color:var(--accent)}.player.out{opacity:.4}
+.player b{display:block}.player small{color:var(--mute)}
+.table{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start}
+.piles{display:flex;gap:12px}
+.pile{text-align:center;font-size:12px;color:var(--mute)}
+.groups{display:flex;gap:8px;flex-wrap:wrap;flex:1;min-width:220px}
+.group{background:var(--panel2);border-radius:10px;padding:8px}
+.group .row{gap:4px}.group small{display:block;color:var(--mute);margin-bottom:4px}
+.card{position:relative;width:46px;height:64px;border-radius:7px;border:2px solid #fff;color:#fff;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;padding:0;font-weight:700;box-shadow:0 1px 3px #0006;flex:none}
+.card b{font-size:21px;line-height:1}.card i{font-style:normal;font-size:11px;opacity:.9}
+.card u{position:absolute;bottom:1px;right:3px;font-size:10px;text-decoration:none}
+.card.sm{width:34px;height:48px}.card.sm b{font-size:16px}
+.card.R{background:var(--R)}.card.B{background:var(--B)}.card.G{background:var(--G)}.card.Y{background:var(--Y);color:#2a2200}
+.card.W{background:conic-gradient(var(--R),var(--Y),var(--G),var(--B),var(--R))}.card.W b,.card.W i,.card.W u{text-shadow:0 0 4px #000,0 0 2px #000}
+.card.S{background:#222}.card.back{background:repeating-linear-gradient(45deg,#7b2d8f,#7b2d8f 6px,#5d2070 6px,#5d2070 12px);font-size:11px}
+.card.sel{transform:translateY(-12px);outline:3px solid var(--accent)}
+.card.empty{background:transparent;border:2px dashed var(--mute);color:var(--mute);box-shadow:none}
+.hand{display:flex;flex-wrap:wrap;gap:6px;padding:16px 0 4px}
+.slot{background:#0c2f23;border-radius:8px;padding:8px;margin-top:8px}
+.slotH{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+.slot .row{min-height:48px}
+.log{font-size:12px;color:var(--mute);max-height:90px;overflow:auto}
+.overlay{position:fixed;inset:0;background:#000a;display:flex;align-items:center;justify-content:center;padding:16px;z-index:5}
+.modal{background:var(--panel);border-radius:14px;padding:20px;max-width:560px;width:100%;max-height:90vh;overflow:auto}
+table{width:100%;border-collapse:collapse}td,th{padding:6px 4px;text-align:left}th{color:var(--mute);font-weight:500}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#000d;padding:10px 18px;border-radius:10px;z-index:9;display:none}
+.crown{color:var(--accent)}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;background:#777}.dot.on{background:#5fe08a}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast" role="status"></div>
+<script>
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const SYM = { R: '●', B: '■', G: '▲', Y: '◆' }, CN = { R: '紅', B: '藍', G: '綠', Y: '黃' };
+const lab = ([t, n]) => (t === 'set' ? `${n} 張同數字` : t === 'run' ? `${n} 張連續順子` : `${n} 張同顏色`);
+const store = {
+  get() { try { return JSON.parse(localStorage.getItem('p10') || 'null'); } catch { return null; } },
+  set(v) { try { v ? localStorage.setItem('p10', JSON.stringify(v)) : localStorage.removeItem('p10'); } catch {} },
+};
+const urlRoom = (new URLSearchParams(location.search).get('room') || '').toUpperCase();
+let sess = store.get(), snap = null, es = null, sel = new Set(), slots = {};
+if (sess && urlRoom && sess.code !== urlRoom) sess = null; // 邀請連結指向另一間房 → 先顯示加入畫面
+
+function toast(m) {
+  const t = $('#toast'); t.textContent = m; t.style.display = 'block';
+  clearTimeout(toast.t); toast.t = setTimeout(() => (t.style.display = 'none'), 2800);
+}
+async function post(name, data = {}) {
+  const r = await fetch('/api/' + name, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(data) });
+  const j = await r.json();
+  if (!r.ok) throw new Error(j.error || '發生錯誤');
+  return j;
+}
+const call = (name, data) => post(name, { ...sess, ...data }).catch((e) => toast(e.message));
+
+function connect() {
+  es?.close();
+  es = new EventSource(`/api/events?code=${sess.code}&token=${sess.token}`);
+  es.onmessage = (e) => { snap = JSON.parse(e.data); render(); };
+  es.onerror = () => { if (es.readyState === EventSource.CLOSED) { toast('連線中斷或房間已過期'); exit(); } };
+}
+function exit() {
+  es?.close(); sess = snap = null; sel.clear(); slots = {}; store.set(null);
+  history.replaceState(null, '', '/'); render();
+}
+function enter(r) {
+  sess = r; store.set(r); history.replaceState(null, '', '/?room=' + r.code); connect();
+}
+
+const card = (c, o = {}) => {
+  const cls = c.t === 'n' ? c.c : c.t === 'w' ? 'W' : 'S';
+  const face = c.t === 'n' ? c.n : c.t === 'w' ? 'W' : '⊘';
+  const sym = c.t === 'n' ? SYM[c.c] : c.t === 'w' ? '★' : 'SKIP';
+  const name = c.t === 'n' ? `${CN[c.c]}${c.n}` : c.t === 'w' ? '百搭' : '跳過';
+  return `<${o.tag || 'button'} class="card ${cls} ${o.cls || ''}" aria-label="${name}" ${o.attrs || ''}><b>${face}</b><i>${sym}</i>${o.sub ? `<u>${o.sub}</u>` : ''}</${o.tag || 'button'}>`;
+};
+
+function lobby() {
+  return `<h1>🃏 Phase 10 線上</h1>
+  <div class="panel"><h2>你的名字</h2><input id="name" maxlength="12" placeholder="最多 12 字" value="${esc(localStorage.getItem('p10name') || '')}"></div>
+  ${urlRoom ? '' : `<div class="panel"><h2>開新房間</h2><button data-a="create">建立房間</button></div>`}
+  <div class="panel"><h2>${urlRoom ? '你被邀請加入房間' : '加入房間'}</h2>
+    <div class="row"><input id="code" maxlength="4" size="6" placeholder="房間代碼" value="${esc(urlRoom)}" style="text-transform:uppercase"><button data-a="join">加入</button>
+    ${urlRoom ? '<button class="ghost" data-a="home">改為開新房間</button>' : ''}</div></div>
+  <p class="mute">2–6 人。建立房間後把邀請連結傳給朋友即可。</p>`;
+}
+
+function room() {
+  const s = snap, host = s.me === s.host, n = s.players.length, st = s.settings;
+  const link = `${location.origin}/?room=${s.code}`;
+  const set = host
+    ? `<div class="row"><select data-c="mode"><option value="phases" ${st.mode === 'phases' ? 'selected' : ''}>先完成目標階段者獲勝</option><option value="rounds" ${st.mode === 'rounds' ? 'selected' : ''}>固定 10 回合比總分</option></select>
+       ${st.mode === 'phases' ? `<select data-c="target">${[...Array(10)].map((_, i) => `<option value="${i + 1}" ${st.target === i + 1 ? 'selected' : ''}>目標：第 ${i + 1} 階段</option>`).join('')}</select>` : ''}</div>`
+    : `<div>${st.mode === 'phases' ? `先完成第 ${st.target} 階段者獲勝` : '固定 10 回合，總分最低者獲勝'}</div>`;
+  return `<h1>房間 <span class="big">${s.code}</span></h1>
+  <div class="panel"><h2>邀請朋友</h2><div class="row"><input readonly value="${esc(link)}" size="34" onfocus="this.select()"><button data-a="copy">複製連結</button></div></div>
+  <div class="panel"><h2>玩家（${n}/6）</h2>
+    ${s.players.map((p) => `<div><span class="dot ${p.online ? 'on' : ''}"></span>${esc(p.name)} ${p.id === s.host ? '<span class="crown">👑 房主</span>' : ''} ${p.id === s.me ? '<span class="mute">（你）</span>' : ''}</div>`).join('')}</div>
+  <div class="panel"><h2>規則（依人數 ${n} 人）</h2>${set}
+    <p class="mute">每人發 10 張牌。${st.mode === 'phases' ? (n >= 5 ? '人多時回合較長，預設縮短為 7 階段。' : '預設打完全部 10 階段。') + '房主改過目標後不再自動調整。' : '每回合所有人同步進入下一階段，不論有沒有完成。'}</p></div>
+  <div class="row">${host ? `<button data-a="start" ${n < 2 ? 'disabled' : ''}>開始遊戲</button>${n < 2 ? '<span class="mute">至少需要 2 人</span>' : ''}` : '<span class="mute">等待房主開始…</span>'}
+  <button class="ghost" data-a="leave">離開房間</button></div>`;
+}
+
+function game() {
+  const s = snap, g = s.game, me = s.me, mine = g.players.find((p) => p.id === me);
+  const myTurn = g.turn === me, canDraw = myTurn && g.stage === 'draw', canAct = myTurn && g.stage === 'act';
+  const online = Object.fromEntries(s.players.map((p) => [p.id, p.online]));
+  const ids = new Set(g.hand.map((c) => c.id));
+  sel.forEach((id) => ids.has(id) || sel.delete(id));
+  Object.keys(slots).forEach((id) => ids.has(+id) || delete slots[id]);
+  const rank = (c) => (c.t === 'n' ? c.n * 4 + 'RBGY'.indexOf(c.c) : c.t === 'w' ? 100 : 101);
+  const hand = [...g.hand].sort((a, b) => rank(a) - rank(b));
+  const req = g.phases[mine.phase - 1] || [];
+  const name = (id) => g.players.find((p) => p.id === id)?.name ?? '?';
+  const picked = hand.filter((c) => sel.has(c.id));
+
+  const players = g.players.map((p) => `<div class="player ${g.turn === p.id ? 'turn' : ''} ${p.in ? '' : 'out'}">
+    <b>${esc(p.name)}${p.id === me ? '（你）' : ''} ${online[p.id] ? '' : '💤'}</b>
+    <small>階段 ${p.phase > 10 ? 10 : p.phase} ${p.laid ? '✅' : ''} · ${p.n} 張 · ${p.score} 分${p.skip === 1 ? ' · ⏭將被跳過' : ''}</small></div>`).join('');
+
+  const groups = g.groups.map((gr, i) => {
+    const t = gr.type === 'set' ? `${gr.n} 同數` : gr.type === 'run' ? `順子 ${gr.lo}–${gr.hi}` : `同色（${CN[gr.c]}）`;
+    const cs = gr.cards.map((c, k) => card(c, { tag: 'div', cls: 'sm', sub: c.t === 'w' ? (gr.type === 'set' ? gr.n : gr.type === 'run' ? gr.lo + k : '') : '' })).join('');
+    const can = canAct && mine.laid && picked.length;
+    const btn = !can ? '' : gr.type === 'run'
+      ? `<div class="row" style="margin-top:6px"><button data-a="hit" data-v="${i}" data-end="lo">‹ 接前</button><button data-a="hit" data-v="${i}" data-end="hi">接後 ›</button></div>`
+      : `<div style="margin-top:6px"><button data-a="hit" data-v="${i}">接牌</button></div>`;
+    return `<div class="group"><small>${esc(name(gr.owner))} · ${t}</small><div class="row">${cs}</div>${btn}</div>`;
+  }).join('');
+
+  const need = req.map(([, n], gi) => hand.filter((c) => slots[c.id] === gi).length === n);
+  const layUI = canAct && !mine.laid ? `<div>${req.map((r, gi) => {
+    const cs = hand.filter((c) => slots[c.id] === gi);
+    return `<div class="slot"><div class="slotH"><span>組 ${gi + 1}：${lab(r)}（${cs.length}/${r[1]}）</span><button data-a="slot" data-v="${gi}" ${picked.length ? '' : 'disabled'}>放入選取的牌</button></div>
+      <div class="row">${cs.map((c) => card(c, { attrs: `data-a="unslot" data-v="${c.id}"` })).join('') || '<span class="mute">先選牌，再按右上角按鈕</span>'}</div></div>`;
+  }).join('')}<div class="row" style="margin-top:8px"><button data-a="lay" ${need.every(Boolean) ? '' : 'disabled'}>放下階段</button><span class="mute">順子可用百搭補洞；每組至少要有一張數字牌</span></div></div>` : '';
+
+  const free = hand.filter((c) => slots[c.id] === undefined);
+  const one = picked.length === 1 ? picked[0] : null;
+  const targets = g.players.filter((p) => p.in && p.id !== me && p.skip === 0);
+  const discard = !canAct ? '' : one?.t === 's' && targets.length && g.hand.length > 1
+    ? `<div class="row"><span>跳過誰？</span>${targets.map((p) => `<button data-a="discard" data-v="${p.id}">${esc(p.name)}</button>`).join('')}</div>`
+    : `<button data-a="discard" ${one ? '' : 'disabled'}>棄牌並結束回合</button>`;
+
+  const status = g.status !== 'play' ? '' : myTurn
+    ? (g.stage === 'draw' ? '輪到你了：先從牌堆或棄牌堆抽一張' : '放下階段／接牌，最後棄一張牌')
+    : `輪到 ${esc(name(g.turn))}`;
+
+  return `<div class="row" style="justify-content:space-between"><b>房間 ${s.code} · 第 ${g.round} 回合${g.playoff ? '（加賽）' : ''}</b>
+    <span class="mute">${g.mode === 'phases' ? `目標：第 ${g.target} 階段` : '10 回合比總分'}</span></div>
+  <div class="row" style="margin:10px 0">${players}</div>
+  <div class="panel table">
+    <div class="piles">
+      <div class="pile"><button class="card back" aria-label="抽牌堆" data-a="draw" data-v="pile" ${canDraw ? '' : 'disabled'}><b>抽牌</b></button><br>牌堆 ${g.drawCount}</div>
+      <div class="pile">${g.top ? card(g.top, { attrs: `data-a="draw" data-v="discard" ${canDraw && g.top.t !== 's' ? '' : 'disabled'}` }) : '<div class="card empty"></div>'}<br>棄牌</div>
+    </div>
+    <div class="groups">${groups || '<span class="mute">還沒有人放下階段</span>'}</div>
+  </div>
+  <div class="panel">
+    <h2>你的階段 ${mine.phase}：${req.map(lab).join(' ＋ ')} ${mine.laid ? '✅ 已完成' : ''}</h2>
+    <div><b>${status}</b></div>
+    ${layUI}
+    <div class="hand">${free.map((c) => card(c, { cls: sel.has(c.id) ? 'sel' : '', attrs: `data-a="card" data-v="${c.id}"` })).join('')}</div>
+    ${discard}
+  </div>
+  <div class="log">${g.log.map(esc).join('<br>')}</div>
+  ${g.status === 'play' ? '' : overlay(g, s)}`;
+}
+
+function overlay(g, s) {
+  const sm = g.summary, over = g.status === 'over', host = s.me === s.host;
+  const nm = (id) => esc(g.players.find((p) => p.id === id).name);
+  return `<div class="overlay"><div class="modal">
+    <h2>${over ? '🏆 遊戲結束' : '回合結束'}</h2>
+    ${over ? `<p style="font-size:20px"><b>勝利：${g.winners.map(nm).join('、')}</b></p>` : `<p><b>${nm(sm.out)}</b> 出完牌！</p>`}
+    <table><tr><th>玩家</th><th>階段</th><th>本回合</th><th>總分</th></tr>
+    ${sm.rows.map((r) => `<tr><td>${esc(r.name)}</td><td>${r.phase} ${r.laid ? '✅' : '❌'}</td><td>+${r.gain}</td><td>${r.score}</td></tr>`).join('')}</table>
+    ${sm.note ? `<p>${esc(sm.note)}</p>` : ''}
+    <div class="row" style="margin-top:12px">${over
+      ? (host ? '<button data-a="back">回到房間</button>' : '<span class="mute">等待房主…</span>')
+      : '<button data-a="next">下一回合</button>'}</div></div></div>`;
+}
+
+function render() {
+  const keep = $('#name')?.value;
+  $('#app').innerHTML = !sess ? lobby() : !snap ? '<p>連線中…</p>' : snap.game ? game() : room();
+  if (keep !== undefined && $('#name')) $('#name').value = keep;
+}
+
+const A = {
+  async create() { const r = await post('create', { name: $('#name').value }).catch((e) => toast(e.message)); if (r) { localStorage.setItem('p10name', $('#name').value); enter(r); } },
+  async join() { const r = await post('join', { name: $('#name').value, code: $('#code').value }).catch((e) => toast(e.message)); if (r) { localStorage.setItem('p10name', $('#name').value); enter(r); } },
+  home() { history.replaceState(null, '', '/'); location.reload(); },
+  async copy() {
+    const l = `${location.origin}/?room=${snap.code}`;
+    try { await navigator.clipboard.writeText(l); toast('已複製邀請連結'); } catch { prompt('複製這個連結傳給朋友：', l); }
+  },
+  start: () => call('start'),
+  async leave() { await call('leave'); exit(); },
+  back: () => call('back'),
+  next: () => call('act', { action: { type: 'next' } }),
+  draw: (v) => call('act', { action: { type: 'draw', from: v } }),
+  card(v) { sel.has(+v) ? sel.delete(+v) : sel.add(+v); render(); },
+  slot(v) { sel.forEach((id) => (slots[id] = +v)); sel.clear(); render(); },
+  unslot(v) { delete slots[v]; render(); },
+  async lay() {
+    const req = snap.game.phases[snap.game.players.find((p) => p.id === snap.me).phase - 1];
+    const groups = req.map((_, gi) => Object.keys(slots).filter((id) => slots[id] === gi).map(Number));
+    if (await call('act', { action: { type: 'lay', groups } })) slots = {};
+  },
+  hit: (v, el) => call('act', { action: { type: 'hit', group: +v, cards: [...sel], end: el.dataset.end } }).then((r) => r && sel.clear()),
+  discard: (v) => call('act', { action: { type: 'discard', card: [...sel][0], target: v } }).then((r) => r && sel.clear()),
+};
+$('#app').addEventListener('click', (e) => {
+  const el = e.target.closest('[data-a]');
+  if (el && !el.disabled) A[el.dataset.a]?.(el.dataset.v, el);
+});
+$('#app').addEventListener('change', (e) => {
+  const k = e.target.dataset.c;
+  if (k) call('settings', { [k]: k === 'target' ? +e.target.value : e.target.value });
+});
+if (sess) connect(); else render();
+</script>
+</body>
+</html>
