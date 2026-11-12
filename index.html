@@ -53,6 +53,15 @@ table{width:100%;border-collapse:collapse}td,th{padding:6px 4px;text-align:left}
 #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#000d;padding:10px 18px;border-radius:10px;z-index:9;display:none}
 tr.me{color:var(--accent);font-weight:600}h2 small{font-weight:400}
 .crown{color:var(--accent)}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;background:#777}.dot.on{background:#5fe08a}
+@media(max-width:600px){
+#app{padding:8px 8px 32px}.panel{padding:10px}h1{font-size:22px}
+.player{min-width:calc(50% - 4px);padding:6px 10px}
+.piles{width:100%;justify-content:center}.groups{min-width:0;width:100%}
+.hand{gap:4px}.card{width:40px;height:56px}.card b{font-size:18px}.card.sm{width:32px;height:46px}
+button,select,input{min-height:40px}
+.slotH{flex-wrap:wrap}.big{font-size:26px;letter-spacing:4px}
+input[readonly]{width:100%}
+}
 </style>
 </head>
 <body>
@@ -139,7 +148,7 @@ function game() {
   sel.forEach((id) => ids.has(id) || sel.delete(id));
   Object.keys(slots).forEach((id) => ids.has(+id) || delete slots[id]);
   // 抽牌動畫：手牌比上次多出來的牌 = 剛抽到的（只在該次 render 播動畫），標記「新」直到我棄牌結束回合
-  if (seen?.round !== g.round) seen = { round: g.round, ids: null, drawn: null }; // 新回合發牌不算抽牌
+  if (seen?.round !== g.round) { seen = { round: g.round, ids: null, drawn: null }; slots = {}; } // 新回合發牌不算抽牌；牌 id 每局重編，舊預放要清
   const fresh = seen.ids ? [...ids].filter((id) => !seen.ids.has(id)) : [];
   seen.ids = ids;
   if (!canAct || !ids.has(seen.drawn)) seen.drawn = null;
@@ -172,11 +181,11 @@ function game() {
   }).join('');
 
   const need = req.map(([, n], gi) => hand.filter((c) => slots[c.id] === gi).length === n);
-  const layUI = canAct && !mine.laid ? `<div>${req.map((r, gi) => {
+  const layUI = g.status === 'play' && mine.in && !mine.laid ? `<div>${req.map((r, gi) => {
     const cs = hand.filter((c) => slots[c.id] === gi);
     return `<div class="slot"><div class="slotH"><span>組 ${gi + 1}：${lab(r)}（${cs.length}/${r[1]}）</span><button data-a="slot" data-v="${gi}" ${picked.length ? '' : 'disabled'}>放入選取的牌</button></div>
       <div class="row">${cs.map((c) => card(c, { attrs: `data-a="unslot" data-v="${c.id}"` })).join('') || '<span class="mute">先選牌，再按右上角按鈕</span>'}</div></div>`;
-  }).join('')}<div class="row" style="margin-top:8px"><button data-a="lay" ${need.every(Boolean) ? '' : 'disabled'}>放下階段</button><span class="mute">順子可用百搭補洞；每組至少要有一張數字牌</span></div></div>` : '';
+  }).join('')}<div class="row" style="margin-top:8px"><button data-a="lay" ${canAct && need.every(Boolean) ? '' : 'disabled'}>放下階段</button><span class="mute">${canAct ? '順子可用百搭補洞；每組至少要有一張數字牌' : '可先排好牌，輪到你抽完牌後再放下'}</span></div></div>` : '';
 
   const free = hand.filter((c) => slots[c.id] === undefined);
   const one = picked.length === 1 ? picked[0] : null;
@@ -192,8 +201,6 @@ function game() {
   return `<div class="row" style="justify-content:space-between"><b>房間 ${s.code} · 第 ${g.round} 回合${g.playoff ? '（加賽）' : ''}</b>
     <span class="mute">目標：第 ${g.target} 階段</span></div>
   <div class="row" style="margin:10px 0">${players}</div>
-  <div class="panel"><h2>排名 <small>階段高者優先，同階段比分數（低者優先）</small></h2><table>${ranking}</table></div>
-  <details class="panel" ${rulesOpen ? 'open' : ''} ontoggle="rulesOpen=this.open"><summary>10 個階段</summary><table>${g.phases.map((r, i) => `<tr class="${i + 1 === Math.min(mine.phase, 10) ? 'me' : ''}"><td>${i + 1}</td><td>${r.map(lab).join(' ＋ ')}</td></tr>`).join('')}</table></details>
   <div class="panel table">
     <div class="piles">
       <div class="pile"><button class="card back" aria-label="抽牌堆" data-a="draw" data-v="pile" ${canDraw ? '' : 'disabled'}><b>抽牌</b></button><br>牌堆 ${g.drawCount}</div>
@@ -208,6 +215,8 @@ function game() {
     <div class="hand">${free.map((c) => card(c, { cls: `${sel.has(c.id) ? 'sel' : ''} ${c.id === seen.drawn ? 'new' : ''} ${fresh.includes(c.id) ? 'pop' : ''}`, attrs: `data-a="card" data-v="${c.id}"` })).join('')}</div>
     ${discard}
   </div>
+  <div class="panel"><h2>排名 <small>階段高者優先，同階段比分數（低者優先）</small></h2><table>${ranking}</table></div>
+  <details class="panel" ${rulesOpen ? 'open' : ''} ontoggle="rulesOpen=this.open"><summary>10 個階段</summary><table>${g.phases.map((r, i) => `<tr class="${i + 1 === Math.min(mine.phase, 10) ? 'me' : ''}"><td>${i + 1}</td><td>${r.map(lab).join(' ＋ ')}</td></tr>`).join('')}</table></details>
   <div class="log">${g.log.map(esc).join('<br>')}</div>
   ${g.status === 'play' ? '' : overlay(g, s)}`;
 }
