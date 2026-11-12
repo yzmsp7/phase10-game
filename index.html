@@ -245,7 +245,8 @@ function game() {
     <div class="row" style="justify-content:space-between"><h2 style="margin:0">排名 <small>階段高者優先，同階段比分數（低者優先）</small></h2><button class="ghost ic" data-a="sheet" aria-label="關閉">✕</button></div>
     <table>${ranking}</table>
     <h2 style="margin-top:16px">10 個階段</h2><table>${g.phases.map((r, i) => `<tr class="${i + 1 === Math.min(mine.phase, 10) ? 'me' : ''}"><td>${i + 1}</td><td>${r.map(lab).join(' ＋ ')}</td></tr>`).join('')}</table>
-    <h2 style="margin-top:16px">最近動態</h2><div class="log">${g.log.map(esc).join('<br>')}</div></div></div>` : '';
+    <h2 style="margin-top:16px">最近動態</h2><div class="log">${g.log.map(esc).join('<br>')}</div>
+    <button class="ghost" data-a="leave" style="width:100%;margin-top:16px">離開房間</button></div></div>` : '';
 
   return `<div class="row"><b style="flex:1">房間 ${s.code} · 第 ${g.round} 回合${g.playoff ? '（加賽）' : ''}</b>
     <span class="mute">目標：階段 ${g.target}</span><button class="ghost ic" data-a="sheet" aria-label="排名、階段表、動態">📋</button></div>
@@ -277,7 +278,7 @@ function overlay(g, s) {
     <div class="row" style="justify-content:space-between"><b>${esc(r.name)}${r.id === me ? '（你）' : ''}</b><span>階段 ${r.phase} ${r.laid ? '✅' : '❌'} · <b>+${r.gain}</b> → ${r.score} 分</span></div>
     ${r.hand.length ? `<div class="row" style="margin-top:8px;gap:4px">${r.hand.map((c) => card(c, { tag: 'span', cls: 'sm' })).join('')}</div>` : ''}</div>`).join('');
   const foot = over
-    ? (host ? '<button data-a="back">回到房間再來一局</button>' : `<span class="mute">等 ${nm(s.host)} 開新局…</span><button class="ghost" data-a="leave">離開房間</button>`)
+    ? (host ? '<button data-a="back">回到房間再來一局</button><button class="ghost" data-a="leave">離開房間</button>' :`<span class="mute">等 ${nm(s.host)} 開新局…</span><button class="ghost" data-a="leave">離開房間</button>`)
     : '<button data-a="next">下一回合</button>';
   return `<div class="overlay"><div class="modal res-m"><div class="body">
     <div class="hd">${head}</div>${over && !g.winners.includes(me) ? '<div class="mute">差一點，再來一局！</div>' : ''}
@@ -303,7 +304,14 @@ const A = {
     try { await navigator.clipboard.writeText(l); toast('已複製邀請連結'); } catch { prompt('複製這個連結傳給朋友：', l); }
   },
   start: () => call('start'),
-  async leave() { await call('leave'); exit(); },
+  async leave() {
+    // 遊戲進行中伺服器不讓你正式退出（牌和輪次都綁在你身上）→ 只在本機斷線，由系統代打；之後無法回到這局，所以先確認
+    if (snap?.game && snap.game.status !== 'over') {
+      if (!confirm('離開後這局會由系統代打，而且無法再回到這局。確定要離開？')) return;
+      return exit();
+    }
+    await call('leave'); exit();
+  },
   back: () => call('back'),
   next: () => call('act', { action: { type: 'next' } }),
   draw: (v) => call('act', { action: { type: 'draw', from: v } }),
