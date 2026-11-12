@@ -370,6 +370,7 @@ for (let np = 2; np <= 6; np++) {
   assert.equal((await post('join', { code: host.code, name: '遲到' })).status, 400, '遊戲開始後不能加入');
   assert.equal((await post('act', { ...host, action: { type: 'draw', from: 'pile' } })).status === 200 || true, true);
   assert.equal((await post('act', { code: host.code, token: 'bad', action: {} })).status, 404);
+  assert.equal((await post('leave', guests[0])).status, 400, '遊戲進行中不能離開（結束後才放行）');
   server.close();
   console.log('✅ 全部測試通過');
   process.exit(0);

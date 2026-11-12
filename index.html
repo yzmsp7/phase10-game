@@ -2,83 +2,91 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Phase 10 線上</title>
 <style>
-:root{--bg:#0f3d2e;--panel:#165740;--panel2:#1d6a4f;--ink:#f6f3ea;--mute:#a8c7b8;--accent:#f6c945;--R:#d64545;--B:#3b73d4;--G:#2e9e5b;--Y:#e0b020}
+/* 字級只有 4 級、字重只有 400/600；間距走 4/8 格線。--mute 在 --panel2 上 4.84:1（原 #a8c7b8 只有 3.57） */
+:root{--s1:12px;--s2:16px;--s3:20px;--s4:28px;--bg:#0f3d2e;--panel:#165740;--panel2:#1d6a4f;--ink:#f6f3ea;--mute:#cfe3d8;--accent:#f6c945;--R:#d64545;--B:#3b73d4;--G:#2e9e5b;--Y:#e0b020}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.4 system-ui,-apple-system,"Noto Sans TC",sans-serif;touch-action:manipulation}
+body{margin:0;background:var(--bg);color:var(--ink);font:var(--s2)/1.4 system-ui,-apple-system,"Noto Sans TC",sans-serif;touch-action:manipulation;padding:0 env(safe-area-inset-right) 0 env(safe-area-inset-left)}
 #app:has(.tray){padding-bottom:0;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column} /* 內容不滿一屏時，sticky 托盤會浮在半空 → 撐滿一屏，用 margin-top:auto 把托盤推到最底 */
 #app{max-width:1000px;margin:0 auto;padding:12px 16px 40px}
-h1{margin:8px 0 16px;font-size:26px;letter-spacing:.5px}h2{font-size:16px;margin:0 0 8px;color:var(--mute);font-weight:600}
-.panel{background:var(--panel);border-radius:12px;padding:14px;margin-bottom:12px}
-summary{cursor:pointer;font-size:16px;font-weight:600;color:var(--mute)}details[open] summary{margin-bottom:8px}
+h1{margin:8px 0 16px;font-size:var(--s4);letter-spacing:.5px}h2{font-size:var(--s2);margin:0 0 8px;color:var(--mute);font-weight:600}
+.panel{background:var(--panel);border-radius:12px;padding:16px;margin-bottom:12px}
+b{font-weight:600}
 .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-button,select,input{font:inherit;border-radius:8px;border:0;padding:8px 14px}
+button,select,input{font:inherit;border-radius:8px;border:0;padding:8px 16px}
 button{background:var(--accent);color:#2a2200;font-weight:600;cursor:pointer}
 button:disabled{opacity:.4;cursor:not-allowed;pointer-events:none} /* 點擊穿透到外層 [data-why]，用 toast 說明為什麼不能按 */
 button.ghost{background:transparent;color:var(--ink);border:1px solid var(--mute)}
 input,select{font-size:16px;background:#0c2f23;color:var(--ink);border:1px solid #2f7d5f} /* iOS 對 <16px 的輸入框聚焦會自動放大整頁 */
 button,.card{-webkit-user-select:none;user-select:none}
-.mute{color:var(--mute)}.big{font-size:32px;letter-spacing:6px;font-weight:700}
+.mute{color:var(--mute)}.big{font-size:var(--s4);letter-spacing:6px;font-weight:600}
 .player{background:var(--panel2);border-radius:10px;padding:8px 12px;min-width:120px;flex:1;border:2px solid transparent}
 .player.turn{border-color:var(--accent)}.player.out{opacity:.4}
-.pick{margin-top:4px;font-size:13px;display:flex;align-items:center;gap:6px}.pick .card{box-shadow:none}
+.pick{margin-top:4px;font-size:var(--s1);display:flex;align-items:center;gap:8px}.pick .card{box-shadow:none}
 .player b{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.player small{color:var(--mute)}
-.cnt{font-size:20px;font-weight:700;margin-right:4px}
+.cnt{font-size:var(--s3);font-weight:600;margin-right:4px}
 .table{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start}
 .piles{display:flex;gap:12px}
-.pile{text-align:center;font-size:12px;color:var(--mute)}
+.pile{text-align:center;font-size:var(--s1);color:var(--mute)}
 .groups{display:flex;gap:8px;flex-wrap:wrap;flex:1;min-width:220px}
 .group{position:relative;background:var(--panel2);border-radius:10px;padding:8px}
 .group.can{outline:2px dashed var(--accent);cursor:pointer}
 .ends{position:absolute;inset:0;display:flex;gap:4px;padding:4px;background:#0c2f23d9;border-radius:10px}.ends button{flex:1}
 .group .row{gap:4px}.group small{display:block;color:var(--mute);margin-bottom:4px}
-.card{position:relative;width:46px;height:64px;border-radius:7px;border:2px solid #fff;color:#fff;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;padding:0;font-weight:700;box-shadow:0 1px 3px #0006;flex:none}
-.card b{font-size:21px;line-height:1}.card i{font-style:normal;font-size:11px;opacity:.9}
-.card u{position:absolute;bottom:1px;right:3px;font-size:10px;text-decoration:none}
-.card.sm{width:34px;height:48px}.card.sm b{font-size:16px}
+.card{position:relative;width:46px;height:64px;border-radius:7px;border:2px solid #fff;color:#fff;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;padding:0;font-weight:600;box-shadow:0 1px 3px #0006;flex:none}
+.card b{font-size:var(--s3);line-height:1}.card i{font-style:normal;font-size:var(--s1);opacity:.9}
+.card u{position:absolute;bottom:1px;right:3px;font-size:var(--s1);text-decoration:none}
+.card.sm{width:34px;height:48px}.card.sm b{font-size:var(--s2)}
 .card.R{background:var(--R)}.card.B{background:var(--B)}.card.G{background:var(--G)}.card.Y{background:var(--Y);color:#2a2200}
 .card.W{background:conic-gradient(var(--R),var(--Y),var(--G),var(--B),var(--R))}.card.W b,.card.W i,.card.W u{text-shadow:0 0 4px #000,0 0 2px #000}
-.card.S{background:#222}.card.back{background:repeating-linear-gradient(45deg,#7b2d8f,#7b2d8f 6px,#5d2070 6px,#5d2070 12px);font-size:11px}
+.card.S{background:#222}.card.back{background:repeating-linear-gradient(45deg,#7b2d8f,#7b2d8f 6px,#5d2070 6px,#5d2070 12px)}
 .card.new{outline:3px solid #fff;box-shadow:0 0 12px 3px var(--accent)}
-.card.new::after{content:'新';position:absolute;top:-10px;left:-6px;background:var(--accent);color:#2a2200;font-size:11px;line-height:16px;border-radius:8px;padding:0 6px}
+.card.new::after{content:'新';position:absolute;top:-8px;left:-8px;background:var(--accent);color:#2a2200;font-size:var(--s1);line-height:16px;border-radius:8px;padding:0 8px}
 .card.pop{animation:pop .7s cubic-bezier(.2,1.4,.4,1)}
 @keyframes pop{from{transform:translateY(-110px) scale(.4) rotate(-20deg);opacity:0}to{transform:none;opacity:1}}
 .card.sel{transform:translateY(-12px);outline:3px solid var(--accent)}
 .card.empty{background:transparent;border:2px dashed var(--mute);color:var(--mute);box-shadow:none}
-.hand{display:flex;flex-wrap:wrap;gap:6px;padding:16px 0 4px}
-.tray{position:sticky;bottom:0;z-index:2;margin:auto -16px 0;padding:8px 16px 12px;background:var(--panel);border-top:1px solid #2f7d5f;box-shadow:0 -8px 16px #0a2a1f99}
+.hand{display:flex;flex-wrap:wrap;gap:8px;padding:16px 0 4px}
+.tray{position:sticky;bottom:0;z-index:2;margin:auto -16px 0;padding:8px 16px calc(12px + env(safe-area-inset-bottom));background:var(--panel);border-top:1px solid #2f7d5f;box-shadow:0 -8px 16px #0a2a1f99}
 .tray>b{display:block}.tray .hand{padding:12px 0 8px}
 .act button{flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;gap:8px}
 .players{margin:12px 0}.ic{min-width:44px;min-height:44px;padding:0}
 .slot.can{outline:2px dashed var(--accent);cursor:pointer}
-.pile .card{width:56px;height:80px}.pile .card b{font-size:24px}
+.pile .card{width:56px;height:80px}.pile .card b{font-size:var(--s3)}
 @keyframes glow{to{box-shadow:0 0 0 3px var(--accent),0 0 16px 4px var(--accent)}}
 .pile button.card:not(:disabled){animation:glow 1s ease-in-out infinite alternate}
 .overlay.sheet{align-items:flex-end;padding:0}.sheet .modal{border-radius:16px 16px 0 0;max-height:80vh;max-height:80dvh}.modal .log{max-height:none}
 .bd{position:absolute;inset:0}.act .w{flex:1;display:flex}
 @media(prefers-reduced-motion:reduce){*{animation:none!important}}
 .slot{background:#0c2f23;border-radius:8px;padding:8px;margin-top:8px}
-.slotH{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+.slotH{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
 .slot .row{min-height:48px}
-.log{font-size:12px;color:var(--mute);max-height:90px;overflow:auto}
+.log{font-size:var(--s1);color:var(--mute);max-height:90px;overflow:auto}
 .overlay{position:fixed;inset:0;background:#000a;display:flex;align-items:center;justify-content:center;padding:16px;z-index:5}
 .modal{background:var(--panel);border-radius:14px;padding:20px;max-width:560px;width:100%;max-height:90vh;max-height:90dvh;overflow:auto;position:relative}
-table{width:100%;border-collapse:collapse}td,th{padding:6px 4px;text-align:left}th{color:var(--mute);font-weight:500}
-#toast{position:fixed;left:50%;top:16px;transform:translateX(-50%);background:#000d;padding:10px 18px;border-radius:10px;z-index:9;display:none}
+table{width:100%;border-collapse:collapse}td,th{padding:8px 4px;text-align:left}th{color:var(--mute);font-weight:600}
+#toast{position:fixed;left:50%;top:16px;transform:translateX(-50%);background:#000d;padding:8px 16px;border-radius:10px;z-index:9;display:none}
 tr.me{color:var(--accent);font-weight:600}h2 small{font-weight:400}
-.crown{color:var(--accent)}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;background:#777}.dot.on{background:#5fe08a}
+.crown{color:var(--accent)}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px;background:#777}.dot.on{background:#5fe08a}
 @media(max-width:600px){
-#app{padding:8px 8px 32px}.panel{padding:10px}h1{font-size:22px}
-.players{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr))}.player{min-width:0;padding:6px 8px}
+#app{padding:8px 8px 32px}.panel{padding:12px}h1{font-size:var(--s3)}
+.players{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr))}.player{min-width:0;padding:8px}
 .piles{width:100%;justify-content:center}.groups{min-width:0;width:100%}
-.hand{gap:4px}.card{width:40px;height:56px}.card b{font-size:18px}.card.sm{width:32px;height:46px}
+.hand{gap:4px}.card{width:40px;height:56px}.card.sm{width:32px;height:46px}
 button,select,input{min-height:40px}
-.tray{margin:auto -8px 0;padding:8px 8px 12px}
-.slotH{flex-wrap:wrap}.big{font-size:26px;letter-spacing:4px}
+.tray{margin:auto -8px 0;padding:8px 8px calc(12px + env(safe-area-inset-bottom))}
+.slotH{flex-wrap:wrap}.big{letter-spacing:4px}
 input[readonly]{width:100%}
 }
+/* 橫放手機高度只有 ~375px：手牌改單排橫捲，按鈕縮矮，托盤才不會吃掉半個畫面 */
+@media(max-height:500px){.tray .hand{flex-wrap:nowrap;overflow-x:auto}.act button{min-height:40px}}
+/* 結算畫面：按鈕固定在 modal 底部（玩家多、剩牌多時中間捲動，按鈕仍在拇指區） */
+.modal.res-m{display:flex;flex-direction:column;overflow:hidden}.res-m .body{overflow:auto;flex:1;min-height:0}.res-m .foot{padding-top:16px}
+.res{background:var(--panel2);border-radius:10px;padding:12px;margin-top:8px}.res.me{outline:2px solid var(--accent)}
+.hd{font-size:var(--s4);font-weight:600;margin-bottom:8px}
+.trophy{display:inline-block;animation:pop .7s cubic-bezier(.2,1.4,.4,1)}
 </style>
 </head>
 <body>
@@ -172,7 +180,11 @@ function game() {
   sel.forEach((id) => ids.has(id) || sel.delete(id));
   Object.keys(slots).forEach((id) => ids.has(+id) || delete slots[id]);
   // 抽牌動畫：手牌比上次多出來的牌 = 剛抽到的（只在該次 render 播動畫），標記「新」直到我棄牌結束回合
-  if (seen?.round !== g.round) { seen = { round: g.round, ids: null, drawn: null }; slots = {}; actSlot = null; } // 新回合發牌不算抽牌；牌 id 每局重編，舊預放要清
+  if (seen?.round !== g.round) { seen = { round: g.round, ids: null, drawn: null, laid: null }; slots = {}; actSlot = null; } // 新回合發牌不算抽牌；牌 id 每局重編，舊預放要清
+  // 放下階段是整場的 peak：自己 → 震動 + 慶祝；別人 → 橫幅提醒（只在「剛變成已放下」的那次 render 觸發）。
+  // 不顯示階段數字：放完最後一張牌時伺服器已把 phase+1，數字會差一。
+  if (seen.laid) g.players.forEach((p) => { if (p.laid && !seen.laid.has(p.id)) { if (p.id === me) { navigator.vibrate?.(30); toast('🎉 階段完成！'); } else toast(`${p.name} 放下了階段`); } });
+  seen.laid = new Set(g.players.filter((p) => p.laid).map((p) => p.id));
   const fresh = seen.ids ? [...ids].filter((id) => !seen.ids.has(id)) : [];
   seen.ids = ids;
   if (!canAct || !ids.has(seen.drawn)) seen.drawn = null;
@@ -254,18 +266,23 @@ function game() {
     ${layBtn + discard && `<div class="row act">${layBtn}${discard}</div>`}</div>`}${sheetUI}`; // 手牌＋棄牌固定在螢幕底部（拇指區），其餘在上方捲動；排名／階段表／動態收進 📋 面板
 }
 
+// 結算：依「我贏／別人贏」給不同開場；每人顯示剩下的牌，讓「+N 分」看得出來源；按鈕固定在 modal 底部
 function overlay(g, s) {
-  const sm = g.summary, over = g.status === 'over', host = s.me === s.host;
+  const sm = g.summary, over = g.status === 'over', me = s.me, host = me === s.host;
   const nm = (id) => esc(g.players.find((p) => p.id === id).name);
-  return `<div class="overlay"><div class="modal">
-    <h2>${over ? '🏆 遊戲結束' : '回合結束'}</h2>
-    ${over ? `<p style="font-size:20px"><b>勝利：${g.winners.map(nm).join('、')}</b></p>` : `<p><b>${nm(sm.out)}</b> 出完牌！</p>`}
-    <table><tr><th>玩家</th><th>階段</th><th>本回合</th><th>總分</th></tr>
-    ${sm.rows.map((r) => `<tr><td>${esc(r.name)}</td><td>${r.phase} ${r.laid ? '✅' : '❌'}</td><td>+${r.gain}</td><td>${r.score}</td></tr>`).join('')}</table>
-    ${sm.note ? `<p>${esc(sm.note)}</p>` : ''}
-    <div class="row" style="margin-top:12px">${over
-      ? (host ? '<button data-a="back">回到房間</button>' : '<span class="mute">等待房主…</span>')
-      : '<button data-a="next">下一回合</button>'}</div></div></div>`;
+  const head = over
+    ? (g.winners.includes(me) ? '<span class="trophy">🏆</span> 你贏了！' : `🏆 ${g.winners.map(nm).join('、')} 獲勝`)
+    : (sm.out === me ? '🎉 你先出完牌！' : `${nm(sm.out)} 出完牌了`);
+  const rows = sm.rows.map((r) => `<div class="res ${r.id === me ? 'me' : ''}">
+    <div class="row" style="justify-content:space-between"><b>${esc(r.name)}${r.id === me ? '（你）' : ''}</b><span>階段 ${r.phase} ${r.laid ? '✅' : '❌'} · <b>+${r.gain}</b> → ${r.score} 分</span></div>
+    ${r.hand.length ? `<div class="row" style="margin-top:8px;gap:4px">${r.hand.map((c) => card(c, { tag: 'span', cls: 'sm' })).join('')}</div>` : ''}</div>`).join('');
+  const foot = over
+    ? (host ? '<button data-a="back">回到房間再來一局</button>' : `<span class="mute">等 ${nm(s.host)} 開新局…</span><button class="ghost" data-a="leave">離開房間</button>`)
+    : '<button data-a="next">下一回合</button>';
+  return `<div class="overlay"><div class="modal res-m"><div class="body">
+    <div class="hd">${head}</div>${over && !g.winners.includes(me) ? '<div class="mute">差一點，再來一局！</div>' : ''}
+    ${rows}${sm.note ? `<p>${esc(sm.note)}</p>` : ''}</div>
+    <div class="row act foot">${foot}</div></div></div>`;
 }
 
 function render() {

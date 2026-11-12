@@ -85,7 +85,7 @@ const actions = {
     room.game = null;
   },
   leave(room, p) {
-    if (room.game) G.err('遊戲進行中不能離開，直接關掉頁面即可（會由系統代打）');
+    if (room.game && room.game.status !== 'over') G.err('遊戲進行中不能離開，直接關掉頁面即可（會由系統代打）'); // 結束後可以走，不然非房主只能乾等房主
     room.players = room.players.filter((x) => x !== p);
     room.clients.get(p.id)?.forEach((res) => res.end());
     room.clients.delete(p.id);
