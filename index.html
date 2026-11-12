@@ -102,7 +102,7 @@ const store = {
   set(v) { try { v ? localStorage.setItem('p10', JSON.stringify(v)) : localStorage.removeItem('p10'); } catch {} },
 };
 const urlRoom = (new URLSearchParams(location.search).get('room') || '').toUpperCase();
-let dl = null, sess = store.get(), snap = null, es = null, sel = new Set(), slots = {}, seen = null, sheet = false, endFor = null, actSlot = null; // 每次 render 會重建 DOM，UI 狀態要存在這：sheet = 底部資訊面板開著；endFor = 正在選「接前/接後」的順子；actSlot = 放階段時作用中的那一組
+let dl = null, sess = store.get(), snap = null, es = null, sel = new Set(), slots = {}, seen = null, sheet = false, endFor = null, actSlot = null, byColor = false; // 每次 render 會重建 DOM，UI 狀態要存在這：sheet = 底部資訊面板開著；endFor = 正在選「接前/接後」的順子；actSlot = 放階段時作用中的那一組
 if (sess && urlRoom && sess.code !== urlRoom) sess = null; // 邀請連結指向另一間房 → 先顯示加入畫面
 
 function toast(m) {
@@ -196,7 +196,7 @@ function game() {
   seen.ids = ids;
   if (!canAct || !ids.has(seen.drawn)) seen.drawn = null;
   if (fresh.length === 1) seen.drawn = fresh[0];
-  const rank = (c) => (c.t === 'n' ? c.n * 4 + 'RBGY'.indexOf(c.c) : c.t === 'w' ? 100 : 101);
+  const rank = (c) => (c.t === 'n' ? (byColor ? 'RBGY'.indexOf(c.c) * 13 + c.n : c.n * 4 + 'RBGY'.indexOf(c.c)) : c.t === 'w' ? 100 : 101); // 顏色模式：同色排一起，色內依數字
   const hand = [...g.hand].sort((a, b) => rank(a) - rank(b));
   const req = g.phases[mine.phase - 1] || [];
   const name = (id) => g.players.find((p) => p.id === id)?.name ?? '?';
@@ -269,7 +269,7 @@ function game() {
     <h2>你的階段 ${mine.phase}：${req.map(lab).join(' ＋ ')} ${mine.laid ? '✅ 已完成' : ''}</h2>
     ${layUI}
   </div>
-  ${g.status !== 'play' ? overlay(g, s) : `<div class="tray"><b>${status}</b>
+  ${g.status !== 'play' ? overlay(g, s) : `<div class="tray"><div class="row" style="justify-content:space-between;flex-wrap:nowrap"><b>${status}</b><button class="ghost" data-a="sort" aria-label="切換手牌排序">排序：${byColor ? '顏色' : '數字'}</button></div>
     <div class="hand">${free.map((c) => card(c, { cls: `${sel.has(c.id) ? 'sel' : ''} ${c.id === seen.drawn ? 'new' : ''} ${fresh.includes(c.id) ? 'pop' : ''}`, attrs: `data-a="card" data-v="${c.id}"` })).join('')}</div>
     ${layBtn + discard && `<div class="row act">${layBtn}${discard}</div>`}</div>`}${sheetUI}`; // 手牌＋棄牌固定在螢幕底部（拇指區），其餘在上方捲動；排名／階段表／動態收進 📋 面板
 }
@@ -348,6 +348,7 @@ const A = {
   },
   unslot(v) { delete slots[v]; render(); },
   sheet() { sheet = !sheet; render(); },
+  sort() { byColor = !byColor; render(); },
   async lay() {
     const groups = phaseReq().map((_, gi) => Object.keys(slots).filter((id) => slots[id] === gi).map(Number));
     if (await call('act', { action: { type: 'lay', groups } })) { slots = {}; actSlot = null; }
