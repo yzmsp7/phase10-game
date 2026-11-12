@@ -8,7 +8,7 @@
 :root{--bg:#0f3d2e;--panel:#165740;--panel2:#1d6a4f;--ink:#f6f3ea;--mute:#a8c7b8;--accent:#f6c945;--R:#d64545;--B:#3b73d4;--G:#2e9e5b;--Y:#e0b020}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.4 system-ui,-apple-system,"Noto Sans TC",sans-serif;touch-action:manipulation}
-#app:has(.tray){padding-bottom:0}
+#app:has(.tray){padding-bottom:0;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column} /* 內容不滿一屏時，sticky 托盤會浮在半空 → 撐滿一屏，用 margin-top:auto 把托盤推到最底 */
 #app{max-width:1000px;margin:0 auto;padding:12px 16px 40px}
 h1{margin:8px 0 16px;font-size:26px;letter-spacing:.5px}h2{font-size:16px;margin:0 0 8px;color:var(--mute);font-weight:600}
 .panel{background:var(--panel);border-radius:12px;padding:14px;margin-bottom:12px}
@@ -48,7 +48,7 @@ button,.card{-webkit-user-select:none;user-select:none}
 .card.sel{transform:translateY(-12px);outline:3px solid var(--accent)}
 .card.empty{background:transparent;border:2px dashed var(--mute);color:var(--mute);box-shadow:none}
 .hand{display:flex;flex-wrap:wrap;gap:6px;padding:16px 0 4px}
-.tray{position:sticky;bottom:0;z-index:2;margin:12px -16px 0;padding:8px 16px 12px;background:var(--panel);border-top:1px solid #2f7d5f;box-shadow:0 -8px 16px #0a2a1f99}
+.tray{position:sticky;bottom:0;z-index:2;margin:auto -16px 0;padding:8px 16px 12px;background:var(--panel);border-top:1px solid #2f7d5f;box-shadow:0 -8px 16px #0a2a1f99}
 .tray>b{display:block}.tray .hand{padding:12px 0 8px}
 .act button{flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;gap:8px}
 .players{margin:12px 0}.ic{min-width:44px;min-height:44px;padding:0}
@@ -75,7 +75,7 @@ tr.me{color:var(--accent);font-weight:600}h2 small{font-weight:400}
 .piles{width:100%;justify-content:center}.groups{min-width:0;width:100%}
 .hand{gap:4px}.card{width:40px;height:56px}.card b{font-size:18px}.card.sm{width:32px;height:46px}
 button,select,input{min-height:40px}
-.tray{margin:12px -8px 0;padding:8px 8px 12px}
+.tray{margin:auto -8px 0;padding:8px 8px 12px}
 .slotH{flex-wrap:wrap}.big{font-size:26px;letter-spacing:4px}
 input[readonly]{width:100%}
 }
