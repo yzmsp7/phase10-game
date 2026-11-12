@@ -11,6 +11,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.4 system-ui,-app
 #app{max-width:1000px;margin:0 auto;padding:12px 16px 40px}
 h1{margin:8px 0 16px;font-size:26px;letter-spacing:.5px}h2{font-size:16px;margin:0 0 8px;color:var(--mute);font-weight:600}
 .panel{background:var(--panel);border-radius:12px;padding:14px;margin-bottom:12px}
+summary{cursor:pointer;font-size:16px;font-weight:600;color:var(--mute)}details[open] summary{margin-bottom:8px}
 .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 button,select,input{font:inherit;border-radius:8px;border:0;padding:8px 14px}
 button{background:var(--accent);color:#2a2200;font-weight:600;cursor:pointer}
@@ -62,7 +63,7 @@ const store = {
   set(v) { try { v ? localStorage.setItem('p10', JSON.stringify(v)) : localStorage.removeItem('p10'); } catch {} },
 };
 const urlRoom = (new URLSearchParams(location.search).get('room') || '').toUpperCase();
-let sess = store.get(), snap = null, es = null, sel = new Set(), slots = {};
+let sess = store.get(), snap = null, es = null, sel = new Set(), slots = {}, rulesOpen = true; // 每次 render 會重建 DOM，展開狀態要存在這
 if (sess && urlRoom && sess.code !== urlRoom) sess = null; // 邀請連結指向另一間房 → 先顯示加入畫面
 
 function toast(m) {
@@ -180,6 +181,7 @@ function game() {
     <span class="mute">目標：第 ${g.target} 階段</span></div>
   <div class="row" style="margin:10px 0">${players}</div>
   <div class="panel"><h2>排名 <small>階段高者優先，同階段比分數（低者優先）</small></h2><table>${ranking}</table></div>
+  <details class="panel" ${rulesOpen ? 'open' : ''} ontoggle="rulesOpen=this.open"><summary>10 個階段</summary><table>${g.phases.map((r, i) => `<tr class="${i + 1 === Math.min(mine.phase, 10) ? 'me' : ''}"><td>${i + 1}</td><td>${r.map(lab).join(' ＋ ')}</td></tr>`).join('')}</table></details>
   <div class="panel table">
     <div class="piles">
       <div class="pile"><button class="card back" aria-label="抽牌堆" data-a="draw" data-v="pile" ${canDraw ? '' : 'disabled'}><b>抽牌</b></button><br>牌堆 ${g.drawCount}</div>
