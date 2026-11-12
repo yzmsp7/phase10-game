@@ -148,7 +148,7 @@ function lobby() {
   <div class="panel"><h2>你的名字</h2><input id="name" maxlength="12" placeholder="最多 12 字" value="${esc(localStorage.getItem('p10name') || '')}"></div>
   ${urlRoom ? '' : `<div class="panel"><h2>開新房間</h2><button data-a="create">建立房間</button></div>`}
   <div class="panel"><h2>${urlRoom ? '你被邀請加入房間' : '加入房間'}</h2>
-    <div class="row"><input id="code" maxlength="4" size="6" placeholder="房間代碼" value="${esc(urlRoom)}" style="text-transform:uppercase"><button data-a="join">加入</button>
+    <div class="row"><input id="code" maxlength="4" size="6" placeholder="房間代碼" value="${esc(urlRoom)}" style="text-transform:uppercase" autocapitalize="characters" autocorrect="off" autocomplete="off" spellcheck="false"><button data-a="join">加入</button>
     ${urlRoom ? '<button class="ghost" data-a="home">改為開新房間</button>' : ''}</div></div>
   <p class="mute">2–6 人。建立房間後把邀請連結傳給朋友即可。</p>`;
 }
