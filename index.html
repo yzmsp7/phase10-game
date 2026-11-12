@@ -7,7 +7,8 @@
 <style>
 :root{--bg:#0f3d2e;--panel:#165740;--panel2:#1d6a4f;--ink:#f6f3ea;--mute:#a8c7b8;--accent:#f6c945;--R:#d64545;--B:#3b73d4;--G:#2e9e5b;--Y:#e0b020}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.4 system-ui,-apple-system,"Noto Sans TC",sans-serif}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.4 system-ui,-apple-system,"Noto Sans TC",sans-serif;touch-action:manipulation}
+#app:has(.tray){padding-bottom:0}
 #app{max-width:1000px;margin:0 auto;padding:12px 16px 40px}
 h1{margin:8px 0 16px;font-size:26px;letter-spacing:.5px}h2{font-size:16px;margin:0 0 8px;color:var(--mute);font-weight:600}
 .panel{background:var(--panel);border-radius:12px;padding:14px;margin-bottom:12px}
@@ -17,7 +18,8 @@ button,select,input{font:inherit;border-radius:8px;border:0;padding:8px 14px}
 button{background:var(--accent);color:#2a2200;font-weight:600;cursor:pointer}
 button:disabled{opacity:.4;cursor:not-allowed}
 button.ghost{background:transparent;color:var(--ink);border:1px solid var(--mute)}
-input,select{background:#0c2f23;color:var(--ink);border:1px solid #2f7d5f}
+input,select{font-size:16px;background:#0c2f23;color:var(--ink);border:1px solid #2f7d5f} /* iOS 對 <16px 的輸入框聚焦會自動放大整頁 */
+button,.card{-webkit-user-select:none;user-select:none}
 .mute{color:var(--mute)}.big{font-size:32px;letter-spacing:6px;font-weight:700}
 .player{background:var(--panel2);border-radius:10px;padding:8px 12px;min-width:120px;flex:1;border:2px solid transparent}
 .player.turn{border-color:var(--accent)}.player.out{opacity:.4}
@@ -27,7 +29,9 @@ input,select{background:#0c2f23;color:var(--ink);border:1px solid #2f7d5f}
 .piles{display:flex;gap:12px}
 .pile{text-align:center;font-size:12px;color:var(--mute)}
 .groups{display:flex;gap:8px;flex-wrap:wrap;flex:1;min-width:220px}
-.group{background:var(--panel2);border-radius:10px;padding:8px}
+.group{position:relative;background:var(--panel2);border-radius:10px;padding:8px}
+.group.can{outline:2px dashed var(--accent);cursor:pointer}
+.ends{position:absolute;inset:0;display:flex;gap:4px;padding:4px;background:#0c2f23d9;border-radius:10px}.ends button{flex:1}
 .group .row{gap:4px}.group small{display:block;color:var(--mute);margin-bottom:4px}
 .card{position:relative;width:46px;height:64px;border-radius:7px;border:2px solid #fff;color:#fff;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;padding:0;font-weight:700;box-shadow:0 1px 3px #0006;flex:none}
 .card b{font-size:21px;line-height:1}.card i{font-style:normal;font-size:11px;opacity:.9}
@@ -43,6 +47,9 @@ input,select{background:#0c2f23;color:var(--ink);border:1px solid #2f7d5f}
 .card.sel{transform:translateY(-12px);outline:3px solid var(--accent)}
 .card.empty{background:transparent;border:2px dashed var(--mute);color:var(--mute);box-shadow:none}
 .hand{display:flex;flex-wrap:wrap;gap:6px;padding:16px 0 4px}
+.tray{position:sticky;bottom:0;z-index:2;margin:12px -16px 0;padding:8px 16px 12px;background:var(--panel);border-top:1px solid #2f7d5f;box-shadow:0 -8px 16px #0a2a1f99}
+.tray>b{display:block}.tray .hand{padding:12px 0 8px}
+.act button{flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;gap:8px}
 .slot{background:#0c2f23;border-radius:8px;padding:8px;margin-top:8px}
 .slotH{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
 .slot .row{min-height:48px}
@@ -50,7 +57,7 @@ input,select{background:#0c2f23;color:var(--ink);border:1px solid #2f7d5f}
 .overlay{position:fixed;inset:0;background:#000a;display:flex;align-items:center;justify-content:center;padding:16px;z-index:5}
 .modal{background:var(--panel);border-radius:14px;padding:20px;max-width:560px;width:100%;max-height:90vh;overflow:auto}
 table{width:100%;border-collapse:collapse}td,th{padding:6px 4px;text-align:left}th{color:var(--mute);font-weight:500}
-#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#000d;padding:10px 18px;border-radius:10px;z-index:9;display:none}
+#toast{position:fixed;left:50%;top:16px;transform:translateX(-50%);background:#000d;padding:10px 18px;border-radius:10px;z-index:9;display:none}
 tr.me{color:var(--accent);font-weight:600}h2 small{font-weight:400}
 .crown{color:var(--accent)}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;background:#777}.dot.on{background:#5fe08a}
 @media(max-width:600px){
@@ -59,6 +66,7 @@ tr.me{color:var(--accent);font-weight:600}h2 small{font-weight:400}
 .piles{width:100%;justify-content:center}.groups{min-width:0;width:100%}
 .hand{gap:4px}.card{width:40px;height:56px}.card b{font-size:18px}.card.sm{width:32px;height:46px}
 button,select,input{min-height:40px}
+.tray{margin:12px -8px 0;padding:8px 8px 12px}
 .slotH{flex-wrap:wrap}.big{font-size:26px;letter-spacing:4px}
 input[readonly]{width:100%}
 }
@@ -77,7 +85,7 @@ const store = {
   set(v) { try { v ? localStorage.setItem('p10', JSON.stringify(v)) : localStorage.removeItem('p10'); } catch {} },
 };
 const urlRoom = (new URLSearchParams(location.search).get('room') || '').toUpperCase();
-let sess = store.get(), snap = null, es = null, sel = new Set(), slots = {}, seen = null, rulesOpen = true; // 每次 render 會重建 DOM，展開狀態要存在這
+let sess = store.get(), snap = null, es = null, sel = new Set(), slots = {}, seen = null, rulesOpen = true, endFor = null; // 每次 render 會重建 DOM，展開狀態要存在這；endFor = 正在選「接前/接後」的順子
 if (sess && urlRoom && sess.code !== urlRoom) sess = null; // 邀請連結指向另一間房 → 先顯示加入畫面
 
 function toast(m) {
@@ -98,6 +106,8 @@ function connect() {
   es.onmessage = (e) => { snap = JSON.parse(e.data); render(); };
   es.onerror = () => { if (es.readyState === EventSource.CLOSED) { toast('連線中斷或房間已過期'); exit(); } };
 }
+// 手機切去別的 App 再回來，iOS 的 EventSource 常常是死的 → 回前景一律重連
+document.addEventListener('visibilitychange', () => { if (!document.hidden && sess) connect(); });
 function exit() {
   es?.close(); sess = snap = null; sel.clear(); slots = {}; store.set(null);
   history.replaceState(null, '', '/'); render();
@@ -158,6 +168,7 @@ function game() {
   const req = g.phases[mine.phase - 1] || [];
   const name = (id) => g.players.find((p) => p.id === id)?.name ?? '?';
   const picked = hand.filter((c) => sel.has(c.id));
+  if (!canAct || !picked.length) endFor = null;
 
   const players = g.players.map((p) => `<div class="player ${g.turn === p.id ? 'turn' : ''} ${p.in ? '' : 'out'}">
     <b>${esc(p.name)}${p.id === me ? '（你）' : ''} ${online[p.id] ? '' : '💤'}</b>
@@ -173,11 +184,10 @@ function game() {
   const groups = g.groups.map((gr, i) => {
     const t = gr.type === 'set' ? `${gr.n} 同數` : gr.type === 'run' ? `順子 ${gr.lo}–${gr.hi}` : `同色（${CN[gr.c]}）`;
     const cs = gr.cards.map((c, k) => card(c, { tag: 'div', cls: 'sm', sub: c.t === 'w' ? (gr.type === 'set' ? gr.n : gr.type === 'run' ? gr.lo + k : '') : '' })).join('');
+    // 選了牌後整組變成點擊目標（不再長按鈕列，版面不會跳）；選到百搭的順子才多問接前/接後（覆蓋層，不占版面）
     const can = canAct && mine.laid && picked.length;
-    const btn = !can ? '' : gr.type === 'run'
-      ? `<div class="row" style="margin-top:6px"><button data-a="hit" data-v="${i}" data-end="lo">‹ 接前</button><button data-a="hit" data-v="${i}" data-end="hi">接後 ›</button></div>`
-      : `<div style="margin-top:6px"><button data-a="hit" data-v="${i}">接牌</button></div>`;
-    return `<div class="group"><small>${esc(name(gr.owner))} · ${t}</small><div class="row">${cs}</div>${btn}</div>`;
+    const ends = can && endFor === i ? `<div class="ends"><button data-a="hit" data-v="${i}" data-end="lo">‹ 接前</button><button data-a="hit" data-v="${i}" data-end="hi">接後 ›</button></div>` : '';
+    return `<div class="group ${can ? 'can' : ''}" ${can ? `data-a="hit" data-v="${i}" role="button"` : ''}><small>${esc(name(gr.owner))} · ${t}</small><div class="row">${cs}</div>${ends}</div>`;
   }).join('');
 
   const need = req.map(([, n], gi) => hand.filter((c) => slots[c.id] === gi).length === n);
@@ -191,7 +201,7 @@ function game() {
   const one = picked.length === 1 ? picked[0] : null;
   const targets = g.players.filter((p) => p.in && p.id !== me && p.skip === 0);
   const discard = !canAct ? '' : one?.t === 's' && targets.length && g.hand.length > 1
-    ? `<div class="row"><span>跳過誰？</span>${targets.map((p) => `<button data-a="discard" data-v="${p.id}">${esc(p.name)}</button>`).join('')}</div>`
+    ? `<span>跳過誰？</span>${targets.map((p) => `<button data-a="discard" data-v="${p.id}">${esc(p.name)}</button>`).join('')}`
     : `<button data-a="discard" ${one ? '' : 'disabled'}>棄牌並結束回合</button>`;
 
   const status = g.status !== 'play' ? '' : myTurn
@@ -210,15 +220,14 @@ function game() {
   </div>
   <div class="panel">
     <h2>你的階段 ${mine.phase}：${req.map(lab).join(' ＋ ')} ${mine.laid ? '✅ 已完成' : ''}</h2>
-    <div><b>${status}</b></div>
     ${layUI}
-    <div class="hand">${free.map((c) => card(c, { cls: `${sel.has(c.id) ? 'sel' : ''} ${c.id === seen.drawn ? 'new' : ''} ${fresh.includes(c.id) ? 'pop' : ''}`, attrs: `data-a="card" data-v="${c.id}"` })).join('')}</div>
-    ${discard}
   </div>
   <div class="panel"><h2>排名 <small>階段高者優先，同階段比分數（低者優先）</small></h2><table>${ranking}</table></div>
   <details class="panel" ${rulesOpen ? 'open' : ''} ontoggle="rulesOpen=this.open"><summary>10 個階段</summary><table>${g.phases.map((r, i) => `<tr class="${i + 1 === Math.min(mine.phase, 10) ? 'me' : ''}"><td>${i + 1}</td><td>${r.map(lab).join(' ＋ ')}</td></tr>`).join('')}</table></details>
   <div class="log">${g.log.map(esc).join('<br>')}</div>
-  ${g.status === 'play' ? '' : overlay(g, s)}`;
+  ${g.status !== 'play' ? overlay(g, s) : `<div class="tray"><b>${status}</b>
+    <div class="hand">${free.map((c) => card(c, { cls: `${sel.has(c.id) ? 'sel' : ''} ${c.id === seen.drawn ? 'new' : ''} ${fresh.includes(c.id) ? 'pop' : ''}`, attrs: `data-a="card" data-v="${c.id}"` })).join('')}</div>
+    ${discard && `<div class="row act">${discard}</div>`}</div>`}`; // 手牌＋棄牌固定在螢幕底部（拇指區），其餘在上方捲動
 }
 
 function overlay(g, s) {
@@ -255,7 +264,7 @@ const A = {
   back: () => call('back'),
   next: () => call('act', { action: { type: 'next' } }),
   draw: (v) => call('act', { action: { type: 'draw', from: v } }),
-  card(v) { sel.has(+v) ? sel.delete(+v) : sel.add(+v); render(); },
+  card(v) { sel.has(+v) ? sel.delete(+v) : sel.add(+v); endFor = null; render(); },
   slot(v) { sel.forEach((id) => (slots[id] = +v)); sel.clear(); render(); },
   unslot(v) { delete slots[v]; render(); },
   async lay() {
@@ -263,7 +272,12 @@ const A = {
     const groups = req.map((_, gi) => Object.keys(slots).filter((id) => slots[id] === gi).map(Number));
     if (await call('act', { action: { type: 'lay', groups } })) slots = {};
   },
-  hit: (v, el) => call('act', { action: { type: 'hit', group: +v, cards: [...sel], end: el.dataset.end } }).then((r) => r && sel.clear()),
+  hit(v, el) {
+    const gr = snap.game.groups[+v], end = el.dataset.end;
+    // 順子 + 選到百搭 + 還沒指定方向 → 先問接前/接後（純數字牌伺服器會自己判斷）
+    if (gr.type === 'run' && !end && snap.game.hand.some((c) => sel.has(c.id) && c.t === 'w')) { endFor = +v; return render(); }
+    return call('act', { action: { type: 'hit', group: +v, cards: [...sel], end } }).then((r) => { endFor = null; r ? sel.clear() : render(); });
+  },
   discard: (v) => call('act', { action: { type: 'discard', card: [...sel][0], target: v } }).then((r) => r && sel.clear()),
 };
 $('#app').addEventListener('click', (e) => {

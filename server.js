@@ -6,7 +6,7 @@ const path = require('node:path');
 const { randomInt, randomUUID } = require('node:crypto');
 const G = require('./game');
 
-const MAX = 6, MIN = 2, AFK_MS = 20_000;
+const MAX = 6, MIN = 2, AFK_MS = 60_000; // 手機切去 LINE 回訊息再回來要來得及，所以不能太短
 const rooms = new Map();
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
 
