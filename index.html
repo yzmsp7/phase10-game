@@ -16,7 +16,7 @@ summary{cursor:pointer;font-size:16px;font-weight:600;color:var(--mute)}details[
 .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 button,select,input{font:inherit;border-radius:8px;border:0;padding:8px 14px}
 button{background:var(--accent);color:#2a2200;font-weight:600;cursor:pointer}
-button:disabled{opacity:.4;cursor:not-allowed}
+button:disabled{opacity:.4;cursor:not-allowed;pointer-events:none} /* 點擊穿透到外層 [data-why]，用 toast 說明為什麼不能按 */
 button.ghost{background:transparent;color:var(--ink);border:1px solid var(--mute)}
 input,select{font-size:16px;background:#0c2f23;color:var(--ink);border:1px solid #2f7d5f} /* iOS 對 <16px 的輸入框聚焦會自動放大整頁 */
 button,.card{-webkit-user-select:none;user-select:none}
@@ -24,7 +24,8 @@ button,.card{-webkit-user-select:none;user-select:none}
 .player{background:var(--panel2);border-radius:10px;padding:8px 12px;min-width:120px;flex:1;border:2px solid transparent}
 .player.turn{border-color:var(--accent)}.player.out{opacity:.4}
 .pick{margin-top:4px;font-size:13px;display:flex;align-items:center;gap:6px}.pick .card{box-shadow:none}
-.player b{display:block}.player small{color:var(--mute)}
+.player b{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.player small{color:var(--mute)}
+.cnt{font-size:20px;font-weight:700;margin-right:4px}
 .table{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start}
 .piles{display:flex;gap:12px}
 .pile{text-align:center;font-size:12px;color:var(--mute)}
@@ -50,19 +51,27 @@ button,.card{-webkit-user-select:none;user-select:none}
 .tray{position:sticky;bottom:0;z-index:2;margin:12px -16px 0;padding:8px 16px 12px;background:var(--panel);border-top:1px solid #2f7d5f;box-shadow:0 -8px 16px #0a2a1f99}
 .tray>b{display:block}.tray .hand{padding:12px 0 8px}
 .act button{flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;gap:8px}
+.players{margin:12px 0}.ic{min-width:44px;min-height:44px;padding:0}
+.slot.can{outline:2px dashed var(--accent);cursor:pointer}
+.pile .card{width:56px;height:80px}.pile .card b{font-size:24px}
+@keyframes glow{to{box-shadow:0 0 0 3px var(--accent),0 0 16px 4px var(--accent)}}
+.pile button.card:not(:disabled){animation:glow 1s ease-in-out infinite alternate}
+.overlay.sheet{align-items:flex-end;padding:0}.sheet .modal{border-radius:16px 16px 0 0;max-height:80vh;max-height:80dvh}.modal .log{max-height:none}
+.bd{position:absolute;inset:0}.act .w{flex:1;display:flex}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
 .slot{background:#0c2f23;border-radius:8px;padding:8px;margin-top:8px}
 .slotH{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
 .slot .row{min-height:48px}
 .log{font-size:12px;color:var(--mute);max-height:90px;overflow:auto}
 .overlay{position:fixed;inset:0;background:#000a;display:flex;align-items:center;justify-content:center;padding:16px;z-index:5}
-.modal{background:var(--panel);border-radius:14px;padding:20px;max-width:560px;width:100%;max-height:90vh;overflow:auto}
+.modal{background:var(--panel);border-radius:14px;padding:20px;max-width:560px;width:100%;max-height:90vh;max-height:90dvh;overflow:auto;position:relative}
 table{width:100%;border-collapse:collapse}td,th{padding:6px 4px;text-align:left}th{color:var(--mute);font-weight:500}
 #toast{position:fixed;left:50%;top:16px;transform:translateX(-50%);background:#000d;padding:10px 18px;border-radius:10px;z-index:9;display:none}
 tr.me{color:var(--accent);font-weight:600}h2 small{font-weight:400}
 .crown{color:var(--accent)}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;background:#777}.dot.on{background:#5fe08a}
 @media(max-width:600px){
 #app{padding:8px 8px 32px}.panel{padding:10px}h1{font-size:22px}
-.player{min-width:calc(50% - 4px);padding:6px 10px}
+.players{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr))}.player{min-width:0;padding:6px 8px}
 .piles{width:100%;justify-content:center}.groups{min-width:0;width:100%}
 .hand{gap:4px}.card{width:40px;height:56px}.card b{font-size:18px}.card.sm{width:32px;height:46px}
 button,select,input{min-height:40px}
@@ -85,7 +94,7 @@ const store = {
   set(v) { try { v ? localStorage.setItem('p10', JSON.stringify(v)) : localStorage.removeItem('p10'); } catch {} },
 };
 const urlRoom = (new URLSearchParams(location.search).get('room') || '').toUpperCase();
-let sess = store.get(), snap = null, es = null, sel = new Set(), slots = {}, seen = null, rulesOpen = true, endFor = null; // 每次 render 會重建 DOM，展開狀態要存在這；endFor = 正在選「接前/接後」的順子
+let sess = store.get(), snap = null, es = null, sel = new Set(), slots = {}, seen = null, sheet = false, endFor = null, actSlot = null; // 每次 render 會重建 DOM，UI 狀態要存在這：sheet = 底部資訊面板開著；endFor = 正在選「接前/接後」的順子；actSlot = 放階段時作用中的那一組
 if (sess && urlRoom && sess.code !== urlRoom) sess = null; // 邀請連結指向另一間房 → 先顯示加入畫面
 
 function toast(m) {
@@ -103,7 +112,8 @@ const call = (name, data) => post(name, { ...sess, ...data }).catch((e) => toast
 function connect() {
   es?.close();
   es = new EventSource(`/api/events?code=${sess.code}&token=${sess.token}`);
-  es.onmessage = (e) => { snap = JSON.parse(e.data); render(); };
+  // 房主正在開 <select>（iOS 滾輪）時不重繪，否則 innerHTML 重建會把選單關掉；focusout 時再補畫
+  es.onmessage = (e) => { snap = JSON.parse(e.data); if (!document.activeElement?.matches?.('select')) render(); };
   es.onerror = () => { if (es.readyState === EventSource.CLOSED) { toast('連線中斷或房間已過期'); exit(); } };
 }
 // 手機切去別的 App 再回來，iOS 的 EventSource 常常是死的 → 回前景一律重連
@@ -116,6 +126,7 @@ function enter(r) {
   sess = r; store.set(r); history.replaceState(null, '', '/?room=' + r.code); connect();
 }
 
+const phaseReq = () => snap.game.phases[snap.game.players.find((p) => p.id === snap.me).phase - 1];
 const card = (c, o = {}) => {
   const cls = c.t === 'n' ? c.c : c.t === 'w' ? 'W' : 'S';
   const face = c.t === 'n' ? c.n : c.t === 'w' ? 'W' : '⊘';
@@ -141,7 +152,7 @@ function room() {
     ? `<div class="row"><select data-c="target">${[...Array(10)].map((_, i) => `<option value="${i + 1}" ${st.target === i + 1 ? 'selected' : ''}>目標：第 ${i + 1} 階段</option>`).join('')}</select></div>`
     : `<div>先完成第 ${st.target} 階段者結束遊戲</div>`;
   return `<h1>房間 <span class="big">${s.code}</span></h1>
-  <div class="panel"><h2>邀請朋友</h2><div class="row"><input readonly value="${esc(link)}" size="34" onfocus="this.select()"><button data-a="copy">複製連結</button></div></div>
+  <div class="panel"><h2>邀請朋友</h2><div class="row"><input readonly value="${esc(link)}" size="34" onfocus="this.select()"><button data-a="copy">${navigator.share ? '分享邀請' : '複製連結'}</button></div></div>
   <div class="panel"><h2>玩家（${n}/6）</h2>
     ${s.players.map((p) => `<div><span class="dot ${p.online ? 'on' : ''}"></span>${esc(p.name)} ${p.id === s.host ? '<span class="crown">👑 房主</span>' : ''} ${p.id === s.me ? '<span class="mute">（你）</span>' : ''}</div>`).join('')}</div>
   <div class="panel"><h2>規則</h2>${set}
@@ -152,13 +163,16 @@ function room() {
 
 function game() {
   const s = snap, g = s.game, me = s.me, mine = g.players.find((p) => p.id === me);
-  const myTurn = g.turn === me, canDraw = myTurn && g.stage === 'draw', canAct = myTurn && g.stage === 'act';
+  const myTurn = g.turn === me, canAct = myTurn && g.stage === 'act';
+  const laying = g.status === 'play' && mine.in && !mine.laid;
+  if (!laying) actSlot = null;
+  if (g.status !== 'play') sheet = false; // 結算畫面出現時收起 📋 面板，免得下一回合自己彈出來
   const online = Object.fromEntries(s.players.map((p) => [p.id, p.online]));
   const ids = new Set(g.hand.map((c) => c.id));
   sel.forEach((id) => ids.has(id) || sel.delete(id));
   Object.keys(slots).forEach((id) => ids.has(+id) || delete slots[id]);
   // 抽牌動畫：手牌比上次多出來的牌 = 剛抽到的（只在該次 render 播動畫），標記「新」直到我棄牌結束回合
-  if (seen?.round !== g.round) { seen = { round: g.round, ids: null, drawn: null }; slots = {}; } // 新回合發牌不算抽牌；牌 id 每局重編，舊預放要清
+  if (seen?.round !== g.round) { seen = { round: g.round, ids: null, drawn: null }; slots = {}; actSlot = null; } // 新回合發牌不算抽牌；牌 id 每局重編，舊預放要清
   const fresh = seen.ids ? [...ids].filter((id) => !seen.ids.has(id)) : [];
   seen.ids = ids;
   if (!canAct || !ids.has(seen.drawn)) seen.drawn = null;
@@ -171,8 +185,8 @@ function game() {
   if (!canAct || !picked.length) endFor = null;
 
   const players = g.players.map((p) => `<div class="player ${g.turn === p.id ? 'turn' : ''} ${p.in ? '' : 'out'}">
-    <b>${esc(p.name)}${p.id === me ? '（你）' : ''} ${online[p.id] ? '' : '💤'}</b>
-    <small>階段 ${p.phase > 10 ? 10 : p.phase} ${p.laid ? '✅' : ''} · ${p.n} 張 · ${p.score} 分${p.skip === 1 ? ' · ⏭將被跳過' : ''}</small>
+    <div class="row" style="flex-wrap:nowrap;justify-content:space-between"><b>${esc(p.name)}${p.id === me ? '（你）' : ''} ${online[p.id] ? '' : '💤'}</b><span class="cnt" aria-label="${p.n} 張">${p.n}<small>張</small></span></div>
+    <small>階段 ${p.phase > 10 ? 10 : p.phase} ${p.laid ? '✅' : ''} · ${p.score} 分${p.skip === 1 ? ' · ⏭將被跳過' : ''}</small>
     ${p.id === me || !p.pick ? '' : `<div class="pick">${p.pick.from === 'pile' ? '🂠 抽牌堆' : `♻ 撿棄牌 ${card(p.pick.card, { tag: 'span', cls: 'sm' })}`}</div>`}</div>`).join('');
 
   // 排名：先比階段（高者優先）再比分數（低者優先）。同條件並列同名次。
@@ -191,30 +205,43 @@ function game() {
   }).join('');
 
   const need = req.map(([, n], gi) => hand.filter((c) => slots[c.id] === gi).length === n);
-  const layUI = g.status === 'play' && mine.in && !mine.laid ? `<div>${req.map((r, gi) => {
-    const cs = hand.filter((c) => slots[c.id] === gi);
-    return `<div class="slot"><div class="slotH"><span>組 ${gi + 1}：${lab(r)}（${cs.length}/${r[1]}）</span><button data-a="slot" data-v="${gi}" ${picked.length ? '' : 'disabled'}>放入選取的牌</button></div>
-      <div class="row">${cs.map((c) => card(c, { attrs: `data-a="unslot" data-v="${c.id}"` })).join('') || '<span class="mute">先選牌，再按右上角按鈕</span>'}</div></div>`;
-  }).join('')}<div class="row" style="margin-top:8px"><button data-a="lay" ${canAct && need.every(Boolean) ? '' : 'disabled'}>放下階段</button><span class="mute">${canAct ? '順子可用百搭補洞；每組至少要有一張數字牌' : '可先排好牌，輪到你抽完牌後再放下'}</span></div></div>` : '';
+  // 放階段：點某一組讓它「作用中」，再直接點手牌放入（滿了自動跳下一組）；點組內的牌拿回手上。放下階段的按鈕在底部托盤。
+  const layUI = laying ? `<div>${req.map((r, gi) => {
+    const cs = hand.filter((c) => slots[c.id] === gi), on = actSlot === gi;
+    return `<div class="slot ${on ? 'can' : ''}" data-a="slot" data-v="${gi}" role="button" aria-pressed="${on}"><div class="slotH"><span>組 ${gi + 1}：${lab(r)}（${cs.length}/${r[1]}）</span></div>
+      <div class="row">${cs.map((c) => card(c, { attrs: `data-a="unslot" data-v="${c.id}"` })).join('') || `<span class="mute">${on ? '點下方手牌放入這組' : '點這組，再點下方手牌'}</span>`}</div></div>`;
+  }).join('')}<p class="mute" style="margin:8px 0 0">順子可用百搭補洞；每組至少要有一張數字牌${canAct ? '' : '。可先排好牌，輪到你抽完牌後再放下'}</p></div>` : '';
 
   const free = hand.filter((c) => slots[c.id] === undefined);
   const one = picked.length === 1 ? picked[0] : null;
   const targets = g.players.filter((p) => p.in && p.id !== me && p.skip === 0);
+  // 停用的按鈕不吞掉點擊（CSS pointer-events:none），外層 data-why 會用 toast 說明原因
+  const wb = (label, a, why, cls = '') => `<span class="w" data-why="${esc(why)}"><button class="${cls}" data-a="${a}" ${why ? 'disabled' : ''}>${label}</button></span>`;
+  const layWhy = need.every(Boolean) ? '' : '每一組都要放滿才能放下階段';
+  const layBtn = canAct && laying ? wb('放下階段', 'lay', layWhy, layWhy ? 'ghost' : '') : '';
   const discard = !canAct ? '' : one?.t === 's' && targets.length && g.hand.length > 1
     ? `<span>跳過誰？</span>${targets.map((p) => `<button data-a="discard" data-v="${p.id}">${esc(p.name)}</button>`).join('')}`
-    : `<button data-a="discard" ${one ? '' : 'disabled'}>棄牌並結束回合</button>`;
+    : wb('棄牌並結束回合', 'discard', one ? '' : actSlot !== null ? '正在放階段：再點一次該組可取消' : picked.length > 1 ? '一次只能棄一張牌' : '先點一張要棄的牌', layBtn && !layWhy ? 'ghost' : '');
+  const drawWhy = !myTurn ? `還沒輪到你，現在是 ${name(g.turn)}` : g.stage === 'act' ? '這回合已經抽過牌了' : '';
+  const topWhy = drawWhy || (!g.top ? '棄牌堆是空的' : g.top.t === 's' ? '跳過牌不能撿' : '');
 
-  const status = g.status !== 'play' ? '' : myTurn
+  const status = g.status !== 'play' ? '' : actSlot !== null ? `放入第 ${actSlot + 1} 組：點下方手牌` : myTurn
     ? (g.stage === 'draw' ? '輪到你了：先從牌堆或棄牌堆抽一張' : '放下階段／接牌，最後棄一張牌')
     : `輪到 ${esc(name(g.turn))}`;
 
-  return `<div class="row" style="justify-content:space-between"><b>房間 ${s.code} · 第 ${g.round} 回合${g.playoff ? '（加賽）' : ''}</b>
-    <span class="mute">目標：第 ${g.target} 階段</span></div>
-  <div class="row" style="margin:10px 0">${players}</div>
+  const sheetUI = sheet && g.status === 'play' ? `<div class="overlay sheet"><div class="bd" data-a="sheet"></div><div class="modal">
+    <div class="row" style="justify-content:space-between"><h2 style="margin:0">排名 <small>階段高者優先，同階段比分數（低者優先）</small></h2><button class="ghost ic" data-a="sheet" aria-label="關閉">✕</button></div>
+    <table>${ranking}</table>
+    <h2 style="margin-top:16px">10 個階段</h2><table>${g.phases.map((r, i) => `<tr class="${i + 1 === Math.min(mine.phase, 10) ? 'me' : ''}"><td>${i + 1}</td><td>${r.map(lab).join(' ＋ ')}</td></tr>`).join('')}</table>
+    <h2 style="margin-top:16px">最近動態</h2><div class="log">${g.log.map(esc).join('<br>')}</div></div></div>` : '';
+
+  return `<div class="row"><b style="flex:1">房間 ${s.code} · 第 ${g.round} 回合${g.playoff ? '（加賽）' : ''}</b>
+    <span class="mute">目標：階段 ${g.target}</span><button class="ghost ic" data-a="sheet" aria-label="排名、階段表、動態">📋</button></div>
+  <div class="row players">${players}</div>
   <div class="panel table">
     <div class="piles">
-      <div class="pile"><button class="card back" aria-label="抽牌堆" data-a="draw" data-v="pile" ${canDraw ? '' : 'disabled'}><b>抽牌</b></button><br>牌堆 ${g.drawCount}</div>
-      <div class="pile">${g.top ? card(g.top, { attrs: `data-a="draw" data-v="discard" ${canDraw && g.top.t !== 's' ? '' : 'disabled'}` }) : '<div class="card empty"></div>'}<br>棄牌</div>
+      <div class="pile" data-why="${esc(drawWhy)}"><button class="card back" aria-label="抽牌堆" data-a="draw" data-v="pile" ${drawWhy ? 'disabled' : ''}><b>抽牌</b></button><br>牌堆 ${g.drawCount}</div>
+      <div class="pile" data-why="${esc(topWhy)}">${g.top ? card(g.top, { attrs: `data-a="draw" data-v="discard" ${topWhy ? 'disabled' : ''}` }) : '<div class="card empty"></div>'}<br>棄牌</div>
     </div>
     <div class="groups">${groups || '<span class="mute">還沒有人放下階段</span>'}</div>
   </div>
@@ -222,12 +249,9 @@ function game() {
     <h2>你的階段 ${mine.phase}：${req.map(lab).join(' ＋ ')} ${mine.laid ? '✅ 已完成' : ''}</h2>
     ${layUI}
   </div>
-  <div class="panel"><h2>排名 <small>階段高者優先，同階段比分數（低者優先）</small></h2><table>${ranking}</table></div>
-  <details class="panel" ${rulesOpen ? 'open' : ''} ontoggle="rulesOpen=this.open"><summary>10 個階段</summary><table>${g.phases.map((r, i) => `<tr class="${i + 1 === Math.min(mine.phase, 10) ? 'me' : ''}"><td>${i + 1}</td><td>${r.map(lab).join(' ＋ ')}</td></tr>`).join('')}</table></details>
-  <div class="log">${g.log.map(esc).join('<br>')}</div>
   ${g.status !== 'play' ? overlay(g, s) : `<div class="tray"><b>${status}</b>
     <div class="hand">${free.map((c) => card(c, { cls: `${sel.has(c.id) ? 'sel' : ''} ${c.id === seen.drawn ? 'new' : ''} ${fresh.includes(c.id) ? 'pop' : ''}`, attrs: `data-a="card" data-v="${c.id}"` })).join('')}</div>
-    ${discard && `<div class="row act">${discard}</div>`}</div>`}`; // 手牌＋棄牌固定在螢幕底部（拇指區），其餘在上方捲動
+    ${layBtn + discard && `<div class="row act">${layBtn}${discard}</div>`}</div>`}${sheetUI}`; // 手牌＋棄牌固定在螢幕底部（拇指區），其餘在上方捲動；排名／階段表／動態收進 📋 面板
 }
 
 function overlay(g, s) {
@@ -257,6 +281,8 @@ const A = {
   home() { history.replaceState(null, '', '/'); location.reload(); },
   async copy() {
     const l = `${location.origin}/?room=${snap.code}`;
+    // 手機優先叫出系統分享面板（LINE／訊息一步到位）；使用者按取消不算失敗
+    if (navigator.share) { try { return await navigator.share({ title: 'Phase 10', text: '來玩 Phase 10！', url: l }); } catch (e) { if (e.name === 'AbortError') return; } }
     try { await navigator.clipboard.writeText(l); toast('已複製邀請連結'); } catch { prompt('複製這個連結傳給朋友：', l); }
   },
   start: () => call('start'),
@@ -264,13 +290,26 @@ const A = {
   back: () => call('back'),
   next: () => call('act', { action: { type: 'next' } }),
   draw: (v) => call('act', { action: { type: 'draw', from: v } }),
-  card(v) { sel.has(+v) ? sel.delete(+v) : sel.add(+v); endFor = null; render(); },
-  slot(v) { sel.forEach((id) => (slots[id] = +v)); sel.clear(); render(); },
+  card(v) {
+    endFor = null;
+    if (actSlot === null) sel.has(+v) ? sel.delete(+v) : sel.add(+v);
+    else { // 有作用中的組：點牌就直接放入；這組滿了自動換到下一個還沒滿的組
+      const req = phaseReq(), full = (gi) => Object.values(slots).filter((x) => x === gi).length >= req[gi][1];
+      if (full(actSlot)) return toast('這組已經放滿了，點組內的牌可以拿回來');
+      slots[v] = actSlot;
+      if (full(actSlot)) actSlot = req.findIndex((_, gi) => !full(gi)) < 0 ? null : req.findIndex((_, gi) => !full(gi));
+    }
+    render();
+  },
+  slot(v) { // 有先選好的牌 → 整批放入（舊流程仍可用）；否則切換作用中的組
+    if (sel.size) { sel.forEach((id) => (slots[id] = +v)); sel.clear(); actSlot = null; } else actSlot = actSlot === +v ? null : +v;
+    render();
+  },
   unslot(v) { delete slots[v]; render(); },
+  sheet() { sheet = !sheet; render(); },
   async lay() {
-    const req = snap.game.phases[snap.game.players.find((p) => p.id === snap.me).phase - 1];
-    const groups = req.map((_, gi) => Object.keys(slots).filter((id) => slots[id] === gi).map(Number));
-    if (await call('act', { action: { type: 'lay', groups } })) slots = {};
+    const groups = phaseReq().map((_, gi) => Object.keys(slots).filter((id) => slots[id] === gi).map(Number));
+    if (await call('act', { action: { type: 'lay', groups } })) { slots = {}; actSlot = null; }
   },
   hit(v, el) {
     const gr = snap.game.groups[+v], end = el.dataset.end;
@@ -281,11 +320,15 @@ const A = {
   discard: (v) => call('act', { action: { type: 'discard', card: [...sel][0], target: v } }).then((r) => r && sel.clear()),
 };
 $('#app').addEventListener('click', (e) => {
+  const why = e.target.closest('[data-why]')?.dataset.why; // 停用的按鈕 pointer-events:none，點擊落在外層 → 說明為什麼不能按
+  if (why) return toast(why);
   const el = e.target.closest('[data-a]');
   if (el && !el.disabled) A[el.dataset.a]?.(el.dataset.v, el);
 });
+$('#app').addEventListener('focusout', (e) => { if (e.target.matches?.('select') && snap) render(); }); // 補上選單開著時被略過的重繪
 $('#app').addEventListener('change', (e) => {
   const k = e.target.dataset.c;
+  if (k) e.target.blur(); // 選完就放開焦點，不然「焦點在 select 時略過重繪」會讓房主一直看不到新加入的玩家
   if (k) call('settings', { [k]: k === 'target' ? +e.target.value : e.target.value });
 });
 if (sess) connect(); else render();
