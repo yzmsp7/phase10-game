@@ -64,7 +64,7 @@ assert.equal(G.hit(col, [n(9, 'Y'), w()]).cards.length, 9);
 throws(() => G.hit(col, [n(9, 'R')]), /不能接/);
 
 // --- 回合流程（固定牌局）---
-function rawRig(nPlayers, opts = { mode: 'phases', target: 10 }) {
+function rawRig(nPlayers, opts = { target: 10 }) {
   const ps = [...Array(nPlayers)].map((_, i) => ({ id: 'p' + i, name: 'P' + i }));
   return G.create(ps, opts);
 }
@@ -223,7 +223,7 @@ const plain = (p) => p.hand.find((x) => x.t !== 's').id;
 // --- 勝負 ---
 {
   // 同回合兩人完成目標階段：總分少者贏
-  const g = rig(3, { mode: 'phases', target: 2 });
+  const g = rig(3, { target: 2 });
   const [a, b, c] = g.players;
   [a, b, c].forEach((p) => { p.phase = 2; });
   a.score = 30; b.score = 10; c.score = 0;
@@ -236,7 +236,7 @@ const plain = (p) => p.hand.find((x) => x.t !== 's').id;
 }
 {
   // 平手 → 加賽
-  const g = rig(3, { mode: 'phases', target: 2 });
+  const g = rig(3, { target: 2 });
   const [a, b, c] = g.players;
   [a, b, c].forEach((p) => { p.phase = 2; });
   g.turn = 0; g.stage = 'act';
@@ -252,14 +252,15 @@ const plain = (p) => p.hand.find((x) => x.t !== 's').id;
   assert.notEqual(g.players[g.turn], c);
 }
 {
-  // 固定 10 回合：第 10 回合結束後總分最低者贏
-  const g = rig(2, { mode: 'rounds', target: 10 });
-  g.round = 10; g.turn = 0; g.stage = 'act';
-  g.players.forEach((p) => { p.phase = 10; p.hand = [n(1)]; });
-  g.players[0].score = 50; g.players[1].score = 40;
-  G.act(g, g.players[0].id, { type: 'discard', card: g.players[0].hand[0].id });
-  assert.equal(g.status, 'over');
-  assert.deepEqual(g.winners, [g.players[1].id], '出牌者 +0=50，另一人 40+5=45 → 總分最低的 1 號贏');
+  // 沒人完成目標階段 → 遊戲繼續；未完成者下一回合仍在同一階段
+  const g = rig(2, { target: 10 });
+  const [a, b] = g.players;
+  a.phase = 10; b.phase = 3; g.turn = 0; g.stage = 'act';
+  a.laid = false; b.laid = false; a.hand = [n(1)]; b.hand = [n(1), n(1)];
+  G.act(g, a.id, { type: 'discard', card: a.hand[0].id });
+  assert.equal(g.status, 'roundEnd', 'a 出完牌但沒完成第 10 階段，不能結束');
+  G.act(g, a.id, { type: 'next' });
+  assert.deepEqual([a.phase, b.phase], [10, 3], '沒完成階段就不升階，也不會被同步');
 }
 
 // --- 隨機機器人整局模擬 ---
@@ -310,8 +311,7 @@ function simulate(nPlayers, opts) {
   return g;
 }
 for (let np = 2; np <= 6; np++) {
-  const phasesGame = simulate(np, { mode: 'phases', target: np >= 5 ? 3 : 4 });
-  simulate(np, { mode: 'rounds', target: 10 });
+  const phasesGame = simulate(np, { target: np >= 5 ? 3 : 4 });
   assert.ok(phasesGame.round >= 3);
 }
 
@@ -352,7 +352,7 @@ for (let np = 2; np <= 6; np++) {
   };
   let v = await sseOnce(host);
   assert.equal(v.players.length, 6);
-  assert.equal(v.settings.target, 7, '6 人預設 7 階段');
+  assert.equal(v.settings.target, 10, '預設打完 10 階段');
   assert.equal((await post('settings', { ...host, target: 4 })).status, 200);
   assert.equal((await post('start', host)).status, 200);
   v = await sseOnce(guests[2]);

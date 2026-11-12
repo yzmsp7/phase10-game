@@ -93,9 +93,9 @@ const nextIn = (g, i) => {
 };
 const lowest = (ps) => { const m = Math.min(...ps.map((p) => p.score)); return ps.filter((p) => p.score === m); };
 
-function create(players, { mode, target }) {
+function create(players, { target }) {
   const g = {
-    mode, target, round: 0, dealer: randomInt(players.length), turn: 0, stage: 'draw', status: 'play',
+    target, round: 0, dealer: randomInt(players.length), turn: 0, stage: 'draw', status: 'play',
     players: players.map(({ id, name }) => ({ id, name, phase: 1, score: 0, hand: [], laid: false, skip: 0, in: true })),
     draw: [], disc: [], groups: [], log: [], summary: null, winners: null, playoff: null,
   };
@@ -111,7 +111,6 @@ function startRound(g) {
     p.in = !g.playoff || g.playoff.includes(p.id);
     p.laid = false; p.skip = 0;
     p.hand = p.in ? d.splice(0, HAND) : [];
-    if (g.mode === 'rounds') p.phase = g.round;
   }
   g.disc = [d.pop()];
   g.draw = d;
@@ -133,16 +132,15 @@ function begin(g) {
 function endRound(g, out) {
   const w = g.players[out];
   const live = g.players.filter((p) => p.in);
-  const done = g.mode === 'phases' ? live.filter((p) => p.laid && p.phase >= g.target) : [];
+  const done = live.filter((p) => p.laid && p.phase >= g.target);
   const rows = live.map((p) => {
     const gain = p === w ? 0 : p.hand.reduce((s, c) => s + pts(c), 0);
     p.score += gain;
     return { id: p.id, name: p.name, phase: p.phase, laid: p.laid, gain, score: p.score, hand: [...p.hand] };
   });
-  if (g.mode === 'phases') live.forEach((p) => { if (p.laid) p.phase++; });
+  live.forEach((p) => { if (p.laid) p.phase++; }); // 只有完成階段的人才進下一階段
   let winners = null, note = '';
   if (g.playoff) winners = [w];
-  else if (g.mode === 'rounds') { if (g.round >= 10) winners = lowest(live); }
   else if (done.length) {
     const best = lowest(done);
     if (best.length > 1) {
@@ -247,7 +245,7 @@ function autoPlay(g, pid) {
 function view(g, pid) {
   const me = g.players.find((p) => p.id === pid);
   return {
-    mode: g.mode, target: g.target, round: g.round, status: g.status, stage: g.stage, playoff: !!g.playoff,
+    target: g.target, round: g.round, status: g.status, stage: g.stage, playoff: !!g.playoff,
     turn: g.status === 'play' ? g.players[g.turn].id : null,
     drawCount: g.draw.length, top: g.disc.at(-1) || null,
     players: g.players.map((p) => ({ id: p.id, name: p.name, phase: p.phase, score: p.score, laid: p.laid, n: p.hand.length, skip: p.skip, in: p.in })),

@@ -113,15 +113,14 @@ function room() {
   const s = snap, host = s.me === s.host, n = s.players.length, st = s.settings;
   const link = `${location.origin}/?room=${s.code}`;
   const set = host
-    ? `<div class="row"><select data-c="mode"><option value="phases" ${st.mode === 'phases' ? 'selected' : ''}>先完成目標階段者獲勝</option><option value="rounds" ${st.mode === 'rounds' ? 'selected' : ''}>固定 10 回合比總分</option></select>
-       ${st.mode === 'phases' ? `<select data-c="target">${[...Array(10)].map((_, i) => `<option value="${i + 1}" ${st.target === i + 1 ? 'selected' : ''}>目標：第 ${i + 1} 階段</option>`).join('')}</select>` : ''}</div>`
-    : `<div>${st.mode === 'phases' ? `先完成第 ${st.target} 階段者獲勝` : '固定 10 回合，總分最低者獲勝'}</div>`;
+    ? `<div class="row"><select data-c="target">${[...Array(10)].map((_, i) => `<option value="${i + 1}" ${st.target === i + 1 ? 'selected' : ''}>目標：第 ${i + 1} 階段</option>`).join('')}</select></div>`
+    : `<div>先完成第 ${st.target} 階段者結束遊戲</div>`;
   return `<h1>房間 <span class="big">${s.code}</span></h1>
   <div class="panel"><h2>邀請朋友</h2><div class="row"><input readonly value="${esc(link)}" size="34" onfocus="this.select()"><button data-a="copy">複製連結</button></div></div>
   <div class="panel"><h2>玩家（${n}/6）</h2>
     ${s.players.map((p) => `<div><span class="dot ${p.online ? 'on' : ''}"></span>${esc(p.name)} ${p.id === s.host ? '<span class="crown">👑 房主</span>' : ''} ${p.id === s.me ? '<span class="mute">（你）</span>' : ''}</div>`).join('')}</div>
-  <div class="panel"><h2>規則（依人數 ${n} 人）</h2>${set}
-    <p class="mute">每人發 10 張牌。${st.mode === 'phases' ? (n >= 5 ? '人多時回合較長，預設縮短為 7 階段。' : '預設打完全部 10 階段。') + '房主改過目標後不再自動調整。' : '每回合所有人同步進入下一階段，不論有沒有完成。'}</p></div>
+  <div class="panel"><h2>規則</h2>${set}
+    <p class="mute">每人發 10 張牌。只有完成當前階段的人，下一回合才能進下一階段；沒完成就繼續挑戰同一階段。有人完成目標階段後，該回合結束時比總分（低者勝）。</p></div>
   <div class="row">${host ? `<button data-a="start" ${n < 2 ? 'disabled' : ''}>開始遊戲</button>${n < 2 ? '<span class="mute">至少需要 2 人</span>' : ''}` : '<span class="mute">等待房主開始…</span>'}
   <button class="ghost" data-a="leave">離開房間</button></div>`;
 }
@@ -143,8 +142,8 @@ function game() {
     <b>${esc(p.name)}${p.id === me ? '（你）' : ''} ${online[p.id] ? '' : '💤'}</b>
     <small>階段 ${p.phase > 10 ? 10 : p.phase} ${p.laid ? '✅' : ''} · ${p.n} 張 · ${p.score} 分${p.skip === 1 ? ' · ⏭將被跳過' : ''}</small></div>`).join('');
 
-  // 排名：階段制先比階段（高者勝）再比分數（低者勝）；回合制只比分數。同條件並列同名次。
-  const cmp = (a, b) => (g.mode === 'phases' ? b.phase - a.phase : 0) || a.score - b.score;
+  // 排名：先比階段（高者優先）再比分數（低者優先）。同條件並列同名次。
+  const cmp = (a, b) => b.phase - a.phase || a.score - b.score;
   const sorted = [...g.players].sort(cmp);
   const ranking = sorted.map((p) => `<tr class="${p.id === me ? 'me' : ''}"><td>${sorted.findIndex((q) => !cmp(q, p)) + 1}</td><td>${esc(p.name)}</td>
     <td>階段 ${Math.min(p.phase, 10)} ${p.laid ? '✅' : ''}</td><td>${p.score} 分</td></tr>`).join('');
@@ -178,9 +177,9 @@ function game() {
     : `輪到 ${esc(name(g.turn))}`;
 
   return `<div class="row" style="justify-content:space-between"><b>房間 ${s.code} · 第 ${g.round} 回合${g.playoff ? '（加賽）' : ''}</b>
-    <span class="mute">${g.mode === 'phases' ? `目標：第 ${g.target} 階段` : '10 回合比總分'}</span></div>
+    <span class="mute">目標：第 ${g.target} 階段</span></div>
   <div class="row" style="margin:10px 0">${players}</div>
-  <div class="panel"><h2>排名 <small>${g.mode === 'phases' ? '階段高者優先，同階段比分數（低者勝）' : '總分低者勝'}</small></h2><table>${ranking}</table></div>
+  <div class="panel"><h2>排名 <small>階段高者優先，同階段比分數（低者優先）</small></h2><table>${ranking}</table></div>
   <div class="panel table">
     <div class="piles">
       <div class="pile"><button class="card back" aria-label="抽牌堆" data-a="draw" data-v="pile" ${canDraw ? '' : 'disabled'}><b>抽牌</b></button><br>牌堆 ${g.drawCount}</div>

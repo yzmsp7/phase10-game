@@ -10,14 +10,10 @@ const MAX = 6, MIN = 2, AFK_MS = 20_000;
 const rooms = new Map();
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
 
-// 規則隨人數變化的預設值（說明書本身沒有分人數的規則，這是我們的設計）：
-// 2-4 人打完 10 階段；5-6 人每回合更久，預設 7 階段。房主可自行改。
-const defaultTarget = (n) => (n >= 5 ? 7 : 10);
-
 function newRoom() {
   let code;
   do { code = Array.from({ length: 4 }, () => CODE_CHARS[randomInt(CODE_CHARS.length)]).join(''); } while (rooms.has(code));
-  const r = { code, players: [], host: null, settings: { mode: 'phases', target: 10, auto: true }, game: null, clients: new Map(), touched: Date.now(), timer: null };
+  const r = { code, players: [], host: null, settings: { target: 10 }, game: null, clients: new Map(), touched: Date.now(), timer: null };
   rooms.set(code, r);
   return r;
 }
@@ -29,7 +25,6 @@ function addPlayer(room, name) {
   const p = { id: randomUUID().slice(0, 8), token: randomUUID(), name };
   room.players.push(p);
   room.host ??= p.id;
-  if (room.settings.auto) room.settings.target = defaultTarget(room.players.length);
   return p;
 }
 
@@ -72,9 +67,7 @@ const actions = {
   settings(room, p, b) {
     if (room.host !== p.id) G.err('只有房主可以改設定');
     if (room.game) G.err('遊戲進行中不能改設定');
-    const s = room.settings;
-    if (b.mode === 'phases' || b.mode === 'rounds') s.mode = b.mode;
-    if (Number.isInteger(b.target) && b.target >= 1 && b.target <= 10) { s.target = b.target; s.auto = false; }
+    if (Number.isInteger(b.target) && b.target >= 1 && b.target <= 10) room.settings.target = b.target;
   },
   start(room, p) {
     if (room.host !== p.id) G.err('只有房主可以開始');
@@ -97,7 +90,6 @@ const actions = {
     room.clients.get(p.id)?.forEach((res) => res.end());
     room.clients.delete(p.id);
     if (room.host === p.id) room.host = room.players[0]?.id ?? null;
-    if (room.settings.auto) room.settings.target = defaultTarget(room.players.length);
     if (!room.players.length) rooms.delete(room.code);
   },
 };
