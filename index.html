@@ -121,7 +121,11 @@ function connect() {
   es?.close();
   es = new EventSource(`/api/events?code=${sess.code}&token=${sess.token}`);
   // 房主正在開 <select>（iOS 滾輪）時不重繪，否則 innerHTML 重建會把選單關掉；focusout 時再補畫
-  es.onmessage = (e) => { snap = JSON.parse(e.data); if (!document.activeElement?.matches?.('select')) render(); };
+  es.onmessage = (e) => {
+    const d = JSON.parse(e.data);
+    if (d.closed) { exit(); return toast(d.closed); } // 房間被關（遊戲中只剩一人）→ 回首頁並說明原因
+    snap = d; if (!document.activeElement?.matches?.('select')) render();
+  };
   es.onerror = () => { if (es.readyState === EventSource.CLOSED) { toast('連線中斷或房間已過期'); exit(); } };
 }
 // 手機切去別的 App 再回來，iOS 的 EventSource 常常是死的 → 回前景一律重連
@@ -197,13 +201,13 @@ function game() {
   if (!canAct || !picked.length) endFor = null;
 
   const players = g.players.map((p) => `<div class="player ${g.turn === p.id ? 'turn' : ''} ${p.in ? '' : 'out'}">
-    <div class="row" style="flex-wrap:nowrap;justify-content:space-between"><b>${esc(p.name)}${p.id === me ? '（你）' : ''} ${online[p.id] ? '' : '💤'}</b><span class="cnt" aria-label="${p.n} 張">${p.n}<small>張</small></span></div>
-    <small>階段 ${p.phase > 10 ? 10 : p.phase} ${p.laid ? '✅' : ''} · ${p.score} 分${p.skip === 1 ? ' · ⏭將被跳過' : ''}</small>
+    <div class="row" style="flex-wrap:nowrap;justify-content:space-between"><b>${esc(p.name)}${p.id === me ? '（你）' : ''} ${online[p.id] || p.left ? '' : '💤'}</b>${p.left ? '' : `<span class="cnt" aria-label="${p.n} 張">${p.n}<small>張</small></span>`}</div>
+    <small>${p.left ? '已離開' : `階段 ${p.phase > 10 ? 10 : p.phase} ${p.laid ? '✅' : ''} · ${p.score} 分${p.skip === 1 ? ' · ⏭將被跳過' : ''}`}</small>
     ${p.id === me || !p.pick ? '' : `<div class="pick">${p.pick.from === 'pile' ? '🂠 抽牌堆' : `♻ 撿棄牌 ${card(p.pick.card, { tag: 'span', cls: 'sm' })}`}</div>`}</div>`).join('');
 
   // 排名：先比階段（高者優先）再比分數（低者優先）。同條件並列同名次。
   const cmp = (a, b) => b.phase - a.phase || a.score - b.score;
-  const sorted = [...g.players].sort(cmp);
+  const sorted = g.players.filter((p) => !p.left).sort(cmp); // 離開的人不列入排名
   const ranking = sorted.map((p) => `<tr class="${p.id === me ? 'me' : ''}"><td>${sorted.findIndex((q) => !cmp(q, p)) + 1}</td><td>${esc(p.name)}</td>
     <td>階段 ${Math.min(p.phase, 10)} ${p.laid ? '✅' : ''}</td><td>${p.score} 分</td></tr>`).join('');
 
@@ -305,10 +309,10 @@ const A = {
   },
   start: () => call('start'),
   async leave() {
-    // 遊戲進行中伺服器不讓你正式退出（牌和輪次都綁在你身上）→ 只在本機斷線，由系統代打；之後無法回到這局，所以先確認
+    // 遊戲中途退出是真的退出：牌放回棄牌堆、不能再回來；剩 2 人時你一走房間就關閉，所以先確認
     if (snap?.game && snap.game.status !== 'over') {
-      if (!confirm('離開後這局會由系統代打，而且無法再回到這局。確定要離開？')) return;
-      return exit();
+      const last2 = snap.game.players.filter((p) => p.in).length <= 2;
+      if (!confirm(last2 ? '現在只剩兩人，你離開後房間會關閉，大家都會回到首頁。確定要離開？' : '離開後無法再回到這局，你的牌會放回棄牌堆。確定要離開？')) return;
     }
     await call('leave'); exit();
   },

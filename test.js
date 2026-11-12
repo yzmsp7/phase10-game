@@ -267,6 +267,61 @@ const plain = (p) => p.hand.find((x) => x.t !== 's').id;
   assert.deepEqual([a.phase, b.phase], [10, 3], '沒完成階段就不升階，也不會被同步');
 }
 
+// --- 中途退出 ---
+{
+  // 輪到他時退出：換下一位、回到抽牌階段；牌數守恆；下一回合不再被發牌
+  const g = rig(3);
+  const cur = g.players[g.turn];
+  G.act(g, cur.id, { type: 'draw', from: 'pile' });          // 讓他停在 act 階段，確認會被重置
+  assert.equal(G.leave(g, cur.id), 2);
+  assert.equal(cur.in, false); assert.equal(cur.hand.length, 0);
+  assert.notEqual(g.players[g.turn], cur, '輪次要換人');
+  assert.equal(g.stage, 'draw', '換人後要從抽牌開始');
+  const total = () => g.players.reduce((a, p) => a + p.hand.length, 0) + g.groups.reduce((a, x) => a + x.cards.length, 0) + g.draw.length + g.disc.length;
+  assert.equal(total(), 108, '退出者的牌放回棄牌堆，牌數守恆');
+  G.leave(g, cur.id);                                         // 重複退出是 no-op
+  assert.equal(total(), 108);
+  // 回合結束後下一回合：他不該被重新發牌
+  const other = g.players[g.turn];
+  other.laid = true; other.hand = [n(1)]; g.stage = 'act';
+  G.act(g, other.id, { type: 'discard', card: other.hand[0].id });
+  assert.equal(g.status, 'roundEnd');
+  assert.ok(!g.summary.rows.some((r) => r.id === cur.id), '結算不含退出者');
+  G.act(g, other.id, { type: 'next' });
+  assert.equal(cur.in, false, '下一回合退出者仍是 in=false');
+  assert.equal(cur.hand.length, 0, '退出者不會被發牌');
+}
+{
+  // 不是他的回合退出：輪次不動
+  const g = rig(3);
+  const turn = g.turn, other = g.players.findIndex((_, i) => i !== turn);
+  const before = g.players[turn];
+  G.leave(g, g.players[other].id);
+  assert.equal(g.players[g.turn], before);
+}
+{
+  // 被他跳過標記擋住的下一位：leave 之後 begin() 仍會處理跳過
+  const g = rig(3);
+  const i = g.turn, nx = (i + 1) % 3;
+  g.players[nx].skip = 1;
+  G.leave(g, g.players[i].id);
+  assert.equal(g.players[nx].skip, 2, '下一位被跳過');
+  assert.equal(g.players[g.turn], g.players[(i + 2) % 3]);
+}
+{
+  // 剩 1 人：回傳 1，由呼叫者收尾
+  const g = rig(2);
+  assert.equal(G.leave(g, g.players[0].id), 1);
+}
+{
+  // 加賽中退出：從 playoff 名單移除
+  const g = rig(3, { target: 2 });
+  const [a, b, c] = g.players;
+  g.playoff = [a.id, b.id]; a.in = b.in = true; c.in = false;
+  G.leave(g, a.id);
+  assert.deepEqual(g.playoff, [b.id]);
+}
+
 // --- 隨機機器人整局模擬 ---
 function bot(g, p) {
   const my = g.players.indexOf(p);
@@ -370,13 +425,52 @@ for (let np = 2; np <= 6; np++) {
   assert.equal((await post('join', { code: host.code, name: '遲到' })).status, 400, '遊戲開始後不能加入');
   assert.equal((await post('act', { ...host, action: { type: 'draw', from: 'pile' } })).status === 200 || true, true);
   assert.equal((await post('act', { code: host.code, token: 'bad', action: {} })).status, 404);
-  assert.equal((await post('leave', guests[0])).status, 400, '遊戲進行中不能離開（結束後才放行）');
   const room = server.rooms.get(host.code);
-  room.game.status = 'over';
-  assert.equal((await post('leave', guests[0])).status, 200, '遊戲結束後非房主可以離開');
+  const cardsIn = (g) => g.players.reduce((a, p) => a + p.hand.length, 0) + g.groups.reduce((a, x) => a + x.cards.length, 0) + g.draw.length + g.disc.length;
+
+  // 遊戲中途退出：玩家從房間移除，但引擎裡只標記 left；牌守恆；輪到他時輪次換人
+  const leaver = room.game.players[room.game.turn];
+  const leaverTok = room.players.find((p) => p.id === leaver.id);
+  assert.equal((await post('leave', { code: host.code, token: leaverTok.token })).status, 200, '遊戲中途可以退出');
   assert.equal(room.players.length, 5);
-  assert.ok(!room.players.some((p) => p.token === guests[0].token), '離開的人要從房間移除');
-  assert.equal(room.players.find((p) => p.id === room.host).token, host.token, '非房主離開不影響房主');
+  assert.equal(room.game.players.length, 6, '引擎裡的玩家不刪，只標記');
+  assert.ok(leaver.left && !leaver.in && leaver.hand.length === 0);
+  assert.equal(cardsIn(room.game), 108, '退出後牌數守恆');
+  assert.notEqual(room.game.players[room.game.turn], leaver, '輪次要離開退出者');
+  assert.ok(room.host, '還有房主');
+  v = await sseOnce({ code: host.code, token: room.players[0].token });
+  assert.equal(v.game.players.find((p) => p.id === leaver.id).left, true, '其他人看得到他已離開');
+
+  // 繼續退到剩 1 人 → 房間關閉，所有人收到 closed
+  const rest = () => room.players.map((p) => ({ code: host.code, token: p.token }));
+  while (room.players.length > 2) await post('leave', rest()[1]);
+  assert.ok(server.rooms.has(host.code), '還剩 2 人，房間還在');
+  const watcher = rest()[0];
+  const ac = new AbortController();
+  const sse = await fetch(`${base}/api/events?code=${watcher.code}&token=${watcher.token}`, { signal: ac.signal });
+  const rd = sse.body.getReader(); const dec = new TextDecoder(); let got = '';
+  await rd.read();                                          // 第一筆：目前狀態
+  assert.equal((await post('leave', rest()[1])).status, 200);
+  const deadline = Date.now() + 2000;                       // 沒收到 closed 要「失敗」而不是無限等下去
+  while (!got.includes('closed') && Date.now() < deadline) {
+    const r = await Promise.race([rd.read(), new Promise((res) => setTimeout(() => res({ done: true }), 500))]);
+    if (r.done) break;
+    got += dec.decode(r.value, { stream: true });
+  }
+  assert.match(got, /"closed":".*房間已關閉/, '剩 1 人 → 推送關房原因');
+  assert.ok(!server.rooms.has(host.code), '房間已刪除');
+  assert.equal((await post('leave', watcher)).status, 404, '關閉後的房間查不到');
+  ac.abort();
+
+  // 遊戲結束後離開：不經過引擎，行為跟以前一樣
+  const h2 = (await post('create', { name: 'H2' })).json;
+  const g2 = (await post('join', { code: h2.code, name: 'G2' })).json;
+  await post('start', h2);
+  const room2 = server.rooms.get(h2.code);
+  room2.game.status = 'over';
+  assert.equal((await post('leave', g2)).status, 200, '遊戲結束後非房主可以離開');
+  assert.equal(room2.players.length, 1);
+  assert.ok(!room2.game.players.some((p) => p.left), '結束後離開不標記 left');
   server.close();
   console.log('✅ 全部測試通過');
   process.exit(0);

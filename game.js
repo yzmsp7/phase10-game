@@ -108,7 +108,7 @@ function startRound(g) {
   if (g.round > 1) g.dealer = (g.dealer + 1) % g.players.length;
   const d = shuffle(deck());
   for (const p of g.players) {
-    p.in = !g.playoff || g.playoff.includes(p.id);
+    p.in = !p.left && (!g.playoff || g.playoff.includes(p.id)); // 中途退出的人不會再被發牌
     p.laid = false; p.skip = 0; p.pick = null;
     p.hand = p.in ? d.splice(0, HAND) : [];
   }
@@ -234,6 +234,23 @@ function act(g, pid, a) {
   }
 }
 
+// 遊戲中途退出：不刪玩家（turn / dealer / playoff / groups[].owner 都靠索引或 id 指著他），
+// 只標記 in=false + left=true，沿用加賽淘汰者的機制（nextIn 會跳過）。手牌放回棄牌堆底，牌數守恆。
+// 已放下的組合留在桌上（別人還可以接）。回傳剩下的玩家數；剩 1 人時由呼叫者決定怎麼收尾。
+function leave(g, pid) {
+  const i = g.players.findIndex((p) => p.id === pid);
+  const p = g.players[i];
+  if (!p || p.left) return g.players.filter((q) => q.in).length;
+  const wasTurn = g.status === 'play' && g.turn === i;
+  g.disc.unshift(...p.hand);
+  p.hand = []; p.in = false; p.left = true; p.skip = 0; p.pick = null;
+  log(g, `${p.name} 離開了遊戲`);
+  const left = g.players.filter((q) => q.in).length;
+  if (g.playoff) g.playoff = g.playoff.filter((id) => id !== pid);
+  if (wasTurn && left > 1) { g.turn = nextIn(g, i); begin(g); }
+  return left;
+}
+
 // 離線玩家的代打：抽牌堆，棄掉分數最高的數字牌。
 function autoPlay(g, pid) {
   const p = g.players[g.turn];
@@ -250,10 +267,10 @@ function view(g, pid) {
     target: g.target, round: g.round, status: g.status, stage: g.stage, playoff: !!g.playoff,
     turn: g.status === 'play' ? g.players[g.turn].id : null,
     drawCount: g.draw.length, top: g.disc.at(-1) || null,
-    players: g.players.map((p) => ({ id: p.id, name: p.name, phase: p.phase, score: p.score, laid: p.laid, n: p.hand.length, skip: p.skip, in: p.in, pick: p.pick })),
+    players: g.players.map((p) => ({ id: p.id, name: p.name, phase: p.phase, score: p.score, laid: p.laid, n: p.hand.length, skip: p.skip, in: p.in, left: !!p.left, pick: p.pick })),
     groups: g.groups, hand: me.hand, phases: PHASES, log: g.log.slice(-8),
     summary: g.summary, winners: g.winners,
   };
 }
 
-module.exports = { PHASES, deck, build, hit, create, act, autoPlay, view, pts, err };
+module.exports = { PHASES, deck, build, hit, create, act, leave, autoPlay, view, pts, err };

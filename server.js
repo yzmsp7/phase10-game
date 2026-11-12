@@ -63,6 +63,13 @@ function watch(room) {
   room.timer.unref();
 }
 
+// 關房間：先推一筆 { closed } 讓前端顯示原因並退出，再斷線、刪房。
+function close(room, why) {
+  clearTimeout(room.timer);
+  rooms.delete(room.code); // 先刪房：res.end() 會觸發 req 'close' → broadcast，那時 rooms.has 必須已是 false
+  for (const set of room.clients.values()) for (const res of set) { res.write(`data: ${JSON.stringify({ closed: why })}\n\n`); res.end(); }
+}
+
 const actions = {
   settings(room, p, b) {
     if (room.host !== p.id) G.err('只有房主可以改設定');
@@ -85,7 +92,9 @@ const actions = {
     room.game = null;
   },
   leave(room, p) {
-    if (room.game && room.game.status !== 'over') G.err('遊戲進行中不能離開，直接關掉頁面即可（會由系統代打）'); // 結束後可以走，不然非房主只能乾等房主
+    const playing = room.game && room.game.status !== 'over';
+    // 遊戲中途退出：牌放回棄牌堆、輪次換人；只剩 1 人就關房間（一個人沒辦法玩）
+    if (playing && G.leave(room.game, p.id) < 2) return close(room, `${p.name} 離開了，只剩一人，房間已關閉`);
     room.players = room.players.filter((x) => x !== p);
     room.clients.get(p.id)?.forEach((res) => res.end());
     room.clients.delete(p.id);
