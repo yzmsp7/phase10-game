@@ -442,6 +442,13 @@ for (let np = 2; np <= 6; np++) {
   assert.equal((await post('join', { code: host.code, name: '遲到' })).status, 400, '遊戲開始後不能加入');
   assert.equal((await post('act', { ...host, action: { type: 'draw', from: 'pile' } })).status === 200 || true, true);
   assert.equal((await post('act', { code: host.code, token: 'bad', action: {} })).status, 404);
+  // 表情：白名單、每人冷卻、seq 遞增
+  assert.equal((await post('react', { ...host, e: '😮' })).status, 200);
+  assert.equal((await post('react', { ...host, e: '😮' })).status, 400, '冷卻中');
+  assert.equal((await post('react', { ...guests[0], e: '💩' })).status, 400, '不在白名單');
+  assert.equal((await post('react', { ...guests[0], e: '😡' })).status, 200, '別人不受冷卻影響');
+  v = await sseOnce(guests[1]);
+  assert.deepEqual(v.rx.map((r) => [r.seq, r.e]), [[1, '😮'], [2, '😡']]);
   const room = server.rooms.get(host.code);
   const cardsIn = (g) => g.players.reduce((a, p) => a + p.hand.length, 0) + g.groups.reduce((a, x) => a + x.cards.length, 0) + g.draw.length + g.disc.length;
 

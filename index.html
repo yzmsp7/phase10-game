@@ -90,7 +90,15 @@ input[readonly]{width:100%}
 .cd.warn{display:inline-block;font-size:var(--s3);animation:shake 1s both}
 @keyframes shake{0%{transform:scale(1)}12%{transform:scale(1.9) rotate(-8deg)}28%{transform:scale(1.7) rotate(8deg)}44%{transform:scale(1.7) rotate(-6deg)}60%{transform:scale(1.5) rotate(5deg)}100%{transform:scale(1)}}
 #skipBan{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);z-index:8;display:none;pointer-events:none;text-align:center;font-size:var(--s4);font-weight:600;background:#000d;border:3px solid var(--accent);border-radius:16px;padding:20px 28px;box-shadow:0 0 32px 8px #f6c94588;max-width:90vw}
-#skipBan.on{display:block;animation:ban 2.4s both}
+#skipBan.on{display:block;animation:ban 2.4s both}#skipBan button{pointer-events:auto;font-size:var(--s4);padding:0 16px}
+/* 表情：浮動層放在 #app 外面（render 會重建 #app）；入口是頂列 😀 + 往下展開的選單 */
+#rx{position:fixed;inset:0;z-index:7;pointer-events:none;overflow:hidden}
+.rxb{position:absolute;text-align:center;font-size:var(--s4);line-height:1;animation:rxup 2s ease-out both}
+.rxb small{display:block;margin-top:4px;font-size:var(--s1);background:#000a;border-radius:8px;padding:0 8px;white-space:nowrap}
+@keyframes rxup{0%{transform:translate(-50%,0) scale(.4);opacity:0}15%{transform:translate(-50%,-8px) scale(1.2);opacity:1}25%{transform:translate(-50%,-16px) scale(1)}80%{opacity:1}100%{transform:translate(-50%,-72px);opacity:0}}
+.rxw{position:relative}
+.rxp{position:absolute;right:0;top:calc(100% + 8px);z-index:4;display:flex;flex-wrap:wrap;justify-content:center;gap:4px;width:max-content;max-width:calc(100vw - 16px);padding:8px;background:var(--panel);border:1px solid #2f7d5f;border-radius:12px;box-shadow:0 8px 16px #0a2a1f99}
+.rxp button{background:transparent;font-size:var(--s3);min-width:44px;min-height:44px;padding:0}
 @keyframes ban{0%{transform:translate(-50%,-50%) scale(.3) rotate(-8deg);opacity:0}12%{transform:translate(-50%,-50%) scale(1.15);opacity:1}20%,80%{transform:translate(-50%,-50%) scale(1);opacity:1}100%{transform:translate(-50%,-50%);opacity:0}}
 .trophy{display:inline-block;animation:pop .7s cubic-bezier(.2,1.4,.4,1)}
 </style>
@@ -99,9 +107,11 @@ input[readonly]{width:100%}
 <div id="app"></div>
 <div id="toast" role="status"></div>
 <div id="skipBan" role="status"></div>
+<div id="rx" aria-hidden="true"></div>
 <script>
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const EMOJI = ['😮', '😡', '😂', '👏', '😭', '😎', '🙏']; // 跟 server.js 的白名單同一份
 const SYM = { R: '●', B: '■', G: '▲', Y: '◆' }, CN = { R: '紅', B: '藍', G: '綠', Y: '黃' };
 const lab = ([t, n]) => (t === 'set' ? `${n} 張同數字` : t === 'run' ? `${n} 張連續順子` : `${n} 張同顏色`);
 const store = {
@@ -109,7 +119,7 @@ const store = {
   set(v) { try { v ? localStorage.setItem('p10', JSON.stringify(v)) : localStorage.removeItem('p10'); } catch {} },
 };
 const urlRoom = (new URLSearchParams(location.search).get('room') || '').toUpperCase();
-let dl = null, sess = store.get(), snap = null, es = null, sel = new Set(), slots = {}, seen = null, sheet = false, endFor = null, actSlot = null, byColor = false; // 每次 render 會重建 DOM，UI 狀態要存在這：sheet = 底部資訊面板開著；endFor = 正在選「接前/接後」的順子；actSlot = 放階段時作用中的那一組
+let dl = null, sess = store.get(), snap = null, es = null, sel = new Set(), slots = {}, seen = null, sheet = false, endFor = null, actSlot = null, byColor = false, rxOpen = false, rxSeq = null; // rxOpen = 表情選單開著；rxSeq = 已播到的表情編號（null = 還沒收到第一筆快照）。每次 render 會重建 DOM，UI 狀態要存在這：sheet = 底部資訊面板開著；endFor = 正在選「接前/接後」的順子；actSlot = 放階段時作用中的那一組
 if (sess && urlRoom && sess.code !== urlRoom) sess = null; // 邀請連結指向另一間房 → 先顯示加入畫面
 // 在 localhost 開頁面時，邀請連結／QR 要換成手機連得到的區網 IP（undefined = 查詢中，null = 查不到）。部署後網址不是 localhost，這段不會跑。
 const isLocal = /^(localhost|127\.|\[?::1)/.test(location.hostname);
@@ -122,9 +132,25 @@ function toast(m) {
   clearTimeout(toast.t); toast.t = setTimeout(() => (t.style.display = 'none'), 2800);
 }
 // 橫幅放在 #app 外面：render 會重建 #app，放裡面動畫會一直重播
-function skipBanner(html) {
-  const b = $('#skipBan'); b.innerHTML = html; b.classList.remove('on'); void b.offsetWidth; b.classList.add('on');
-  clearTimeout(skipBanner.t); skipBanner.t = setTimeout(() => b.classList.remove('on'), 2400);
+function skipBanner(html, ms = 2400) {
+  const b = $('#skipBan'); b.innerHTML = html; b.style.animationDuration = ms + 'ms'; b.classList.remove('on'); void b.offsetWidth; b.classList.add('on');
+  clearTimeout(skipBanner.t); skipBanner.t = setTimeout(() => b.classList.remove('on'), ms);
+}
+// 浮動表情：從發送者的玩家卡冒出來（卡片捲出畫面就夾在可視範圍內，所以帶名字）。第一筆快照／重連只記編號不重播。
+function playRx(rx) {
+  const fresh = rxSeq === null ? [] : rx.filter((r) => r.seq > rxSeq);
+  rxSeq = rx.at(-1)?.seq ?? rxSeq ?? 0;
+  const box = $('#rx');
+  for (const r of fresh) {
+    const who = (snap.game?.players ?? snap.players).find((p) => p.id === r.by)?.name ?? '';
+    const c = $(`[data-pid="${r.by}"]`)?.getBoundingClientRect();
+    const x = Math.min(Math.max((c ? c.left + c.width / 2 : innerWidth / 2) + (Math.random() - .5) * 32, 32), innerWidth - 32);
+    const el = document.createElement('div');
+    el.className = 'rxb'; el.style.cssText = `left:${x}px;top:${c ? Math.min(Math.max(c.top, 8), innerHeight - 96) : innerHeight / 3}px`;
+    el.innerHTML = `${esc(r.e)}<small>${esc(who)}</small>`;
+    while (box.children.length >= 4) box.firstChild.remove();
+    box.append(el); setTimeout(() => el.remove(), 2000); // 不等 animationend：prefers-reduced-motion 會關掉動畫
+  }
 }
 async function post(name, data = {}) {
   const r = await fetch('/api/' + name, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(data) });
@@ -135,7 +161,7 @@ async function post(name, data = {}) {
 const call = (name, data) => post(name, { ...sess, ...data }).catch((e) => toast(e.message));
 
 function connect() {
-  es?.close();
+  es?.close(); rxSeq = null; // 重連後第一筆快照只記編號，不把離開期間的表情一次播出來
   es = new EventSource(`/api/events?code=${sess.code}&token=${sess.token}`);
   // 房主正在開 <select>（iOS 滾輪）時不重繪，否則 innerHTML 重建會把選單關掉；focusout 時再補畫
   es.onmessage = (e) => {
@@ -143,13 +169,14 @@ function connect() {
     if (d.closed) { exit(); return toast(d.closed); } // 房間被關（遊戲中只剩一人）→ 回首頁並說明原因
     snap = d; dl = d.turnLeft == null ? null : Date.now() + d.turnLeft; // 伺服器傳剩餘毫秒，用本機時鐘算期限
     if (!document.activeElement?.matches?.('select')) render(); else tick();
+    playRx(d.rx); // 要在 render 之後：玩家卡是剛重建的，位置才對
   };
   es.onerror = () => { if (es.readyState === EventSource.CLOSED) { toast('連線中斷或房間已過期'); exit(); } };
 }
 // 手機切去別的 App 再回來，iOS 的 EventSource 常常是死的 → 回前景一律重連
 document.addEventListener('visibilitychange', () => { if (!document.hidden && sess) connect(); });
 function exit() {
-  es?.close(); sess = snap = null; sel.clear(); slots = {}; store.set(null);
+  es?.close(); sess = snap = null; sel.clear(); slots = {}; rxOpen = false; store.set(null);
   history.replaceState(null, '', '/'); render();
 }
 function enter(r) {
@@ -287,12 +314,16 @@ function game() {
   const name = (id) => g.players.find((p) => p.id === id)?.name ?? '?';
   // 跳過牌：新事件才彈出「誰跳過誰」（第一次 render／重連只記錄，不重播舊事件）
   const ev = g.skipEv;
-  if (seen.skipNo !== undefined && ev && ev.no !== seen.skipNo) { const nm = (id) => (id === me ? '你' : name(id)); skipBanner(`⏭ ${esc(nm(ev.by))} 跳過了 <span class="crown">${esc(nm(ev.to))}</span>`); if (ev.to === me) navigator.vibrate?.([60, 40, 60]); }
+  if (seen.skipNo !== undefined && ev && ev.no !== seen.skipNo) {
+    const nm = (id) => (id === me ? '你' : name(id)), hit = ev.to === me; // 被跳過的人：橫幅多一顆 😡，一鍵回應（停留久一點才按得到）
+    skipBanner(`⏭ ${esc(nm(ev.by))} 跳過了 <span class="crown">${esc(nm(ev.to))}</span>${hit ? '<div style="margin-top:12px"><button data-v="😡" aria-label="回應生氣">😡</button></div>' : ''}`, hit ? 4000 : 2400);
+    if (hit) navigator.vibrate?.([60, 40, 60]);
+  }
   seen.skipNo = ev ? ev.no : null;
   const picked = hand.filter((c) => sel.has(c.id));
   if (!canAct || !picked.length) endFor = null;
 
-  const players = g.players.map((p) => `<div class="player ${g.turn === p.id ? 'turn' : ''} ${p.in ? '' : 'out'}">
+  const players = g.players.map((p) => `<div class="player ${g.turn === p.id ? 'turn' : ''} ${p.in ? '' : 'out'}" data-pid="${p.id}">
     <div class="row" style="flex-wrap:nowrap;justify-content:space-between"><b>${esc(p.name)}${p.id === me ? '（你）' : ''} ${online[p.id] || p.left ? '' : '💤'}</b>${p.left ? '' : `<span class="cnt" aria-label="${p.n} 張">${p.n}<small>張</small></span>`}</div>
     <small>${p.left ? '已離開' : `階段 ${p.phase > 10 ? 10 : p.phase} ${p.laid ? '✅' : ''} · ${p.score} 分${p.skip === 1 ? ' · ⏭將被跳過' : ''}`}</small>
     ${p.id === me || !p.pick ? '' : `<div class="pick">${p.pick.from === 'pile' ? '🂠 抽牌堆' : `♻ 撿棄牌 ${card(p.pick.card, { tag: 'span', cls: 'sm' })}`}</div>`}</div>`).join('');
@@ -345,7 +376,9 @@ function game() {
     <button class="ghost" data-a="leave" style="width:100%;margin-top:16px">離開房間</button></div></div>` : '';
 
   return `<div class="row"><b style="flex:1">房間 ${s.code} · 第 ${g.round} 回合${g.playoff ? '（加賽）' : ''}</b>
-    <span class="mute">目標：階段 ${g.target}</span><b class="cd" aria-live="off"></b><button class="ghost ic" data-a="sheet" aria-label="排名、階段表、動態">📋</button></div>
+    <span class="mute">目標：階段 ${g.target}</span><b class="cd" aria-live="off"></b>
+    <span class="rxw"><button class="ghost ic" data-a="rxMenu" aria-label="送表情" aria-expanded="${rxOpen}">😀</button>${rxOpen ? `<div class="rxp">${EMOJI.map((e) => `<button data-a="react" data-v="${e}" aria-label="${e}">${e}</button>`).join('')}</div>` : ''}</span>
+    <button class="ghost ic" data-a="sheet" aria-label="排名、階段表、動態">📋</button></div>
   <div class="row players">${players}</div>
   <div class="panel table">
     <div class="piles">
@@ -447,6 +480,8 @@ const A = {
   },
   unslot(v) { delete slots[v]; render(); },
   sheet() { sheet = !sheet; render(); },
+  rxMenu() { rxOpen = !rxOpen; render(); },
+  react(v) { rxOpen = false; render(); call('react', { e: v }); },
   sort() { byColor = !byColor; render(); },
   async lay() {
     const groups = phaseReq().map((_, gi) => Object.keys(slots).filter((id) => slots[id] === gi).map(Number));
@@ -460,7 +495,9 @@ const A = {
   },
   discard: (v) => call('act', { action: { type: 'discard', card: [...sel][0], target: v } }).then((r) => r && sel.clear()),
 };
+$('#skipBan').addEventListener('click', (e) => { const v = e.target.dataset.v; if (v) { $('#skipBan').classList.remove('on'); call('react', { e: v }); } }); // 被跳過時橫幅上的快捷表情
 $('#app').addEventListener('click', (e) => {
+  if (rxOpen && !e.target.closest('.rxw')) { rxOpen = false; render(); } // 點選單外面 → 收起（點到別的按鈕時仍照常執行）
   const why = e.target.closest('[data-why]')?.dataset.why; // 停用的按鈕 pointer-events:none，點擊落在外層 → 說明為什麼不能按
   if (why) return toast(why);
   const el = e.target.closest('[data-a]');

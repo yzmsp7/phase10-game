@@ -8,13 +8,14 @@ const { randomInt, randomUUID } = require('node:crypto');
 const G = require('./game');
 
 const MAX = 6, MIN = 2, TURN_SEC = 60; // 每回合預設秒數；建房時可改（10–600），手機切去 LINE 回訊息再回來要來得及，所以下限不能太短
+const EMOJI = ['😮', '😡', '😂', '👏', '😭', '😎', '🙏']; // 白名單；index.html 有同一份，改的時候兩邊一起改
 const rooms = new Map();
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
 
 function newRoom(turn) {
   let code;
   do { code = Array.from({ length: 4 }, () => CODE_CHARS[randomInt(CODE_CHARS.length)]).join(''); } while (rooms.has(code));
-  const r = { code, players: [], host: null, settings: { target: 10, turn }, game: null, clients: new Map(), touched: Date.now(), timer: null, dl: null };
+  const r = { code, players: [], host: null, settings: { target: 10, turn }, game: null, rx: [], clients: new Map(), touched: Date.now(), timer: null, dl: null };
   rooms.set(code, r);
   return r;
 }
@@ -36,6 +37,7 @@ function snapshot(room, pid) {
     code: room.code, me: pid, host: room.host, settings: room.settings,
     turnLeft: room.dl && Math.max(0, room.dl.at - Date.now()), // 剩餘毫秒（不傳絕對時間，免得被手機時鐘誤差影響）
     players: room.players.map((p) => ({ id: p.id, name: p.name, online: online(room, p.id) })),
+    rx: room.rx, // 最近 5 筆表情；seq 遞增，前端只播自己沒看過的
     game: room.game ? G.view(room.game, pid) : null,
   };
 }
@@ -88,6 +90,12 @@ const actions = {
   act(room, p, b) {
     if (!room.game) G.err('遊戲還沒開始');
     G.act(room.game, p.id, b.action ?? {});
+  },
+  react(room, p, b) { // 表情：不是遊戲規則，只是暫時事件，不進 game、不存檔
+    if (!EMOJI.includes(b.e)) G.err('不支援的表情');
+    if (Date.now() - (p.rxAt ?? 0) < 1000) G.err('表情送太快了');
+    p.rxAt = Date.now();
+    room.rx = [...room.rx, { seq: (room.rx.at(-1)?.seq ?? 0) + 1, by: p.id, e: b.e }].slice(-5);
   },
   back(room, p) { // 遊戲結束後回到房間
     if (room.host !== p.id) G.err('只有房主可以操作');
