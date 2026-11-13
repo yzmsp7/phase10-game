@@ -47,6 +47,7 @@ button,.card{-webkit-user-select:none;user-select:none}
 .card.pop{animation:pop .7s cubic-bezier(.2,1.4,.4,1)}
 @keyframes pop{from{transform:translateY(-110px) scale(.4) rotate(-20deg);opacity:0}to{transform:none;opacity:1}}
 .card.sel{transform:translateY(-12px);outline:3px solid var(--accent)}
+.card[data-drag]{cursor:grab;touch-action:none;outline:2px dashed var(--accent);outline-offset:2px}.card.dragging{cursor:grabbing;z-index:5;box-shadow:0 6px 16px #000a}
 .card.empty{background:transparent;border:2px dashed var(--mute);color:var(--mute);box-shadow:none}
 .hand{display:flex;flex-wrap:wrap;gap:8px;padding:16px 0 4px}
 .tray{position:sticky;bottom:0;z-index:2;margin:auto -16px 0;padding:8px 16px calc(12px + env(safe-area-inset-bottom));background:var(--panel);border-top:1px solid #2f7d5f;box-shadow:0 -8px 16px #0a2a1f99}
@@ -119,7 +120,7 @@ const store = {
   set(v) { try { v ? localStorage.setItem('p10', JSON.stringify(v)) : localStorage.removeItem('p10'); } catch {} },
 };
 const urlRoom = (new URLSearchParams(location.search).get('room') || '').toUpperCase();
-let dl = null, sess = store.get(), snap = null, es = null, sel = new Set(), slots = {}, los = {}, seen = null, sheet = false, endFor = null, actSlot = null, byColor = false, rxOpen = false, rxSeq = null, histFor = null; // histFor = 正在看誰的撿棄牌歷史（玩家 id）。 rxOpen = 表情選單開著；rxSeq = 已播到的表情編號（null = 還沒收到第一筆快照）。每次 render 會重建 DOM，UI 狀態要存在這：sheet = 底部資訊面板開著；endFor = 正在選「接前/接後」的順子；actSlot = 放階段時作用中的那一組
+let dl = null, sess = store.get(), snap = null, es = null, sel = new Set(), slots = {}, los = {}, seen = null, sheet = false, endFor = null, actSlot = null, byColor = false, rxOpen = false, rxSeq = null, histFor = null, drag = null, noClick = false; // drag = 正在拖的百搭（拖曳中不重繪，不然 DOM 重建會把它弄丟）；noClick = 剛拖完，吃掉隨後的 click。 histFor = 正在看誰的撿棄牌歷史（玩家 id）。 rxOpen = 表情選單開著；rxSeq = 已播到的表情編號（null = 還沒收到第一筆快照）。每次 render 會重建 DOM，UI 狀態要存在這：sheet = 底部資訊面板開著；endFor = 正在選「接前/接後」的順子；actSlot = 放階段時作用中的那一組
 if (sess && urlRoom && sess.code !== urlRoom) sess = null; // 邀請連結指向另一間房 → 先顯示加入畫面
 // 在 localhost 開頁面時，邀請連結／QR 要換成手機連得到的區網 IP（undefined = 查詢中，null = 查不到）。部署後網址不是 localhost，這段不會跑。
 const isLocal = /^(localhost|127\.|\[?::1)/.test(location.hostname);
@@ -168,7 +169,7 @@ function connect() {
     const d = JSON.parse(e.data);
     if (d.closed) { exit(); return toast(d.closed); } // 房間被關（遊戲中只剩一人）→ 回首頁並說明原因
     snap = d; dl = d.turnLeft == null ? null : Date.now() + d.turnLeft; // 伺服器傳剩餘毫秒，用本機時鐘算期限
-    if (!document.activeElement?.matches?.('select')) render(); else tick();
+    if (!document.activeElement?.matches?.('select') && !drag) render(); else tick();
     playRx(d.rx); // 要在 render 之後：玩家卡是剛重建的，位置才對
   };
   es.onerror = () => { if (es.readyState === EventSource.CLOSED) { toast('連線中斷或房間已過期'); exit(); } };
@@ -194,6 +195,19 @@ const runRange = (gi) => {
   return top > bot ? [bot, top] : null;
 };
 const curLo = (gi) => { const r = runRange(gi); return r && (los[gi] >= r[0] && los[gi] <= r[1] ? los[gi] : r[1]); };
+// 順子放滿後的實際排列（跟伺服器 build 一樣）：[{ c, n, mv }]，n = 該格的數字；mv = 這張百搭能拖到另一頭（'L' 現在在前面、'R' 在後面）。排不出來回傳 null
+const runLayout = (gi) => {
+  const [t, size] = phaseReq()[gi], cs = snap.game.hand.filter((c) => slots[c.id] === gi);
+  const nat = cs.filter((c) => c.t === 'n'), ws = cs.filter((c) => c.t === 'w'), ns = nat.map((c) => c.n);
+  if (t !== 'run' || cs.length !== size || !ns.length || nat.length + ws.length !== size || new Set(ns).size < ns.length) return null;
+  const min = Math.min(...ns), max = Math.max(...ns);
+  if (max - min + 1 > size) return null;
+  const rg = runRange(gi), lo = curLo(gi) ?? Math.min(min, 13 - size);
+  return Array.from({ length: size }, (_, i) => {
+    const n = lo + i, c = nat.find((x) => x.n === n);
+    return c ? { c, n } : { c: ws.pop(), n, mv: n < min ? (lo < rg?.[1] ? 'L' : '') : n > max ? (lo > rg?.[0] ? 'R' : '') : '' };
+  });
+};
 const card = (c, o = {}) => {
   const cls = c.t === 'n' ? c.c : c.t === 'w' ? 'W' : 'S';
   const face = c.t === 'n' ? c.n : c.t === 'w' ? 'W' : '⊘';
@@ -359,9 +373,11 @@ function game() {
   const runBtns = (gi, size) => { const rg = runRange(gi), cur = curLo(gi); if (!rg) return ''; let b = ''; for (let l = rg[0]; l <= rg[1]; l++) b += `<button class="${l === cur ? '' : 'ghost'}" data-a="lo" data-v="${gi}:${l}" aria-pressed="${l === cur}">${l}–${l + size - 1}</button>`; return `<span class="row">${b}</span>`; };
   const layUI = laying ? `<div>${req.map((r, gi) => {
     const cs = hand.filter((c) => slots[c.id] === gi), on = actSlot === gi;
+    // 放滿的順子照實際順序排，百搭標出它代表的數字；頭尾能換邊的百搭可以拖
+    const shown = runLayout(gi) || cs.map((c) => ({ c }));
     return `<div class="slot ${on ? 'can' : ''}" data-a="slot" data-v="${gi}" role="button" aria-pressed="${on}"><div class="slotH"><span>組 ${gi + 1}：${lab(r)}（${cs.length}/${r[1]}）</span>${runBtns(gi, r[1])}</div>
-      <div class="row">${cs.map((c) => card(c, { attrs: `data-a="unslot" data-v="${c.id}"` })).join('') || `<span class="mute">${on ? '點下方手牌放入這組' : '點這組，再點下方手牌'}</span>`}</div></div>`;
-  }).join('')}<p class="mute" style="margin:8px 0 0">順子可用百搭補洞；每組至少要有一張數字牌${canAct ? '' : '。可先排好牌，輪到你抽完牌後再放下'}</p></div>` : '';
+      <div class="row">${shown.map(({ c, n, mv }) => card(c, { attrs: `data-a="unslot" data-v="${c.id}"${mv ? ` data-drag="${gi}:${mv}"` : ''}`, sub: c.t === 'w' ? n : '' })).join('') ||`<span class="mute">${on ? '點下方手牌放入這組' : '點這組，再點下方手牌'}</span>`}</div></div>`;
+  }).join('')}<p class="mute" style="margin:8px 0 0">順子可用百搭補洞；每組至少要有一張數字牌${req.some((_, gi) => runLayout(gi)?.some((x) => x.mv)) ? '。虛線的百搭可以拖到另一頭' : ''}${canAct ? '' : '。可先排好牌，輪到你抽完牌後再放下'}</p></div>` : '';
 
   const free = hand.filter((c) => slots[c.id] === undefined);
   const one = picked.length === 1 ? picked[0] : null;
@@ -516,7 +532,38 @@ const A = {
   discard: (v) => call('act', { action: { type: 'discard', card: [...sel][0], target: v } }).then((r) => r && sel.clear()),
 };
 $('#skipBan').addEventListener('click', (e) => { const v = e.target.dataset.v; if (v) { $('#skipBan').classList.remove('on'); call('react', { e: v }); } }); // 被跳過時橫幅上的快捷表情
+// 拖曳百搭：放開時越過最前／最後一張數字牌的中心 → 整段順子平移一格（等於 los 加減一），所以伺服器不用改
+$('#app').addEventListener('pointerdown', (e) => {
+  noClick = false;
+  const el = e.target.closest('[data-drag]');
+  if (!el || e.button) return;
+  drag = { el, x: e.clientX, moved: false };
+  el.setPointerCapture(e.pointerId);
+});
+$('#app').addEventListener('pointermove', (e) => {
+  if (!drag) return;
+  const dx = e.clientX - drag.x;
+  if (Math.abs(dx) > 6) drag.moved = true;
+  if (drag.moved) { drag.el.classList.add('dragging'); drag.el.style.transform = `translateX(${dx}px)`; }
+});
+const endDrag = (e) => {
+  const d = drag; drag = null;
+  if (!d) return;
+  if (!d.moved) return e.type === 'pointercancel' ? render() : 0; // 沒拖動就是一般點擊（拿回手上），交給 click；補畫拖曳期間被略過的快照
+  noClick = true;
+  const [gi, side] = d.el.dataset.drag.split(':'), lay = runLayout(+gi);
+  if (lay && e.type === 'pointerup') {
+    const kinds = lay.map((x) => x.c.t), cells = [...d.el.parentElement.children];
+    const mid = (k) => { const r = cells[k].getBoundingClientRect(); return r.left + r.width / 2; };
+    if (side === 'L' && e.clientX > mid(kinds.lastIndexOf('n'))) los[gi] = curLo(+gi) + 1;
+    if (side === 'R' && e.clientX < mid(kinds.indexOf('n'))) los[gi] = curLo(+gi) - 1;
+  }
+  render();
+};
+$('#app').addEventListener('pointerup', endDrag);
+$('#app').addEventListener('pointercancel', endDrag);
 $('#app').addEventListener('click', (e) => {
+  if (noClick) { noClick = false; return; }
   if (rxOpen && !e.target.closest('.rxw')) { rxOpen = false; render(); } // 點選單外面 → 收起（點到別的按鈕時仍照常執行）
   const why = e.target.closest('[data-why]')?.dataset.why; // 停用的按鈕 pointer-events:none，點擊落在外層 → 說明為什麼不能按
   if (why) return toast(why);
