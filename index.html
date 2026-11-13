@@ -372,12 +372,17 @@ function overlay(g, s) {
   const rows = sm.rows.map((r) => `<div class="res ${r.id === me ? 'me' : ''}">
     <div class="row" style="justify-content:space-between"><b>${esc(r.name)}${r.id === me ? '（你）' : ''}</b><span>階段 ${r.phase} ${r.laid ? '✅' : '❌'} · <b>+${r.gain}</b> → ${r.score} 分</span></div>
     ${r.hand.length ? `<div class="row" style="margin-top:8px;gap:4px">${r.hand.map((c) => card(c, { tag: 'span', cls: 'sm' })).join('')}</div>` : ''}</div>`).join('');
+  // 結束時改顯示總分排行榜：獲勝者排第一（勝負不一定等於總分最低），其餘依總分低者優先；同條件並列同名次，前三名頒獎牌
+  const cmp = (a, b) => g.winners.includes(b.id) - g.winners.includes(a.id) || a.score - b.score;
+  const sorted = over ? g.players.filter((p) => !p.left).sort(cmp) : [];
+  const board = sorted.map((p) => { const r = sorted.findIndex((q) => !cmp(q, p));
+    return `<div class="res ${p.id === me ? 'me' : ''}"><div class="row" style="justify-content:space-between;flex-wrap:nowrap"><b><span style="display:inline-block;min-width:2em">${['🥇', '🥈', '🥉'][r] ?? r + 1}</span>${esc(p.name)}${p.id === me ? '（你）' : ''}</b><b>${p.score} 分</b></div></div>`; }).join('');
   const foot = over
     ? (host ? '<button data-a="back">回到房間再來一局</button><button class="ghost" data-a="leave">離開房間</button>' :`<span class="mute">等 ${nm(s.host)} 開新局…</span><button class="ghost" data-a="leave">離開房間</button>`)
     : '<button data-a="next">下一回合</button>';
   return `<div class="overlay"><div class="modal res-m"><div class="body">
     <div class="hd">${head}</div>${over && !g.winners.includes(me) ? '<div class="mute">差一點，再來一局！</div>' : ''}
-    ${rows}${sm.note ? `<p>${esc(sm.note)}</p>` : ''}</div>
+    ${over ? board : rows}${sm.note ? `<p>${esc(sm.note)}</p>` : ''}</div>
     <div class="row act foot">${foot}</div></div></div>`;
 }
 
