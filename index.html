@@ -110,6 +110,11 @@ const store = {
 const urlRoom = (new URLSearchParams(location.search).get('room') || '').toUpperCase();
 let dl = null, sess = store.get(), snap = null, es = null, sel = new Set(), slots = {}, seen = null, sheet = false, endFor = null, actSlot = null, byColor = false; // 每次 render 會重建 DOM，UI 狀態要存在這：sheet = 底部資訊面板開著；endFor = 正在選「接前/接後」的順子；actSlot = 放階段時作用中的那一組
 if (sess && urlRoom && sess.code !== urlRoom) sess = null; // 邀請連結指向另一間房 → 先顯示加入畫面
+// 在 localhost 開頁面時，邀請連結／QR 要換成手機連得到的區網 IP（undefined = 查詢中，null = 查不到）。部署後網址不是 localhost，這段不會跑。
+const isLocal = /^(localhost|127\.|\[?::1)/.test(location.hostname);
+let lanHost = isLocal ? undefined : null;
+if (isLocal) fetch('/api/lan').then((r) => r.json()).then((j) => j.ip || null, () => null).then((ip) => { lanHost = ip; if (snap && !snap.game) render(); });
+const inviteLink = (code) => `${lanHost ? `${location.protocol}//${lanHost}${location.port ? ':' + location.port : ''}` : location.origin}/?room=${code}`;
 
 function toast(m) {
   const t = $('#toast'); t.textContent = m; t.style.display = 'block';
@@ -159,6 +164,74 @@ const card = (c, o = {}) => {
   return `<${o.tag || 'button'} class="card ${cls} ${o.cls || ''}" aria-label="${name}" ${o.attrs || ''}><b>${face}</b><i>${sym}</i>${o.sub ? `<u>${o.sub}</u>` : ''}</${o.tag || 'button'}>`;
 };
 
+// <qr> 最小 QR 編碼器：byte 模式、糾錯 L、1–5 版（單一區塊，最多 106 位元組）。太長回傳 null。test.js 會抽出這段來驗。
+function qrMatrix(text) {
+  const data = [...new TextEncoder().encode(text)];
+  const V = [[19, 7], [34, 10], [55, 15], [80, 20], [108, 26]]; // 每版 [資料碼字, 糾錯碼字]
+  const v = V.findIndex(([d]) => data.length <= d - 2);
+  if (v < 0) return null;
+  const [dc, ec] = V[v], N = 21 + 4 * v;
+  // 資料碼字：模式 0100、長度、內容、結尾、補 0xEC/0x11
+  const bits = [], put = (x, n) => { for (let i = n - 1; i >= 0; i--) bits.push((x >> i) & 1); };
+  put(4, 4); put(data.length, 8); data.forEach((b) => put(b, 8)); put(0, Math.min(4, dc * 8 - bits.length));
+  while (bits.length % 8) bits.push(0);
+  const cw = []; for (let i = 0; i < bits.length; i += 8) cw.push(parseInt(bits.slice(i, i + 8).join(''), 2));
+  for (let pad = 0xec; cw.length < dc; pad ^= 0xfd) cw.push(pad);
+  // Reed-Solomon（GF(256)，多項式 0x11d）
+  const exp = [], log = [];
+  for (let i = 0, x = 1; i < 255; i++) { exp[i] = x; log[x] = i; x <<= 1; if (x & 256) x ^= 0x11d; }
+  const mul = (a, b) => (a && b ? exp[(log[a] + log[b]) % 255] : 0);
+  let gen = [1];
+  for (let i = 0; i < ec; i++) { const g = Array(gen.length + 1).fill(0); gen.forEach((c, j) => { g[j] ^= c; g[j + 1] ^= mul(c, exp[i]); }); gen = g; }
+  const rem = Array(ec).fill(0);
+  for (const b of cw) { const f = b ^ rem.shift(); rem.push(0); gen.slice(1).forEach((g, i) => (rem[i] ^= mul(g, f))); }
+  const stream = cw.concat(rem).flatMap((b) => [...Array(8)].map((_, i) => (b >> (7 - i)) & 1));
+  // 固定圖形（fn 標記不可被資料或遮罩動到）
+  const m = Array.from({ length: N }, () => Array(N).fill(0)), fn = m.map((r) => r.map(() => false));
+  const set = (r, c, x) => { if (r >= 0 && r < N && c >= 0 && c < N) { m[r][c] = x; fn[r][c] = true; } };
+  for (const [r0, c0] of [[0, 0], [0, N - 7], [N - 7, 0]]) for (let dr = -1; dr <= 7; dr++) for (let dc2 = -1; dc2 <= 7; dc2++) { const d = Math.max(Math.abs(dr - 3), Math.abs(dc2 - 3)); set(r0 + dr, c0 + dc2, +(d !== 2 && d !== 4)); }
+  for (let i = 8; i < N - 8; i++) { set(6, i, +(i % 2 === 0)); set(i, 6, +(i % 2 === 0)); }
+  if (v) for (let dr = -2; dr <= 2; dr++) for (let dc2 = -2; dc2 <= 2; dc2++) set(N - 7 + dr, N - 7 + dc2, +(Math.max(Math.abs(dr), Math.abs(dc2)) !== 1));
+  set(N - 8, 8, 1);
+  const fc = [...Array(15)].map((_, i) => [i < 6 ? [i, 8] : i < 8 ? [i + 1, 8] : i === 8 ? [8, 7] : [8, 14 - i], i < 8 ? [8, N - 1 - i] : [N - 15 + i, 8]]); // 格式資訊第 i 位的兩個位置
+  fc.flat().forEach(([r, c]) => set(r, c, 0));
+  // 資料由右下角蛇行填入，跳過第 6 欄
+  for (let c = N - 1, up = true, i = 0; c > 0; c -= 2, up = !up) {
+    if (c === 6) c = 5;
+    for (let k = 0; k < N; k++) for (const cc of [c, c - 1]) { const r = up ? N - 1 - k : k; if (!fn[r][cc]) m[r][cc] = stream[i++] ?? 0; }
+  }
+  const MASK = [(r, c) => (r + c) % 2 === 0, (r) => r % 2 === 0, (r, c) => c % 3 === 0, (r, c) => (r + c) % 3 === 0, (r, c) => ((r >> 1) + Math.floor(c / 3)) % 2 === 0,
+    (r, c) => ((r * c) % 2) + ((r * c) % 3) === 0, (r, c) => (((r * c) % 2) + ((r * c) % 3)) % 2 === 0, (r, c) => ((((r + c) % 2) + ((r * c) % 3)) % 2) === 0];
+  const penalty = (t) => { // 規格的四條扣分：連續同色、2×2 色塊、類 finder 圖樣、深淺比例
+    let p = 0;
+    for (const l of [...t, ...t[0].map((_, c) => t.map((row) => row[c]))].map((x) => x.join(''))) {
+      for (const run of l.match(/0{5,}|1{5,}/g) ?? []) p += run.length - 2;
+      p += 40 * (l.match(/(?=10111010000|00001011101)/g) ?? []).length;
+    }
+    for (let r = 0; r < N - 1; r++) for (let c = 0; c < N - 1; c++) if (t[r][c] === t[r][c + 1] && t[r][c] === t[r + 1][c] && t[r][c] === t[r + 1][c + 1]) p += 3;
+    return p + 10 * (Math.ceil(Math.abs(t.flat().reduce((a, b) => a + b) * 20 - N * N * 10) / (N * N)) - 1);
+  };
+  const tries = MASK.map((f, mk) => {
+    const t = m.map((row, r) => row.map((x, c) => (fn[r][c] ? x : x ^ +f(r, c))));
+    let f15 = (0b01000 | mk) << 10, q = f15; // 格式資訊：糾錯 L(01) + 遮罩編號，BCH(15,5)
+    for (let i = 14; i >= 10; i--) if ((q >> i) & 1) q ^= 0x537 << (i - 10);
+    f15 = (f15 | q) ^ 0x5412;
+    fc.forEach((cells, i) => cells.forEach(([r, c]) => (t[r][c] = (f15 >> i) & 1)));
+    return [penalty(t), t];
+  });
+  return tries.reduce((a, b) => (b[0] < a[0] ? b : a))[1];
+}
+// </qr>
+// 邀請 QR：localhost 開頁面時 lanHost 還沒查到就先不畫；查不到區網 IP（null）就說明原因，因為掃 localhost 手機打不開
+function qrBox(link) {
+  if (lanHost === undefined) return '';
+  if (isLocal && !lanHost) return '<p class="mute" style="margin:12px 0 0">找不到區網 IP，無法產生可掃描的 QR code。請確認電腦已連上 Wi-Fi。</p>';
+  const m = qrMatrix(link); if (!m) return '';
+  const d = m.flatMap((row, r) => row.map((x, c) => (x ? `M${c} ${r}h1v1h-1z` : ''))).join(''), n = m.length + 8;
+  return `<svg viewBox="-4 -4 ${n} ${n}" width="176" height="176" role="img" aria-label="邀請連結 QR code" shape-rendering="crispEdges" style="display:block;margin-top:12px;border-radius:8px"><rect x="-4" y="-4" width="${n}" height="${n}" fill="#fff"/><path d="${d}"/></svg>
+    <p class="mute" style="margin:8px 0 0">面對面可以直接用手機相機掃描加入。</p>`;
+}
+
 function lobby() {
   return `<h1>🃏 Phase 10 線上</h1>
   <div class="panel"><h2>你的名字</h2><input id="name" maxlength="12" placeholder="最多 12 字" value="${esc(localStorage.getItem('p10name') || '')}"></div>
@@ -172,12 +245,12 @@ function lobby() {
 
 function room() {
   const s = snap, host = s.me === s.host, n = s.players.length, st = s.settings;
-  const link = `${location.origin}/?room=${s.code}`;
+  const link = inviteLink(s.code);
   const set = host
     ? `<div class="row"><select data-c="target">${[...Array(10)].map((_, i) => `<option value="${i + 1}" ${st.target === i + 1 ? 'selected' : ''}>目標：第 ${i + 1} 階段</option>`).join('')}</select></div>`
     : `<div>先完成第 ${st.target} 階段者結束遊戲</div>`;
   return `<h1>房間 <span class="big">${s.code}</span></h1>
-  <div class="panel"><h2>邀請朋友</h2><div class="row"><input readonly value="${esc(link)}" size="34" onfocus="this.select()"><button data-a="copy">${navigator.share ? '分享邀請' : '複製連結'}</button></div></div>
+  <div class="panel"><h2>邀請朋友</h2><div class="row"><input readonly value="${esc(link)}" size="34" onfocus="this.select()"><button data-a="copy">${navigator.share ? '分享邀請' : '複製連結'}</button></div>${qrBox(link)}</div>
   <div class="panel"><h2>玩家（${n}/6）</h2>
     ${s.players.map((p) => `<div><span class="dot ${p.online ? 'on' : ''}"></span>${esc(p.name)} ${p.id === s.host ? '<span class="crown">👑 房主</span>' : ''} ${p.id === s.me ? '<span class="mute">（你）</span>' : ''}</div>`).join('')}</div>
   <div class="panel"><h2>規則</h2>${set}
@@ -334,7 +407,7 @@ const A = {
   async join() { const r = await post('join', { name: $('#name').value, code: $('#code').value }).catch((e) => toast(e.message)); if (r) { localStorage.setItem('p10name', $('#name').value); enter(r); } },
   home() { history.replaceState(null, '', '/'); location.reload(); },
   async copy() {
-    const l = `${location.origin}/?room=${snap.code}`;
+    const l = inviteLink(snap.code);
     // 手機優先叫出系統分享面板（LINE／訊息一步到位）；使用者按取消不算失敗
     if (navigator.share) { try { return await navigator.share({ title: 'Phase 10', text: '來玩 Phase 10！', url: l }); } catch (e) { if (e.name === 'AbortError') return; } }
     try { await navigator.clipboard.writeText(l); toast('已複製邀請連結'); } catch { prompt('複製這個連結傳給朋友：', l); }

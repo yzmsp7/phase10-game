@@ -3,6 +3,7 @@
 const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
+const os = require('node:os');
 const { randomInt, randomUUID } = require('node:crypto');
 const G = require('./game');
 
@@ -126,6 +127,11 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'GET' && url.pathname === '/') {
       res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
       return res.end(fs.readFileSync(path.join(__dirname, 'index.html')));
+    }
+    if (req.method === 'GET' && url.pathname === '/api/lan') { // 本機開發用：localhost 開的頁面拿區網 IP 組邀請連結／QR。只回應本機請求，部署後（請求來自 proxy）一律 null，不洩漏內網位址
+      const local = /^(::1|127\.|::ffff:127\.)/.test(req.socket.remoteAddress ?? '');
+      const ips = local ? Object.values(os.networkInterfaces()).flat().filter((i) => i.family === 'IPv4' && !i.internal).map((i) => i.address) : [];
+      return json(res, 200, { ip: ips.find((a) => /^(192\.168|10)\./.test(a)) ?? ips[0] ?? null }); // 優先一般家用網段，避開 docker／VPN 的位址
     }
     if (req.method === 'GET' && url.pathname === '/api/events') {
       const a = findAuth(url.searchParams.get('code'), url.searchParams.get('token'));

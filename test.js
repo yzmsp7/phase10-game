@@ -324,6 +324,17 @@ const plain = (p) => p.hand.find((x) => x.t !== 's').id;
   assert.deepEqual(g.playoff, [b.id]);
 }
 
+// --- 邀請 QR code ---
+// 黃金值：這個矩陣已用 zxing-cpp 實際解碼驗過（版本 1–5、邊界長度都能還原原文）。改了編碼器導致雜湊變動，要先重新用解碼器驗證再更新。
+{
+  const src = require('node:fs').readFileSync(require('node:path').join(__dirname, 'index.html'), 'utf8').split('// <qr>')[1].split('// </qr>')[0];
+  const qrMatrix = new Function(src.replace(/^[^\n]*\n/, '') + '; return qrMatrix;')();
+  const m = qrMatrix('http://192.168.1.23:3000/?room=ABCD');
+  assert.equal(m.length, 29); // 35 位元組 → 版本 3
+  assert.equal(require('node:crypto').createHash('sha1').update(m.flat().join('')).digest('hex'), '394df7205d0d0a1c8db2d5af0ec2400ade66d97f');
+  assert.equal(qrMatrix('x'.repeat(107)), null);
+}
+
 // --- 隨機機器人整局模擬 ---
 function bot(g, p) {
   const my = g.players.indexOf(p);
@@ -381,6 +392,10 @@ for (let np = 2; np <= 6; np++) {
   const server = require('./server');
   await new Promise((res) => server.listen(0, res));
   const base = `http://127.0.0.1:${server.address().port}`;
+  { // /api/lan：本機請求回傳 IPv4 字串或 null（沒網路時），不會丟錯
+    const lan = await (await fetch(`${base}/api/lan`)).json();
+    assert.ok(lan.ip === null || /^\d+\.\d+\.\d+\.\d+$/.test(lan.ip));
+  }
   const post = async (name, body) => {
     const r = await fetch(`${base}/api/${name}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
     return { status: r.status, json: await r.json() };
