@@ -83,8 +83,9 @@ input[readonly]{width:100%}
 /* 橫放手機高度只有 ~375px：手牌改單排橫捲，按鈕縮矮，托盤才不會吃掉半個畫面 */
 @media(max-height:500px){.tray .hand{flex-wrap:nowrap;overflow-x:auto}.act button{min-height:40px}}
 /* 結算畫面：按鈕固定在 modal 底部（玩家多、剩牌多時中間捲動，按鈕仍在拇指區） */
-.modal.res-m{display:flex;flex-direction:column;overflow:hidden}.res-m .body{overflow:auto;flex:1;min-height:0}.res-m .foot{padding-top:16px}
+.modal.res-m{display:flex;flex-direction:column;overflow:hidden}.res-m .body{overflow:auto;flex:1;min-height:0;padding:4px}.res-m .foot{padding-top:16px}
 .res{background:var(--panel2);border-radius:10px;padding:12px;margin-top:8px}.res.me{outline:2px solid var(--accent)}
+.rk{padding:16px;font-size:var(--s3)}.rk.me{background:var(--accent);color:#1a1a1a;outline:0} /* 排行榜：列加大；自己整列反白（深字 on 黃底） */
 .hd{font-size:var(--s4);font-weight:600;margin-bottom:8px}
 .cd.warn{display:inline-block;font-size:var(--s3);animation:shake 1s both}
 @keyframes shake{0%{transform:scale(1)}12%{transform:scale(1.9) rotate(-8deg)}28%{transform:scale(1.7) rotate(8deg)}44%{transform:scale(1.7) rotate(-6deg)}60%{transform:scale(1.5) rotate(5deg)}100%{transform:scale(1)}}
@@ -376,7 +377,7 @@ function overlay(g, s) {
   const cmp = (a, b) => g.winners.includes(b.id) - g.winners.includes(a.id) || a.score - b.score;
   const sorted = over ? g.players.filter((p) => !p.left).sort(cmp) : [];
   const board = sorted.map((p) => { const r = sorted.findIndex((q) => !cmp(q, p));
-    return `<div class="res ${p.id === me ? 'me' : ''}"><div class="row" style="justify-content:space-between;flex-wrap:nowrap"><b><span style="display:inline-block;min-width:2em">${['🥇', '🥈', '🥉'][r] ?? r + 1}</span>${esc(p.name)}${p.id === me ? '（你）' : ''}</b><b>${p.score} 分</b></div></div>`; }).join('');
+    return `<div class="res rk ${p.id === me ? 'me' : ''}"><div class="row" style="justify-content:space-between;flex-wrap:nowrap"><b><span style="display:inline-block;min-width:2em">${['🥇', '🥈', '🥉'][r] ?? r + 1}</span>${esc(p.name)}${p.id === me ? '（你）' : ''}</b><b>${p.score} 分</b></div></div>`; }).join('');
   const foot = over
     ? (host ? '<button data-a="back">回到房間再來一局</button><button class="ghost" data-a="leave">離開房間</button>' :`<span class="mute">等 ${nm(s.host)} 開新局…</span><button class="ghost" data-a="leave">離開房間</button>`)
     : '<button data-a="next">下一回合</button>';
