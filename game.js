@@ -225,7 +225,7 @@ function act(g, pid, a) {
         if (ok.length) target = ok.find((q) => q.id === a.target) || err('請選擇要跳過的玩家');
       }
       drop([c]); g.disc.push(c);
-      if (target) { target.skip = 1; log(g, `${p.name} 打出跳過牌，${target.name} 將少一回合`); }
+      if (target) { target.skip = 1; g.skipEv = { by: p.id, to: target.id, no: g.turnNo }; log(g,`${p.name} 打出跳過牌，${target.name} 將少一回合`); }
       if (!p.hand.length) return endRound(g, g.turn);
       p.skip = 0;
       g.turn = nextIn(g, g.turn);
@@ -270,7 +270,7 @@ function view(g, pid) {
     drawCount: g.draw.length, top: g.disc.at(-1) || null,
     players: g.players.map((p) => ({ id: p.id, name: p.name, phase: p.phase, score: p.score, laid: p.laid, n: p.hand.length, skip: p.skip, in: p.in, left: !!p.left, pick: p.pick })),
     groups: g.groups, hand: me.hand, phases: PHASES, log: g.log.slice(-8),
-    summary: g.summary, winners: g.winners,
+    summary: g.summary, winners: g.winners, skipEv: g.skipEv || null, // 最近一次「誰跳過誰」；no 每次出牌都不同，前端靠它判斷是不是新事件
   };
 }
 

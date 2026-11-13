@@ -156,6 +156,8 @@ const plain = (p) => p.hand.find((x) => x.t !== 's').id;
   G.act(g, a.id, { type: 'discard', card: a.hand.find((x) => x.t === 's').id, target: b.id });
   assert.equal(g.players[g.turn], c, 'b 被跳過');
   assert.equal(b.skip, 2);
+  const ev = G.view(g, a.id).skipEv;
+  assert.deepEqual([ev.by, ev.to], [a.id, b.id], 'view 帶出誰跳過誰');
   // 跳過牌不能被撿
   throws(() => G.act(g, c.id, { type: 'draw', from: 'discard' }), /不能撿/);
   G.act(g, c.id, { type: 'draw', from: 'pile' });

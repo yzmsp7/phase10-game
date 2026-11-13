@@ -86,12 +86,16 @@ input[readonly]{width:100%}
 .modal.res-m{display:flex;flex-direction:column;overflow:hidden}.res-m .body{overflow:auto;flex:1;min-height:0}.res-m .foot{padding-top:16px}
 .res{background:var(--panel2);border-radius:10px;padding:12px;margin-top:8px}.res.me{outline:2px solid var(--accent)}
 .hd{font-size:var(--s4);font-weight:600;margin-bottom:8px}
+#skipBan{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);z-index:8;display:none;pointer-events:none;text-align:center;font-size:var(--s4);font-weight:600;background:#000d;border:3px solid var(--accent);border-radius:16px;padding:20px 28px;box-shadow:0 0 32px 8px #f6c94588;max-width:90vw}
+#skipBan.on{display:block;animation:ban 2.4s both}
+@keyframes ban{0%{transform:translate(-50%,-50%) scale(.3) rotate(-8deg);opacity:0}12%{transform:translate(-50%,-50%) scale(1.15);opacity:1}20%,80%{transform:translate(-50%,-50%) scale(1);opacity:1}100%{transform:translate(-50%,-50%);opacity:0}}
 .trophy{display:inline-block;animation:pop .7s cubic-bezier(.2,1.4,.4,1)}
 </style>
 </head>
 <body>
 <div id="app"></div>
 <div id="toast" role="status"></div>
+<div id="skipBan" role="status"></div>
 <script>
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -108,6 +112,11 @@ if (sess && urlRoom && sess.code !== urlRoom) sess = null; // 邀請連結指向
 function toast(m) {
   const t = $('#toast'); t.textContent = m; t.style.display = 'block';
   clearTimeout(toast.t); toast.t = setTimeout(() => (t.style.display = 'none'), 2800);
+}
+// 橫幅放在 #app 外面：render 會重建 #app，放裡面動畫會一直重播
+function skipBanner(html) {
+  const b = $('#skipBan'); b.innerHTML = html; b.classList.remove('on'); void b.offsetWidth; b.classList.add('on');
+  clearTimeout(skipBanner.t); skipBanner.t = setTimeout(() => b.classList.remove('on'), 2400);
 }
 async function post(name, data = {}) {
   const r = await fetch('/api/' + name, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(data) });
@@ -200,6 +209,10 @@ function game() {
   const hand = [...g.hand].sort((a, b) => rank(a) - rank(b));
   const req = g.phases[mine.phase - 1] || [];
   const name = (id) => g.players.find((p) => p.id === id)?.name ?? '?';
+  // 跳過牌：新事件才彈出「誰跳過誰」（第一次 render／重連只記錄，不重播舊事件）
+  const ev = g.skipEv;
+  if (seen.skipNo !== undefined && ev && ev.no !== seen.skipNo) { const nm = (id) => (id === me ? '你' : name(id)); skipBanner(`⏭ ${esc(nm(ev.by))} 跳過了 <span class="crown">${esc(nm(ev.to))}</span>`); if (ev.to === me) navigator.vibrate?.([60, 40, 60]); }
+  seen.skipNo = ev ? ev.no : null;
   const picked = hand.filter((c) => sel.has(c.id));
   if (!canAct || !picked.length) endFor = null;
 
