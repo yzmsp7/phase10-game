@@ -119,7 +119,7 @@ const store = {
   set(v) { try { v ? localStorage.setItem('p10', JSON.stringify(v)) : localStorage.removeItem('p10'); } catch {} },
 };
 const urlRoom = (new URLSearchParams(location.search).get('room') || '').toUpperCase();
-let dl = null, sess = store.get(), snap = null, es = null, sel = new Set(), slots = {}, seen = null, sheet = false, endFor = null, actSlot = null, byColor = false, rxOpen = false, rxSeq = null, histFor = null; // histFor = 正在看誰的撿棄牌歷史（玩家 id）。 rxOpen = 表情選單開著；rxSeq = 已播到的表情編號（null = 還沒收到第一筆快照）。每次 render 會重建 DOM，UI 狀態要存在這：sheet = 底部資訊面板開著；endFor = 正在選「接前/接後」的順子；actSlot = 放階段時作用中的那一組
+let dl = null, sess = store.get(), snap = null, es = null, sel = new Set(), slots = {}, los = {}, seen = null, sheet = false, endFor = null, actSlot = null, byColor = false, rxOpen = false, rxSeq = null, histFor = null; // histFor = 正在看誰的撿棄牌歷史（玩家 id）。 rxOpen = 表情選單開著；rxSeq = 已播到的表情編號（null = 還沒收到第一筆快照）。每次 render 會重建 DOM，UI 狀態要存在這：sheet = 底部資訊面板開著；endFor = 正在選「接前/接後」的順子；actSlot = 放階段時作用中的那一組
 if (sess && urlRoom && sess.code !== urlRoom) sess = null; // 邀請連結指向另一間房 → 先顯示加入畫面
 // 在 localhost 開頁面時，邀請連結／QR 要換成手機連得到的區網 IP（undefined = 查詢中，null = 查不到）。部署後網址不是 localhost，這段不會跑。
 const isLocal = /^(localhost|127\.|\[?::1)/.test(location.hostname);
@@ -176,7 +176,7 @@ function connect() {
 // 手機切去別的 App 再回來，iOS 的 EventSource 常常是死的 → 回前景一律重連
 document.addEventListener('visibilitychange', () => { if (!document.hidden && sess) connect(); });
 function exit() {
-  es?.close(); sess = snap = null; sel.clear(); slots = {}; rxOpen = false; histFor = null; store.set(null);
+  es?.close(); sess = snap = null; sel.clear(); slots = {}; los = {}; rxOpen = false; histFor = null; store.set(null);
   history.replaceState(null, '', '/'); render();
 }
 function enter(r) {
@@ -184,6 +184,16 @@ function enter(r) {
 }
 
 const phaseReq = () => snap.game.phases[snap.game.players.find((p) => p.id === snap.me).phase - 1];
+// 順子放滿後，百搭多出來時可選的起點範圍 [最小, 最大]（只有一種排法回傳 null）；curLo = 玩家選的起點，沒選就用最大（跟伺服器預設一致）
+const runRange = (gi) => {
+  const [t, size] = phaseReq()[gi], cs = snap.game.hand.filter((c) => slots[c.id] === gi);
+  if (t !== 'run' || cs.length !== size) return null;
+  const ns = cs.filter((c) => c.t === 'n').map((c) => c.n);
+  if (!ns.length) return null;
+  const top = Math.min(Math.min(...ns), 13 - size), bot = Math.max(1, Math.max(...ns) - size + 1);
+  return top > bot ? [bot, top] : null;
+};
+const curLo = (gi) => { const r = runRange(gi); return r && (los[gi] >= r[0] && los[gi] <= r[1] ? los[gi] : r[1]); };
 const card = (c, o = {}) => {
   const cls = c.t === 'n' ? c.c : c.t === 'w' ? 'W' : 'S';
   const face = c.t === 'n' ? c.n : c.t === 'w' ? 'W' : '⊘';
@@ -299,7 +309,7 @@ function game() {
   sel.forEach((id) => ids.has(id) || sel.delete(id));
   Object.keys(slots).forEach((id) => ids.has(+id) || delete slots[id]);
   // 抽牌動畫：手牌比上次多出來的牌 = 剛抽到的（只在該次 render 播動畫），標記「新」直到我棄牌結束回合
-  if (seen?.round !== g.round) { seen = { round: g.round, ids: null, drawn: null, laid: null }; slots = {}; actSlot = null; } // 新回合發牌不算抽牌；牌 id 每局重編，舊預放要清
+  if (seen?.round !== g.round) { seen = { round: g.round, ids: null, drawn: null, laid: null }; slots = {}; los = {}; actSlot = null; } // 新回合發牌不算抽牌；牌 id 每局重編，舊預放要清
   // 放下階段是整場的 peak：自己 → 震動 + 慶祝；別人 → 橫幅提醒（只在「剛變成已放下」的那次 render 觸發）。
   // 不顯示階段數字：放完最後一張牌時伺服器已把 phase+1，數字會差一。
   if (seen.laid) g.players.forEach((p) => { if (p.laid && !seen.laid.has(p.id)) { if (p.id === me) { navigator.vibrate?.(30); toast('🎉 階段完成！'); } else toast(`${p.name} 放下了階段`); } });
@@ -345,9 +355,11 @@ function game() {
 
   const need = req.map(([, n], gi) => hand.filter((c) => slots[c.id] === gi).length === n);
   // 放階段：點某一組讓它「作用中」，再直接點手牌放入（滿了自動跳下一組）；點組內的牌拿回手上。放下階段的按鈕在底部托盤。
+  // 百搭多出來時：選順子從幾開始（例如 2,3,4＋百搭 → 1–4 或 2–5）
+  const runBtns = (gi, size) => { const rg = runRange(gi), cur = curLo(gi); if (!rg) return ''; let b = ''; for (let l = rg[0]; l <= rg[1]; l++) b += `<button class="${l === cur ? '' : 'ghost'}" data-a="lo" data-v="${gi}:${l}" aria-pressed="${l === cur}">${l}–${l + size - 1}</button>`; return `<span class="row">${b}</span>`; };
   const layUI = laying ? `<div>${req.map((r, gi) => {
     const cs = hand.filter((c) => slots[c.id] === gi), on = actSlot === gi;
-    return `<div class="slot ${on ? 'can' : ''}" data-a="slot" data-v="${gi}" role="button" aria-pressed="${on}"><div class="slotH"><span>組 ${gi + 1}：${lab(r)}（${cs.length}/${r[1]}）</span></div>
+    return `<div class="slot ${on ? 'can' : ''}" data-a="slot" data-v="${gi}" role="button" aria-pressed="${on}"><div class="slotH"><span>組 ${gi + 1}：${lab(r)}（${cs.length}/${r[1]}）</span>${runBtns(gi, r[1])}</div>
       <div class="row">${cs.map((c) => card(c, { attrs: `data-a="unslot" data-v="${c.id}"` })).join('') || `<span class="mute">${on ? '點下方手牌放入這組' : '點這組，再點下方手牌'}</span>`}</div></div>`;
   }).join('')}<p class="mute" style="margin:8px 0 0">順子可用百搭補洞；每組至少要有一張數字牌${canAct ? '' : '。可先排好牌，輪到你抽完牌後再放下'}</p></div>` : '';
 
@@ -485,6 +497,7 @@ const A = {
     render();
   },
   unslot(v) { delete slots[v]; render(); },
+  lo(v) { const [gi, l] = v.split(':').map(Number); los[gi] = l; render(); },
   sheet() { sheet = !sheet; render(); },
   hist(v) { histFor = v || null; render(); }, // 玩家卡帶 id → 開；遮罩／✕ 沒有 → 關
   rxMenu() { rxOpen = !rxOpen; render(); },
@@ -492,7 +505,7 @@ const A = {
   sort() { byColor = !byColor; render(); },
   async lay() {
     const groups = phaseReq().map((_, gi) => Object.keys(slots).filter((id) => slots[id] === gi).map(Number));
-    if (await call('act', { action: { type: 'lay', groups } })) { slots = {}; actSlot = null; }
+    if (await call('act', { action: { type: 'lay', groups, los: groups.map((_, gi) => curLo(gi)) } })) { slots = {}; los = {}; actSlot = null; }
   },
   hit(v, el) {
     const gr = snap.game.groups[+v], end = el.dataset.end;

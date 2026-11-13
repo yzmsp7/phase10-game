@@ -35,6 +35,18 @@ r = G.build('run', 4, [n(11), n(12), w(), w()]);
 assert.deepEqual([r.lo, r.hi], [9, 12]);
 r = G.build('run', 9, [n(12), w(), w(), w(), w(), w(), w(), w(), w()]);
 assert.deepEqual([r.lo, r.hi], [4, 12]);
+// 玩家可指定起點：2,3,4 + 百搭 → 放前面 1–4，或放後面 2–5（預設）
+r = G.build('run', 4, [n(2), n(3), n(4), w()], 1);
+assert.deepEqual([r.lo, r.hi], [1, 4]);
+assert.equal(r.cards[0].t, 'w');
+r = G.build('run', 4, [n(2), n(3), n(4), w()], 2);
+assert.deepEqual([r.lo, r.hi], [2, 5]);
+assert.equal(r.cards[3].t, 'w');
+throws(() => G.build('run', 4, [n(2), n(3), n(4), w()], 0), /起點/);
+throws(() => G.build('run', 4, [n(2), n(3), n(4), w()], 3), /起點/);
+throws(() => G.build('run', 4, [n(2), n(3), n(4), w()], 1.5), /起點/);
+// 起點不能超過 12：11,12 + 2 百搭 只能是 9–12
+throws(() => G.build('run', 4, [n(11), n(12), w(), w()], 10), /起點/);
 // 只有一張數字牌 + 全百搭也合法
 G.build('run', 4, [n(1), w(), w(), w()]);
 

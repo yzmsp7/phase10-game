@@ -34,9 +34,9 @@ function deck() {
 
 const pts = (c) => (c.t === 'w' ? 25 : c.t === 's' ? 15 : c.n >= 10 ? 10 : 5);
 
-// 驗證並排好一組牌。順子：百搭補洞，多餘的百搭往大的一端延伸。
-// ponytail: 不支援手動指定百搭位置，需要時改成讓玩家傳入排好的順序。
-function build(type, size, cards) {
+// 驗證並排好一組牌。順子：百搭補洞；多餘的百搭預設往大的一端延伸，玩家可用 lo 指定順子的起點。
+// ponytail: 只能指定起點（整段平移），不能把多張百搭拆成一半在前一半在後以外的任意位置；補洞的百搭位置本來就固定。
+function build(type, size, cards, lo) {
   if (cards.length !== size) err(`這組需要 ${size} 張牌`);
   if (cards.some((c) => c.t === 's')) err('跳過牌不能用在階段中');
   const nat = cards.filter((c) => c.t === 'n');
@@ -51,9 +51,11 @@ function build(type, size, cards) {
   }
   const ns = nat.map((c) => c.n);
   if (new Set(ns).size < ns.length) err('順子不能有重複的數字');
-  const min = Math.min(...ns);
-  if (Math.max(...ns) - min + 1 > size) err('數字間隔太大，百搭牌補不起來');
-  const lo = Math.min(min, 13 - size);
+  const min = Math.min(...ns), max = Math.max(...ns);
+  if (max - min + 1 > size) err('數字間隔太大，百搭牌補不起來');
+  const top = Math.min(min, 13 - size); // 起點最大值（也是預設）；最小值是剛好蓋住最大那張
+  if (lo == null) lo = top;
+  else if (!Number.isInteger(lo) || lo > top || lo < Math.max(1, max - size + 1)) err('順子的起點不對');
   const wilds = cards.filter((c) => c.t === 'w');
   const slots = Array.from({ length: size }, (_, i) => nat.find((c) => c.n === lo + i) || wilds.pop());
   return { type, lo, hi: lo + size - 1, cards: slots };
@@ -197,7 +199,7 @@ function act(g, pid, a) {
       if (!Array.isArray(a.groups) || a.groups.length !== req.length || !a.groups.every(Array.isArray)) err('組數不對');
       const cards = take(p, a.groups.flat());
       let k = 0;
-      const built = req.map(([t, s], i) => build(t, s, cards.slice(k, (k += a.groups[i].length))));
+      const built = req.map(([t, s], i) => build(t, s, cards.slice(k, (k += a.groups[i].length)), a.los?.[i]));
       drop(cards);
       built.forEach((b) => g.groups.push({ ...b, owner: p.id }));
       p.laid = true;
