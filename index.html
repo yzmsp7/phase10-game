@@ -86,6 +86,8 @@ input[readonly]{width:100%}
 .modal.res-m{display:flex;flex-direction:column;overflow:hidden}.res-m .body{overflow:auto;flex:1;min-height:0}.res-m .foot{padding-top:16px}
 .res{background:var(--panel2);border-radius:10px;padding:12px;margin-top:8px}.res.me{outline:2px solid var(--accent)}
 .hd{font-size:var(--s4);font-weight:600;margin-bottom:8px}
+.cd.warn{display:inline-block;font-size:var(--s3);animation:shake 1s both}
+@keyframes shake{0%{transform:scale(1)}12%{transform:scale(1.9) rotate(-8deg)}28%{transform:scale(1.7) rotate(8deg)}44%{transform:scale(1.7) rotate(-6deg)}60%{transform:scale(1.5) rotate(5deg)}100%{transform:scale(1)}}
 #skipBan{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);z-index:8;display:none;pointer-events:none;text-align:center;font-size:var(--s4);font-weight:600;background:#000d;border:3px solid var(--accent);border-radius:16px;padding:20px 28px;box-shadow:0 0 32px 8px #f6c94588;max-width:90vw}
 #skipBan.on{display:block;animation:ban 2.4s both}
 @keyframes ban{0%{transform:translate(-50%,-50%) scale(.3) rotate(-8deg);opacity:0}12%{transform:translate(-50%,-50%) scale(1.15);opacity:1}20%,80%{transform:translate(-50%,-50%) scale(1);opacity:1}100%{transform:translate(-50%,-50%);opacity:0}}
@@ -319,6 +321,11 @@ function tick() {
   const s = dl == null ? null : Math.max(0, Math.ceil((dl - Date.now()) / 1000));
   el.textContent = s == null ? '' : `⏱ ${s}`;
   el.style.color = s != null && s <= 10 ? '#ff8a80' : '';
+  // 最後 5 秒：每秒換數字時重播晃動動畫；輪到我才震動（別人的倒數只有畫面提示，免得一直被打擾）
+  const warn = s > 0 && s <= 5;
+  if (warn && s !== tick.s) { el.classList.remove('warn'); void el.offsetWidth; if (snap?.game?.turn === snap.me) navigator.vibrate?.(80); }
+  el.classList.toggle('warn', warn);
+  tick.s = s;
 }
 setInterval(tick, 250);
 
