@@ -130,6 +130,9 @@ const plain = (p) => p.hand.find((x) => x.t !== 's').id;
   G.act(g, c.id, { type: 'draw', from: 'pile' });
   assert.deepEqual(pk(c.id), { from: 'pile' }, '抽牌堆：只知道來源，不洩漏牌面');
   G.act(g, c.id, { type: 'discard', card: plain(c) });
+  const hs = (id) => G.view(g, a.id).players.find((p) => p.id === id).hist;
+  assert.deepEqual([hs(b.id).at(-1).card.n, hs(b.id).at(-1).disc.n], [1, 3], '歷史：撿了 1、棄了 3');
+  assert.deepEqual(Object.keys(hs(c.id).at(-1)).sort(), ['disc', 'from'], '歷史：抽牌堆不洩漏牌面');
   // a 再抽，棄掉最後一張 → 出完
   G.act(g, a.id, { type: 'draw', from: 'pile' });
   a.hand = [n(7)];
@@ -278,6 +281,7 @@ const plain = (p) => p.hand.find((x) => x.t !== 's').id;
   assert.equal(G.leave(g, cur.id), 2);
   assert.equal(cur.in, false); assert.equal(cur.hand.length, 0);
   assert.notEqual(g.players[g.turn], cur, '輪次要換人');
+  assert.deepEqual(cur.hist, [], '退出者的撿棄牌歷史要清掉');
   assert.equal(g.stage, 'draw', '換人後要從抽牌開始');
   const total = () => g.players.reduce((a, p) => a + p.hand.length, 0) + g.groups.reduce((a, x) => a + x.cards.length, 0) + g.draw.length + g.disc.length;
   assert.equal(total(), 108, '退出者的牌放回棄牌堆，牌數守恆');

@@ -23,7 +23,7 @@ input,select{font-size:16px;background:#0c2f23;color:var(--ink);border:1px solid
 button,.card{-webkit-user-select:none;user-select:none}
 .mute{color:var(--mute)}.big{font-size:var(--s4);letter-spacing:6px;font-weight:600}
 .player{background:var(--panel2);border-radius:10px;padding:8px 12px;min-width:120px;flex:1;border:2px solid transparent}
-.player.turn{border-color:var(--accent)}.player.out{opacity:.4}
+.player[data-a]{cursor:pointer}.player[data-a]:active{filter:brightness(1.2)}.player:focus-visible{outline:2px solid var(--accent)}.player.turn{border-color:var(--accent)}.player.out{opacity:.4}
 .pick{margin-top:4px;font-size:var(--s1);display:flex;align-items:center;gap:8px}.pick .card{box-shadow:none}
 .player b{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.player small{color:var(--mute)}
 .cnt{font-size:var(--s3);font-weight:600;margin-right:4px}
@@ -119,7 +119,7 @@ const store = {
   set(v) { try { v ? localStorage.setItem('p10', JSON.stringify(v)) : localStorage.removeItem('p10'); } catch {} },
 };
 const urlRoom = (new URLSearchParams(location.search).get('room') || '').toUpperCase();
-let dl = null, sess = store.get(), snap = null, es = null, sel = new Set(), slots = {}, seen = null, sheet = false, endFor = null, actSlot = null, byColor = false, rxOpen = false, rxSeq = null; // rxOpen = 表情選單開著；rxSeq = 已播到的表情編號（null = 還沒收到第一筆快照）。每次 render 會重建 DOM，UI 狀態要存在這：sheet = 底部資訊面板開著；endFor = 正在選「接前/接後」的順子；actSlot = 放階段時作用中的那一組
+let dl = null, sess = store.get(), snap = null, es = null, sel = new Set(), slots = {}, seen = null, sheet = false, endFor = null, actSlot = null, byColor = false, rxOpen = false, rxSeq = null, histFor = null; // histFor = 正在看誰的撿棄牌歷史（玩家 id）。 rxOpen = 表情選單開著；rxSeq = 已播到的表情編號（null = 還沒收到第一筆快照）。每次 render 會重建 DOM，UI 狀態要存在這：sheet = 底部資訊面板開著；endFor = 正在選「接前/接後」的順子；actSlot = 放階段時作用中的那一組
 if (sess && urlRoom && sess.code !== urlRoom) sess = null; // 邀請連結指向另一間房 → 先顯示加入畫面
 // 在 localhost 開頁面時，邀請連結／QR 要換成手機連得到的區網 IP（undefined = 查詢中，null = 查不到）。部署後網址不是 localhost，這段不會跑。
 const isLocal = /^(localhost|127\.|\[?::1)/.test(location.hostname);
@@ -176,7 +176,7 @@ function connect() {
 // 手機切去別的 App 再回來，iOS 的 EventSource 常常是死的 → 回前景一律重連
 document.addEventListener('visibilitychange', () => { if (!document.hidden && sess) connect(); });
 function exit() {
-  es?.close(); sess = snap = null; sel.clear(); slots = {}; rxOpen = false; store.set(null);
+  es?.close(); sess = snap = null; sel.clear(); slots = {}; rxOpen = false; histFor = null; store.set(null);
   history.replaceState(null, '', '/'); render();
 }
 function enter(r) {
@@ -293,7 +293,7 @@ function game() {
   const myTurn = g.turn === me, canAct = myTurn && g.stage === 'act';
   const laying = g.status === 'play' && mine.in && !mine.laid;
   if (!laying) actSlot = null;
-  if (g.status !== 'play') sheet = false; // 結算畫面出現時收起 📋 面板，免得下一回合自己彈出來
+  if (g.status !== 'play') sheet = false, histFor = null; // 結算畫面出現時收起 📋 面板，免得下一回合自己彈出來
   const online = Object.fromEntries(s.players.map((p) => [p.id, p.online]));
   const ids = new Set(g.hand.map((c) => c.id));
   sel.forEach((id) => ids.has(id) || sel.delete(id));
@@ -323,8 +323,8 @@ function game() {
   const picked = hand.filter((c) => sel.has(c.id));
   if (!canAct || !picked.length) endFor = null;
 
-  const players = g.players.map((p) => `<div class="player ${g.turn === p.id ? 'turn' : ''} ${p.in ? '' : 'out'}" data-pid="${p.id}">
-    <div class="row" style="flex-wrap:nowrap;justify-content:space-between"><b>${esc(p.name)}${p.id === me ? '（你）' : ''} ${online[p.id] || p.left ? '' : '💤'}</b>${p.left ? '' : `<span class="cnt" aria-label="${p.n} 張">${p.n}<small>張</small></span>`}</div>
+  const players = g.players.map((p) => `<div class="player ${g.turn === p.id ? 'turn' : ''} ${p.in ? '' : 'out'}" data-pid="${p.id}" ${p.in ? `data-a="hist" data-v="${p.id}" role="button" tabindex="0" aria-haspopup="dialog"` : ''}>
+    <div class="row" style="flex-wrap:nowrap;justify-content:space-between"><b>${esc(p.name)}${p.id === me ? '（你）' : ''} ${online[p.id] || p.left ? '' : '💤'}</b>${p.left ? '' : `<span class="cnt" aria-label="${p.n} 張">${p.n}<small>張${p.in ? ' ›' : ''}</small></span>`}</div>
     <small>${p.left ? '已離開' : `階段 ${p.phase > 10 ? 10 : p.phase} ${p.laid ? '✅' : ''} · ${p.score} 分${p.skip === 1 ? ' · ⏭將被跳過' : ''}`}</small>
     ${p.id === me || !p.pick ? '' : `<div class="pick">${p.pick.from === 'pile' ? '🂠 抽牌堆' : `♻ 撿棄牌 ${card(p.pick.card, { tag: 'span', cls: 'sm' })}`}</div>`}</div>`).join('');
 
@@ -375,6 +375,12 @@ function game() {
     <h2 style="margin-top:16px">最近動態</h2><div class="log">${g.log.map(esc).join('<br>')}</div>
     <button class="ghost" data-a="leave" style="width:100%;margin-top:16px">離開房間</button></div></div>` : '';
 
+  // 只有還在場的人可看（離開／加賽淘汰者沒有東西可看；面板開著時對方離開 → 自動關）。最新一手排最上面：重繪會把捲動位置歸零，最新的要永遠看得到
+  const hp = g.players.find((p) => p.id === histFor && p.in), who = hp && (hp.id === me ? '你' : esc(hp.name) + ' ');
+  const histUI = hp ? `<div class="overlay sheet"><div class="bd" data-a="hist"></div><div class="modal" role="dialog" aria-label="${who}本回合的撿棄牌">
+    <div class="row" style="justify-content:space-between"><h2 style="margin:0;color:var(--ink)">${who}本回合的撿棄牌</h2><button class="ghost ic" data-a="hist" aria-label="關閉">✕</button></div>
+    ${hp.hist.length ? hp.hist.map((h, i) => `<div class="pick" style="font-size:var(--s2);margin-top:12px"><span class="mute">${i + 1}.</span>${h.from === 'pile' ? '🂠 抽牌堆' : `♻ 撿棄牌 ${card(h.card, { tag: 'span', cls: 'sm' })}`}<span>→</span>${h.disc ? `棄 ${card(h.disc, { tag: 'span', cls: 'sm' })}` : '<span class="mute">出牌中…</span>'}</div>`).reverse().join('') : `<p class="mute">${who}還沒出過牌。輪到之後，這裡會列出每一手撿了或抽了什麼、棄了哪張。</p>`}</div></div>` : '';
+
   return `<div class="row"><b style="flex:1">房間 ${s.code} · 第 ${g.round} 回合${g.playoff ? '（加賽）' : ''}</b>
     <span class="mute">目標：階段 ${g.target}</span><b class="cd" aria-live="off"></b>
     <span class="rxw"><button class="ghost ic" data-a="rxMenu" aria-label="送表情" aria-expanded="${rxOpen}">😀</button>${rxOpen ? `<div class="rxp">${EMOJI.map((e) => `<button data-a="react" data-v="${e}" aria-label="${e}">${e}</button>`).join('')}</div>` : ''}</span>
@@ -393,7 +399,7 @@ function game() {
   </div>
   ${g.status !== 'play' ? overlay(g, s) : `<div class="tray"><div class="row" style="justify-content:space-between;flex-wrap:nowrap"><b>${status}</b><button class="ghost" data-a="sort" aria-label="切換手牌排序">排序：${byColor ? '顏色' : '數字'}</button></div>
     <div class="hand">${free.map((c) => card(c, { cls: `${sel.has(c.id) ? 'sel' : ''} ${c.id === seen.drawn ? 'new' : ''} ${fresh.includes(c.id) ? 'pop' : ''}`, attrs: `data-a="card" data-v="${c.id}"` })).join('')}</div>
-    ${layBtn + discard && `<div class="row act">${layBtn}${discard}</div>`}</div>`}${sheetUI}`; // 手牌＋棄牌固定在螢幕底部（拇指區），其餘在上方捲動；排名／階段表／動態收進 📋 面板
+    ${layBtn + discard && `<div class="row act">${layBtn}${discard}</div>`}</div>`}${sheetUI}${histUI}`; // 手牌＋棄牌固定在螢幕底部（拇指區），其餘在上方捲動；排名／階段表／動態收進 📋 面板
 }
 
 // 結算：依「我贏／別人贏」給不同開場；每人顯示剩下的牌，讓「+N 分」看得出來源；按鈕固定在 modal 底部
@@ -480,6 +486,7 @@ const A = {
   },
   unslot(v) { delete slots[v]; render(); },
   sheet() { sheet = !sheet; render(); },
+  hist(v) { histFor = v || null; render(); }, // 玩家卡帶 id → 開；遮罩／✕ 沒有 → 關
   rxMenu() { rxOpen = !rxOpen; render(); },
   react(v) { rxOpen = false; render(); call('react', { e: v }); },
   sort() { byColor = !byColor; render(); },
@@ -503,6 +510,7 @@ $('#app').addEventListener('click', (e) => {
   const el = e.target.closest('[data-a]');
   if (el && !el.disabled) A[el.dataset.a]?.(el.dataset.v, el);
 });
+$('#app').addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[role=button]')) { e.preventDefault(); e.target.click(); } }); // div 型按鈕（玩家卡、組合、放階段欄）要自己補鍵盤操作
 $('#app').addEventListener('focusout', (e) => { if (e.target.matches?.('select') && snap) render(); }); // 補上選單開著時被略過的重繪
 $('#app').addEventListener('change', (e) => {
   const k = e.target.dataset.c;

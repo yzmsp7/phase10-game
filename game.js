@@ -109,7 +109,7 @@ function startRound(g) {
   const d = shuffle(deck());
   for (const p of g.players) {
     p.in = !p.left && (!g.playoff || g.playoff.includes(p.id)); // 中途退出的人不會再被發牌
-    p.laid = false; p.skip = 0; p.pick = null;
+    p.laid = false; p.skip = 0; p.pick = null; p.hist = []; // hist：本回合每手的 { from, card?, disc }，點玩家卡可看
     p.hand = p.in ? d.splice(0, HAND) : [];
   }
   g.disc = [d.pop()];
@@ -186,6 +186,7 @@ function act(g, pid, a) {
         p.hand.push(g.draw.pop());
         p.pick = { from: 'pile' }; // 牌堆抽的牌不公開
       }
+      p.hist.push({ ...p.pick });
       g.stage = 'act';
       return;
     }
@@ -224,7 +225,7 @@ function act(g, pid, a) {
         const ok = g.players.filter((q) => q.in && q !== p && q.skip === 0);
         if (ok.length) target = ok.find((q) => q.id === a.target) || err('請選擇要跳過的玩家');
       }
-      drop([c]); g.disc.push(c);
+      drop([c]); g.disc.push(c); const h = p.hist.at(-1); if (h) h.disc = c; // 測試會跳過 draw 直接設 stage，所以要判斷
       if (target) { target.skip = 1; g.skipEv = { by: p.id, to: target.id, no: g.turnNo }; log(g,`${p.name} 打出跳過牌，${target.name} 將少一回合`); }
       if (!p.hand.length) return endRound(g, g.turn);
       p.skip = 0;
@@ -244,7 +245,7 @@ function leave(g, pid) {
   if (!p || p.left) return g.players.filter((q) => q.in).length;
   const wasTurn = g.status === 'play' && g.turn === i;
   g.disc.unshift(...p.hand);
-  p.hand = []; p.in = false; p.left = true; p.skip = 0; p.pick = null;
+  p.hand = []; p.in = false; p.left = true; p.skip = 0; p.pick = null; p.hist = [];
   log(g, `${p.name} 離開了遊戲`);
   const left = g.players.filter((q) => q.in).length;
   if (g.playoff) g.playoff = g.playoff.filter((id) => id !== pid);
@@ -268,7 +269,7 @@ function view(g, pid) {
     target: g.target, round: g.round, status: g.status, stage: g.stage, playoff: !!g.playoff,
     turn: g.status === 'play' ? g.players[g.turn].id : null,
     drawCount: g.draw.length, top: g.disc.at(-1) || null,
-    players: g.players.map((p) => ({ id: p.id, name: p.name, phase: p.phase, score: p.score, laid: p.laid, n: p.hand.length, skip: p.skip, in: p.in, left: !!p.left, pick: p.pick })),
+    players: g.players.map((p) => ({ id: p.id, name: p.name, phase: p.phase, score: p.score, laid: p.laid, n: p.hand.length, skip: p.skip, in: p.in, left: !!p.left, pick: p.pick, hist: p.hist })),
     groups: g.groups, hand: me.hand, phases: PHASES, log: g.log.slice(-8),
     summary: g.summary, winners: g.winners, skipEv: g.skipEv || null, // 最近一次「誰跳過誰」；no 每次出牌都不同，前端靠它判斷是不是新事件
   };
