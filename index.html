@@ -187,8 +187,8 @@ function enter(r) {
 const phaseReq = () => snap.game.phases[snap.game.players.find((p) => p.id === snap.me).phase - 1];
 // 順子放滿後，百搭多出來時可選的起點範圍 [最小, 最大]（只有一種排法回傳 null）；curLo = 玩家選的起點，沒選就用最大（跟伺服器預設一致）
 const runRange = (gi) => {
-  const [t, size] = phaseReq()[gi], cs = snap.game.hand.filter((c) => slots[c.id] === gi);
-  if (t !== 'run' || cs.length !== size) return null;
+  const [t, min] = phaseReq()[gi], cs = snap.game.hand.filter((c) => slots[c.id] === gi), size = cs.length; // 張數 ≥ 階段要求都算（多放的牌 = 順便接牌）
+  if (t !== 'run' || size < min || size > 12) return null;
   const ns = cs.filter((c) => c.t === 'n').map((c) => c.n);
   if (!ns.length) return null;
   const top = Math.min(Math.min(...ns), 13 - size), bot = Math.max(1, Math.max(...ns) - size + 1);
@@ -197,9 +197,9 @@ const runRange = (gi) => {
 const curLo = (gi) => { const r = runRange(gi); return r && (los[gi] >= r[0] && los[gi] <= r[1] ? los[gi] : r[1]); };
 // 順子放滿後的實際排列（跟伺服器 build 一樣）：[{ c, n, mv }]，n = 該格的數字；mv = 這張百搭能拖到另一頭（'L' 現在在前面、'R' 在後面）。排不出來回傳 null
 const runLayout = (gi) => {
-  const [t, size] = phaseReq()[gi], cs = snap.game.hand.filter((c) => slots[c.id] === gi);
+  const [t, min0] = phaseReq()[gi], cs = snap.game.hand.filter((c) => slots[c.id] === gi), size = cs.length;
   const nat = cs.filter((c) => c.t === 'n'), ws = cs.filter((c) => c.t === 'w'), ns = nat.map((c) => c.n);
-  if (t !== 'run' || cs.length !== size || !ns.length || nat.length + ws.length !== size || new Set(ns).size < ns.length) return null;
+  if (t !== 'run' || size < min0 || size > 12 || !ns.length || nat.length + ws.length !== size || new Set(ns).size < ns.length) return null;
   const min = Math.min(...ns), max = Math.max(...ns);
   if (max - min + 1 > size) return null;
   const rg = runRange(gi), lo = curLo(gi) ?? Math.min(min, 13 - size);
@@ -367,7 +367,7 @@ function game() {
     return `<div class="group ${can ? 'can' : ''}" ${can ? `data-a="hit" data-v="${i}" role="button"` : ''}><small>${esc(name(gr.owner))} · ${t}</small><div class="row">${cs}</div>${ends}</div>`;
   }).join('');
 
-  const need = req.map(([, n], gi) => hand.filter((c) => slots[c.id] === gi).length === n);
+  const need = req.map(([, n], gi) => hand.filter((c) => slots[c.id] === gi).length >= n);
   // 放階段：點某一組讓它「作用中」，再直接點手牌放入（滿了自動跳下一組）；點組內的牌拿回手上。放下階段的按鈕在底部托盤。
   // 百搭多出來時：選順子從幾開始（例如 2,3,4＋百搭 → 1–4 或 2–5）
   const runBtns = (gi, size) => { const rg = runRange(gi), cur = curLo(gi); if (!rg) return ''; let b = ''; for (let l = rg[0]; l <= rg[1]; l++) b += `<button class="${l === cur ? '' : 'ghost'}" data-a="lo" data-v="${gi}:${l}" aria-pressed="${l === cur}">${l}–${l + size - 1}</button>`; return `<span class="row">${b}</span>`; };
@@ -375,9 +375,9 @@ function game() {
     const cs = hand.filter((c) => slots[c.id] === gi), on = actSlot === gi;
     // 放滿的順子照實際順序排，百搭標出它代表的數字；頭尾能換邊的百搭可以拖
     const shown = runLayout(gi) || cs.map((c) => ({ c }));
-    return `<div class="slot ${on ? 'can' : ''}" data-a="slot" data-v="${gi}" role="button" aria-pressed="${on}"><div class="slotH"><span>組 ${gi + 1}：${lab(r)}（${cs.length}/${r[1]}）</span>${runBtns(gi, r[1])}</div>
+    return `<div class="slot ${on ? 'can' : ''}" data-a="slot" data-v="${gi}" role="button" aria-pressed="${on}"><div class="slotH"><span>組 ${gi + 1}：${lab(r)}（${cs.length}/${r[1]}）</span>${runBtns(gi, cs.length)}</div>
       <div class="row">${shown.map(({ c, n, mv }) => card(c, { attrs: `data-a="unslot" data-v="${c.id}"${mv ? ` data-drag="${gi}:${mv}"` : ''}`, sub: c.t === 'w' ? n : '' })).join('') ||`<span class="mute">${on ? '點下方手牌放入這組' : '點這組，再點下方手牌'}</span>`}</div></div>`;
-  }).join('')}<p class="mute" style="margin:8px 0 0">順子可用百搭補洞；每組至少要有一張數字牌${req.some((_, gi) => runLayout(gi)?.some((x) => x.mv)) ? '。虛線的百搭可以拖到另一頭' : ''}${canAct ? '' : '。可先排好牌，輪到你抽完牌後再放下'}</p></div>` : '';
+  }).join('')}<p class="mute" style="margin:8px 0 0">順子可用百搭補洞；每組至少要有一張數字牌；放滿後還能接的牌可以一起放（等於順便接牌）${req.some((_, gi) => runLayout(gi)?.some((x) => x.mv)) ? '。虛線的百搭可以拖到另一頭' : ''}${canAct ? '' : '。可先排好牌，輪到你抽完牌後再放下'}</p></div>` : '';
 
   const free = hand.filter((c) => slots[c.id] === undefined);
   const one = picked.length === 1 ? picked[0] : null;
@@ -502,10 +502,10 @@ const A = {
     endFor = null;
     if (actSlot === null) sel.has(+v) ? sel.delete(+v) : sel.add(+v);
     else { // 有作用中的組：點牌就直接放入；這組滿了自動換到下一個還沒滿的組
-      const req = phaseReq(), full = (gi) => Object.values(slots).filter((x) => x === gi).length >= req[gi][1];
-      if (full(actSlot)) return toast('這組已經放滿了，點組內的牌可以拿回來');
+      const req = phaseReq(), cnt = (gi) => Object.values(slots).filter((x) => x === gi).length, full = (gi) => cnt(gi) >= req[gi][1];
       slots[v] = actSlot;
-      if (full(actSlot)) actSlot = req.findIndex((_, gi) => !full(gi)) < 0 ? null : req.findIndex((_, gi) => !full(gi));
+      // 剛好放滿才自動跳下一組；放滿之後繼續點牌就是多放（接牌），要再點該組才會回來
+      if (cnt(actSlot) === req[actSlot][1]) actSlot = req.findIndex((_, gi) => !full(gi)) < 0 ? null : req.findIndex((_, gi) => !full(gi));
     }
     render();
   },

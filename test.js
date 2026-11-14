@@ -50,6 +50,15 @@ throws(() => G.build('run', 4, [n(11), n(12), w(), w()], 10), /起點/);
 // 只有一張數字牌 + 全百搭也合法
 G.build('run', 4, [n(1), w(), w(), w()]);
 
+// 放下階段時多放的牌（順便接牌）：張數 ≥ 要求都行
+r = G.build('run', 4, [n(3), n(4), n(5), n(6), n(7)]);
+assert.deepEqual([r.lo, r.hi, r.cards.length], [3, 7, 5]);
+r = G.build('run', 4, [n(3), n(4), n(5), n(6), w()], 2); // 百搭起點仍可指定：2–6
+assert.deepEqual([r.lo, r.hi], [2, 6]);
+assert.equal(G.build('set', 3, [n(7), n(7, 'B'), n(7, 'G'), w()]).cards.length, 4);
+throws(() => G.build('run', 4, [n(3), n(4), n(5), n(9), n(10)]), /間隔/);
+throws(() => G.build('run', 4, [...Array(13)].map((_, i) => (i ? n(i) : w()))), /12/);
+
 // 同色
 G.build('color', 7, [...Array(6)].map((_, i) => n(i + 1, 'G')).concat(w()));
 throws(() => G.build('color', 7, [...Array(6)].map((_, i) => n(i + 1, 'G')).concat(n(1, 'R'))), /顏色/);

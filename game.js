@@ -36,8 +36,10 @@ const pts = (c) => (c.t === 'w' ? 25 : c.t === 's' ? 15 : c.n >= 10 ? 10 : 5);
 
 // 驗證並排好一組牌。順子：百搭補洞；多餘的百搭預設往大的一端延伸，玩家可用 lo 指定順子的起點。
 // ponytail: 只能指定起點（整段平移），不能把多張百搭拆成一半在前一半在後以外的任意位置；補洞的百搭位置本來就固定。
+// 張數 ≥ size 都行：多放的牌等於放下後立刻接牌（順子就是更長的順子），所以後面的運算都用實際張數 size。
 function build(type, size, cards, lo) {
-  if (cards.length !== size) err(`這組需要 ${size} 張牌`);
+  if (cards.length < size) err(`這組至少需要 ${size} 張牌`);
+  size = cards.length;
   if (cards.some((c) => c.t === 's')) err('跳過牌不能用在階段中');
   const nat = cards.filter((c) => c.t === 'n');
   if (!nat.length) err('每組至少要有一張數字牌');
@@ -52,6 +54,7 @@ function build(type, size, cards, lo) {
   const ns = nat.map((c) => c.n);
   if (new Set(ns).size < ns.length) err('順子不能有重複的數字');
   const min = Math.min(...ns), max = Math.max(...ns);
+  if (size > 12) err('順子最長 12 張');
   if (max - min + 1 > size) err('數字間隔太大，百搭牌補不起來');
   const top = Math.min(min, 13 - size); // 起點最大值（也是預設）；最小值是剛好蓋住最大那張
   if (lo == null) lo = top;
