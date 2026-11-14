@@ -303,8 +303,8 @@ function room() {
     : `<div>先完成第 ${st.target} 階段者結束遊戲</div>`;
   return `<h1>房間 <span class="big">${s.code}</span></h1>
   <div class="panel"><h2>邀請朋友</h2><div class="row"><input readonly value="${esc(link)}" size="34" onfocus="this.select()"><button data-a="copy">${navigator.share ? '分享邀請' : '複製連結'}</button></div>${qrBox(link)}</div>
-  <div class="panel"><h2>玩家（${n}/6）</h2>
-    ${s.players.map((p) => `<div><span class="dot ${p.online ? 'on' : ''}"></span>${esc(p.name)} ${p.id === s.host ? '<span class="crown">👑 房主</span>' : ''} ${p.id === s.me ? '<span class="mute">（你）</span>' : ''}</div>`).join('')}</div>
+  <div class="panel"><div class="row" style="justify-content:space-between"><h2 style="margin:0">玩家（${n}/6）</h2>${host && n > 1 ? '<button class="ghost" data-a="shuffle">🔀 隨機排位子</button>' : ''}</div>
+    ${s.players.map((p, i) => `<div><span class="mute">${i + 1}.</span> <span class="dot ${p.online ? 'on' : ''}"></span>${esc(p.name)} ${p.id === s.host ? '<span class="crown">👑 房主</span>' : ''} ${p.id === s.me ? '<span class="mute">（你）</span>' : ''}</div>`).join('')}</div>
   <div class="panel"><h2>規則</h2>${set}
     <p>每回合 ${st.turn} 秒，超時自動代打。</p>
     <p class="mute">每人發 10 張牌。只有完成當前階段的人，下一回合才能進下一階段；沒完成就繼續挑戰同一階段。有人完成目標階段後，該回合結束時比總分（低者勝）。</p></div>
@@ -486,6 +486,7 @@ const A = {
     try { await navigator.clipboard.writeText(l); toast('已複製邀請連結'); } catch { prompt('複製這個連結傳給朋友：', l); }
   },
   start: () => call('start'),
+  shuffle: () => call('shuffle'),
   async leave() {
     // 遊戲中途退出是真的退出：牌放回棄牌堆、不能再回來；剩 2 人時你一走房間就關閉，所以先確認
     if (snap?.game && snap.game.status !== 'over') {

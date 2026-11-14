@@ -81,6 +81,12 @@ const actions = {
     if (room.game) G.err('遊戲進行中不能改設定');
     if (Number.isInteger(b.target) && b.target >= 1 && b.target <= 10) room.settings.target = b.target;
   },
+  shuffle(room, p) { // 隨機排座位：座位 = room.players 的順序，G.create 照這個順序發牌、輪流
+    if (room.host !== p.id) G.err('只有房主可以排位子');
+    if (room.game) G.err('遊戲進行中不能排位子');
+    const a = room.players;
+    for (let i = a.length - 1; i > 0; i--) { const j = randomInt(i + 1); [a[i], a[j]] = [a[j], a[i]]; }
+  },
   start(room, p) {
     if (room.host !== p.id) G.err('只有房主可以開始');
     if (room.game) G.err('遊戲已經開始');

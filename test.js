@@ -446,7 +446,19 @@ for (let np = 2; np <= 6; np++) {
   assert.equal(v.players.length, 6);
   assert.equal(v.settings.target, 10, '預設打完 10 階段');
   assert.equal((await post('settings', { ...host, target: 4 })).status, 200);
+  // 隨機排位子：只有房主；人還在、不多不少；順序會變（4 人洗 20 次全都沒變的機率 ≈ 1e-28）
+  assert.equal((await post('shuffle', guests[0])).status, 400, '非房主不能排位子');
+  const ids = (await sseOnce(host)).players.map((p) => p.id), first = ids.join();
+  let moved = false;
+  for (let i = 0; i < 20 && !moved; i++) {
+    assert.equal((await post('shuffle', host)).status, 200);
+    const now = (await sseOnce(host)).players.map((p) => p.id);
+    assert.deepEqual([...now].sort(), [...ids].sort(), '排位子不能增減玩家');
+    moved = now.join() !== first;
+  }
+  assert.ok(moved, '位子應該被打亂');
   assert.equal((await post('start', host)).status, 200);
+  assert.equal((await post('shuffle', host)).status, 400, '遊戲開始後不能排位子');
   v = await sseOnce(guests[2]);
   assert.equal(v.game.hand.length, 10, '玩家只看到自己的 10 張牌');
   assert.ok(v.game.players.every((p) => p.n === 10));
