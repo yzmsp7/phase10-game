@@ -465,6 +465,9 @@ for (let np = 2; np <= 6; np++) {
   assert.equal((await post('react', { ...guests[0], e: '😡' })).status, 200, '別人不受冷卻影響');
   v = await sseOnce(guests[1]);
   assert.deepEqual(v.rx.map((r) => [r.seq, r.e]), [[1, '😮'], [2, '😡']]);
+  assert.equal((await post('react', { ...guests[1], e: '😴' })).status, 200, '睡覺表情');
+  const wl = (f) => require('node:fs').readFileSync(require('node:path').join(__dirname, f), 'utf8').match(/const EMOJI = (\[.*?\]);/)[1];
+  assert.equal(wl('server.js'), wl('index.html'), 'server 與前端的表情白名單要一致');
   const room = server.rooms.get(host.code);
   const cardsIn = (g) => g.players.reduce((a, p) => a + p.hand.length, 0) + g.groups.reduce((a, x) => a + x.cards.length, 0) + g.draw.length + g.disc.length;
 

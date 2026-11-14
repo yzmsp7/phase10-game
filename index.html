@@ -112,7 +112,7 @@ input[readonly]{width:100%}
 <script>
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const EMOJI = ['😮', '😡', '😂', '👏', '😭', '😎', '🙏']; // 跟 server.js 的白名單同一份
+const EMOJI = ['😮', '😡', '😂', '👏', '😭', '😎', '🙏', '😴']; // 跟 server.js 的白名單同一份
 const SYM = { R: '●', B: '■', G: '▲', Y: '◆' }, CN = { R: '紅', B: '藍', G: '綠', Y: '黃' };
 const lab = ([t, n]) => (t === 'set' ? `${n} 張同數字` : t === 'run' ? `${n} 張連續順子` : `${n} 張同顏色`);
 const store = {

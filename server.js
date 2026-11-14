@@ -8,7 +8,7 @@ const { randomInt, randomUUID } = require('node:crypto');
 const G = require('./game');
 
 const MAX = 6, MIN = 2, TURN_SEC = 60; // 每回合預設秒數；建房時可改（10–600），手機切去 LINE 回訊息再回來要來得及，所以下限不能太短
-const EMOJI = ['😮', '😡', '😂', '👏', '😭', '😎', '🙏']; // 白名單；index.html 有同一份，改的時候兩邊一起改
+const EMOJI = ['😮', '😡', '😂', '👏', '😭', '😎', '🙏', '😴']; // 白名單；index.html 有同一份，改的時候兩邊一起改
 const rooms = new Map();
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
 
