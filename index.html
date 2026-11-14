@@ -299,7 +299,7 @@ function qrBox(link) {
 function lobby() {
   return `<h1>🃏 Phase 10 線上</h1>
   <div class="panel"><h2>你的名字</h2><input id="name" maxlength="12" placeholder="最多 12 字" value="${esc(localStorage.getItem('p10name') || '')}"></div>
-  ${urlRoom ? '' : `<div class="panel"><h2>開新房間</h2><div class="row"><label for="turn">每回合秒數</label><input id="turn" type="number" inputmode="numeric" min="10" max="600" value="60" style="width:96px"><button data-a="create">建立房間</button></div>
+  ${urlRoom ? '' : `<div class="panel"><h2>開新房間</h2><div class="row"><label for="target">目標</label><select id="target">${[...Array(10)].map((_, i) => `<option value="${i + 1}" ${i === 9 ? 'selected' : ''}>第 ${i + 1} 階段</option>`).join('')}</select><label for="turn">每回合秒數</label><input id="turn" type="number" inputmode="numeric" min="10" max="600" value="60" style="width:96px"><button data-a="create">建立房間</button></div>
     <p class="mute" style="margin:8px 0 0">時間到會自動代打（抽牌堆、棄最大張）。10–600 秒。</p>
     <h2 style="margin-top:16px">特殊規則（全不勾 = 標準 Phase 10）</h2><div class="rules">${RULES.map(([k, t, d]) => `<label><input type="checkbox" data-r="${k}"><span><b>${t}</b><br><small class="mute">${d}</small></span></label>`).join('')}</div></div>`}
   <div class="panel"><h2>${urlRoom ? '你被邀請加入房間' : '加入房間'}</h2>
@@ -503,7 +503,7 @@ function tick() {
 setInterval(tick, 250);
 
 const A = {
-  async create() { const rules = Object.fromEntries(RULES.map(([k]) => [k, !!$(`[data-r="${k}"]`)?.checked])); const r = await post('create', { name: $('#name').value, turn: +$('#turn').value, rules }).catch((e) => toast(e.message)); if (r) { localStorage.setItem('p10name', $('#name').value); enter(r); } },
+  async create() { const rules = Object.fromEntries(RULES.map(([k]) => [k, !!$(`[data-r="${k}"]`)?.checked])); const r = await post('create', { name: $('#name').value, turn: +$('#turn').value, target: +$('#target').value, rules }).catch((e) => toast(e.message)); if (r) { localStorage.setItem('p10name', $('#name').value); enter(r); } },
   async join() { const r = await post('join', { name: $('#name').value, code: $('#code').value }).catch((e) => toast(e.message)); if (r) { localStorage.setItem('p10name', $('#name').value); enter(r); } },
   home() { history.replaceState(null, '', '/'); location.reload(); },
   async copy() {

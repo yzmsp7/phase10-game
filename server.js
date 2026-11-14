@@ -13,10 +13,10 @@ const RULES = ['catchUp', 'first', 'rv', 'sh', 'xn', 'xc']; // 建房時可開�
 const rooms = new Map();
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
 
-function newRoom(turn, rules) {
+function newRoom(turn, rules, target) {
   let code;
   do { code = Array.from({ length: 4 }, () => CODE_CHARS[randomInt(CODE_CHARS.length)]).join(''); } while (rooms.has(code));
-  const r = { code, players: [], host: null, settings: { target: 10, turn, rules }, game: null, rx: [], clients: new Map(), touched: Date.now(), timer: null, dl: null };
+  const r = { code, players: [], host: null, settings: { target, turn, rules }, game: null, rx: [], clients: new Map(), touched: Date.now(), timer: null, dl: null };
   rooms.set(code, r);
   return r;
 }
@@ -171,7 +171,9 @@ const server = http.createServer(async (req, res) => {
           const turn = b.turn ?? TURN_SEC;
           if (!Number.isInteger(turn) || turn < 10 || turn > 600) G.err('每回合秒數要在 10–600 之間');
           if (b.rules != null && (typeof b.rules !== 'object' || Array.isArray(b.rules))) G.err('規則格式不對');
-          room = newRoom(turn, Object.fromEntries(RULES.map((k) => [k, b.rules?.[k] === true])));
+          const target = b.target ?? 10;
+          if (!Number.isInteger(target) || target < 1 || target > 10) G.err('目標階段要在 1–10 之間');
+          room = newRoom(turn, Object.fromEntries(RULES.map((k) => [k, b.rules?.[k] === true])), target);
         } else {
           room = rooms.get(String(b.code ?? '').toUpperCase());
           if (!room) G.err('找不到這個房間');

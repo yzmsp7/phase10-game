@@ -682,6 +682,11 @@ for (let np = 2; np <= 6; np++) {
   { // 建房選規則：只認白名單內、值為 true 的；格式不對直接拒絕
     assert.equal((await post('create', { name: 'x', rules: 'all' })).status, 400);
     assert.equal((await post('create', { name: 'x', rules: [] })).status, 400);
+    // 建房時選目標階段：不帶 = 10；1–10 的整數才接受
+    for (const bad of [0, 11, 2.5, '3']) assert.equal((await post('create', { name: 'x', target: bad })).status, 400, `目標 ${bad} 不合法`);
+    const t3 = (await post('create', { name: 'T', target: 3 })).json;
+    assert.equal(server.rooms.get(t3.code).settings.target, 3, '建房時指定目標階段');
+    assert.equal(server.rooms.get((await post('create', { name: 'D' })).json.code).settings.target, 10, '沒指定 = 10');
     const r = (await post('create', { name: 'R', rules: { rv: true, sh: 'yes', hack: true, catchUp: true } })).json;
     assert.deepEqual(server.rooms.get(r.code).settings.rules, { catchUp: true, first: false, rv: true, sh: false, xn: false, xc: false });
     const g = (await post('join', { code: r.code, name: 'S' })).json;
