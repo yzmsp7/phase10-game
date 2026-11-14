@@ -23,16 +23,20 @@ function shuffle(a) {
   return a;
 }
 
-// t: n=數字牌 w=百搭 s=跳過
-function deck() {
+// t: n=數字牌 w=百搭 s=跳過；房間開了才有的特殊牌（各 4 張）：rv=迴轉 sh=換位子 xn=指定數字交換 xc=指定顏色交換
+const SPECIAL = ['rv', 'sh', 'xn', 'xc'];
+const CN = { R: '紅', B: '藍', G: '綠', Y: '黃' };
+const playable = (c) => c.t === 'n' || c.t === 'w'; // 只有數字牌和百搭能用在階段／接牌／從棄牌堆撿
+function deck(rules = {}) {
   const d = []; let id = 0;
   for (let k = 0; k < 2; k++) for (const c of COLORS) for (let n = 1; n <= 12; n++) d.push({ id: id++, t: 'n', c, n });
   for (let i = 0; i < 8; i++) d.push({ id: id++, t: 'w' });
   for (let i = 0; i < 4; i++) d.push({ id: id++, t: 's' });
+  for (const t of SPECIAL) if (rules[t]) for (let i = 0; i < 4; i++) d.push({ id: id++, t });
   return d;
 }
 
-const pts = (c) => (c.t === 'w' ? 25 : c.t === 's' ? 15 : c.n >= 10 ? 10 : 5);
+const pts = (c) => (c.t === 'n' ? (c.n >= 10 ? 10 : 5) : c.t === 's' ? 15 : 25); // 百搭和特殊牌都是 25
 
 // 驗證並排好一組牌。順子：百搭補洞；多餘的百搭預設往大的一端延伸，玩家可用 lo 指定順子的起點。
 // ponytail: 只能指定起點（整段平移），不能把多張百搭拆成一半在前一半在後以外的任意位置；補洞的百搭位置本來就固定。
@@ -40,7 +44,7 @@ const pts = (c) => (c.t === 'w' ? 25 : c.t === 's' ? 15 : c.n >= 10 ? 10 : 5);
 function build(type, size, cards, lo) {
   if (cards.length < size) err(`這組至少需要 ${size} 張牌`);
   size = cards.length;
-  if (cards.some((c) => c.t === 's')) err('跳過牌不能用在階段中');
+  if (!cards.every(playable)) err('跳過牌和特殊牌不能用在階段中');
   const nat = cards.filter((c) => c.t === 'n');
   if (!nat.length) err('每組至少要有一張數字牌');
   if (type === 'set') {
@@ -93,14 +97,15 @@ function hit(grp, cards, end) {
 
 const log = (g, m) => { g.log.push(m); if (g.log.length > 50) g.log.shift(); };
 const nextIn = (g, i) => {
-  for (let k = 1; k <= g.players.length; k++) { const j = (i + k) % g.players.length; if (g.players[j].in) return j; }
+  const n = g.players.length; // g.dir：1 順向、-1 反向（迴轉牌）
+  for (let k = 1; k <= n; k++) { const j = (((i + k * g.dir) % n) + n) % n; if (g.players[j].in) return j; }
   return i;
 };
 const lowest = (ps) => { const m = Math.min(...ps.map((p) => p.score)); return ps.filter((p) => p.score === m); };
 
-function create(players, { target }) {
+function create(players, { target, rules = {} }) {
   const g = {
-    target, round: 0, dealer: randomInt(players.length), turn: 0, stage: 'draw', status: 'play',
+    target, rules, dir: 1, first: null, ev: null, round: 0, dealer: randomInt(players.length), turn: 0, stage: 'draw', status: 'play',
     players: players.map(({ id, name }) => ({ id, name, phase: 1, score: 0, hand: [], laid: false, skip: 0, in: true })),
     draw: [], disc: [], groups: [], log: [], summary: null, winners: null, playoff: null,
   };
@@ -111,17 +116,22 @@ function create(players, { target }) {
 function startRound(g) {
   g.round++;
   if (g.round > 1) g.dealer = (g.dealer + 1) % g.players.length;
-  const d = shuffle(deck());
+  const d = shuffle(deck(g.rules));
+  g.dir = 1; g.first = null;
+  for (const p of g.players) p.in = !p.left && (!g.playoff || g.playoff.includes(p.id)); // 中途退出的人不會再被發牌
+  const top = Math.max(...g.players.filter((p) => p.in).map((p) => p.phase)), more = [];
   for (const p of g.players) {
-    p.in = !p.left && (!g.playoff || g.playoff.includes(p.id)); // 中途退出的人不會再被發牌
     p.laid = false; p.skip = 0; p.pick = null; p.hist = []; // hist：本回合每手的 { from, card?, disc }，點玩家卡可看
-    p.hand = p.in ? d.splice(0, HAND) : [];
+    const extra = p.in && g.rules.catchUp && top - p.phase >= 2 ? 1 : 0; // 落後最高階段 2 階以上多發一張
+    p.hand = p.in ? d.splice(0, HAND + extra) : [];
+    if (extra) more.push(p.name);
   }
   g.disc = [d.pop()];
   g.draw = d;
   g.groups = []; g.status = 'play'; g.summary = null;
   g.turn = nextIn(g, g.dealer);
   log(g, g.playoff ? `加賽開始（第 ${g.round} 回合）` : `第 ${g.round} 回合開始`);
+  if (more.length) log(g, `${more.join('、')} 落後兩階段以上，多發一張牌`);
   if (g.disc[0].t === 's') { g.players[g.turn].skip = 1; log(g, '翻開的第一張是跳過牌'); }
   begin(g);
 }
@@ -140,9 +150,9 @@ function endRound(g, out) {
   const live = g.players.filter((p) => p.in);
   const done = live.filter((p) => p.laid && p.phase >= g.target);
   const rows = live.map((p) => {
-    const gain = p === w ? 0 : p.hand.reduce((s, c) => s + pts(c), 0);
+    const gain = (p === w ? 0 : p.hand.reduce((s, c) => s + pts(c), 0)) - (g.first === p.id ? 10 : 0); // 先放下 −10（可能變負分）
     p.score += gain;
-    return { id: p.id, name: p.name, phase: p.phase, laid: p.laid, gain, score: p.score, hand: [...p.hand] };
+    return { id: p.id, name: p.name, phase: p.phase, laid: p.laid, gain, first: g.first === p.id, score: p.score, hand: [...p.hand] };
   });
   live.forEach((p) => { if (p.laid) p.phase++; }); // 只有完成階段的人才進下一階段
   let winners = null, note = '';
@@ -182,7 +192,7 @@ function act(g, pid, a) {
       if (g.stage !== 'draw') err('這回合已經抽過牌了');
       if (a.from === 'discard') {
         const top = g.disc.at(-1);
-        if (!top || top.t === 's') err('跳過牌不能撿');
+        if (!top || !playable(top)) err('跳過牌和特殊牌不能撿');
         p.hand.push(g.disc.pop());
         p.pick = { from: 'discard', card: p.hand.at(-1) }; // 棄牌堆頂本來就公開，所以連牌面一起給別人看
       } else {
@@ -204,6 +214,7 @@ function act(g, pid, a) {
       let k = 0;
       const built = req.map(([t, s], i) => build(t, s, cards.slice(k, (k += a.groups[i].length)), a.los?.[i]));
       drop(cards);
+      if (g.rules.first && !g.groups.length) g.first = p.id; // 桌上還沒有任何組合 = 第一個放下的人（他中途離開會被清成 null，不會轉給別人）
       built.forEach((b) => g.groups.push({ ...b, owner: p.id }));
       p.laid = true;
       log(g, `${p.name} 放下了第 ${p.phase} 階段`);
@@ -225,14 +236,36 @@ function act(g, pid, a) {
     case 'discard': {
       needAct();
       const [c] = take(p, [a.card]);
-      let target = null;
-      if (c.t === 's' && p.hand.length > 1) {
-        const ok = g.players.filter((q) => q.in && q !== p && q.skip === 0);
+      const live = p.hand.length > 1; // 最後一張牌直接出完，效果不觸發
+      const others = g.players.filter((q) => q.in && q !== p);
+      let target = null, give = null, pool = [];
+      if (live && c.t === 's') {
+        const ok = others.filter((q) => q.skip === 0);
         if (ok.length) target = ok.find((q) => q.id === a.target) || err('請選擇要跳過的玩家');
       }
+      if (live && (c.t === 'xn' || c.t === 'xc')) { // 全部驗證完才動手，錯了不會留下半套狀態
+        const num = c.t === 'xn';
+        target = others.find((q) => q.id === a.target) || err('請選擇要交換的玩家');
+        give = p.hand.find((x) => x.id === a.give && x !== c) || err('請選一張要換出去的牌');
+        if (num ? !(Number.isInteger(a.num) && a.num >= 1 && a.num <= 12) : !COLORS.includes(a.color)) err(num ? '請指定數字 1–12' : '請指定顏色');
+        pool = target.hand.filter((x) => x.t === 'n' && (num ? x.n === a.num : x.c === a.color)); // 百搭和特殊牌換不走
+      }
       drop([c]); g.disc.push(c); const h = p.hist.at(-1); if (h) h.disc = c; // 測試會跳過 draw 直接設 stage，所以要判斷
-      if (target) { target.skip = 1; g.skipEv = { by: p.id, to: target.id, no: g.turnNo }; log(g,`${p.name} 打出跳過牌，${target.name} 將少一回合`); }
       if (!p.hand.length) return endRound(g, g.turn);
+      const ev = (o) => { g.ev = { kind: c.t, by: p.id, no: g.turnNo, ...o }; }; // no 每回合都不同，前端靠它判斷是不是新事件
+      if (target && c.t === 's') { target.skip = 1; ev({ to: target.id }); log(g, `${p.name} 打出跳過牌，${target.name} 將少一回合`); }
+      if (c.t === 'rv') { g.dir = -g.dir; ev(); log(g, `${p.name} 打出迴轉牌，出牌方向反過來了`); }
+      if (c.t === 'sh') { // 座位 = g.players 的順序，turn / dealer 是索引，洗完要用人找回來；手牌掛在人身上，自然跟著走
+        const dealer = g.players[g.dealer];
+        shuffle(g.players); g.turn = g.players.indexOf(p); g.dealer = g.players.indexOf(dealer);
+        ev(); log(g, `${p.name} 打出換位子牌，座位被打亂了`);
+      }
+      if (give) {
+        const got = pool.length ? pool[randomInt(pool.length)] : null, want = c.t === 'xn' ? a.num : a.color;
+        if (got) { target.hand[target.hand.indexOf(got)] = give; p.hand[p.hand.indexOf(give)] = got; }
+        ev({ to: target.id, want, ok: !!got, give: got && give, got }); // give / got 只有當事兩人看得到（見 view）；got 為 null = 對方沒有，落空
+        log(g, `${p.name} 指定 ${target.name} 的${c.t === 'xn' ? `數字 ${want}` : `${CN[want]}色`}，${got ? '交換成功' : '對方沒有，落空'}`);
+      }
       p.skip = 0;
       g.turn = nextIn(g, g.turn);
       return begin(g);
@@ -251,6 +284,7 @@ function leave(g, pid) {
   const wasTurn = g.status === 'play' && g.turn === i;
   g.disc.unshift(...p.hand);
   p.hand = []; p.in = false; p.left = true; p.skip = 0; p.pick = null; p.hist = [];
+  if (g.first === pid) g.first = null; // 先放下的人中途離開 → −10 作廢
   log(g, `${p.name} 離開了遊戲`);
   const left = g.players.filter((q) => q.in).length;
   if (g.playoff) g.playoff = g.playoff.filter((id) => id !== pid);
@@ -264,8 +298,10 @@ function autoPlay(g, pid) {
   if (g.status !== 'play' || p.id !== pid) return;
   if (g.stage === 'draw') act(g, pid, { type: 'draw', from: 'pile' });
   const c = p.hand.filter((x) => x.t === 'n').sort((a, b) => pts(b) - pts(a))[0] || p.hand[0];
-  const t = g.players.find((q) => q.in && q !== p && q.skip === 0);
-  act(g, pid, { type: 'discard', card: c.id, target: t && t.id });
+  const others = g.players.filter((q) => q.in && q !== p);
+  const t = others.find((q) => q.skip === 0) || others[0];
+  // 手上只剩特殊牌時可能得棄到需要選擇的牌：一併給預設值（交換牌：隨便指定 1／紅色，換出手上另一張）
+  act(g, pid, { type: 'discard', card: c.id, target: t?.id, num: 1, color: 'R', give: p.hand.find((x) => x !== c)?.id });
 }
 
 function view(g, pid) {
@@ -276,7 +312,8 @@ function view(g, pid) {
     drawCount: g.draw.length, top: g.disc.at(-1) || null,
     players: g.players.map((p) => ({ id: p.id, name: p.name, phase: p.phase, score: p.score, laid: p.laid, n: p.hand.length, skip: p.skip, in: p.in, left: !!p.left, pick: p.pick, hist: p.hist })),
     groups: g.groups, hand: me.hand, phases: PHASES, log: g.log.slice(-8),
-    summary: g.summary, winners: g.winners, skipEv: g.skipEv || null, // 最近一次「誰跳過誰」；no 每次出牌都不同，前端靠它判斷是不是新事件
+    summary: g.summary, winners: g.winners, rules: g.rules, dir: g.dir, first: g.first,
+    ev: g.ev && (g.ev.by === pid || g.ev.to === pid ? g.ev : { ...g.ev, give: undefined, got: undefined }), // 最近一次特殊牌效果；換到哪張牌只給當事兩人看
   };
 }
 

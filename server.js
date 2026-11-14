@@ -9,13 +9,14 @@ const G = require('./game');
 
 const MAX = 6, MIN = 2, TURN_SEC = 60; // 每回合預設秒數；建房時可改（10–600），手機切去 LINE 回訊息再回來要來得及，所以下限不能太短
 const EMOJI = ['😮', '😡', '😂', '👏', '😭', '😎', '🙏', '😴']; // 白名單；index.html 有同一份，改的時候兩邊一起改
+const RULES = ['catchUp', 'first', 'rv', 'sh', 'xn', 'xc']; // 建房時可開的特殊規則（見 game.js），全部預設關 = 標準 Phase 10；index.html 有同一份鍵名，test.js 會比對
 const rooms = new Map();
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
 
-function newRoom(turn) {
+function newRoom(turn, rules) {
   let code;
   do { code = Array.from({ length: 4 }, () => CODE_CHARS[randomInt(CODE_CHARS.length)]).join(''); } while (rooms.has(code));
-  const r = { code, players: [], host: null, settings: { target: 10, turn }, game: null, rx: [], clients: new Map(), touched: Date.now(), timer: null, dl: null };
+  const r = { code, players: [], host: null, settings: { target: 10, turn, rules }, game: null, rx: [], clients: new Map(), touched: Date.now(), timer: null, dl: null };
   rooms.set(code, r);
   return r;
 }
@@ -169,7 +170,8 @@ const server = http.createServer(async (req, res) => {
         if (name === 'create') {
           const turn = b.turn ?? TURN_SEC;
           if (!Number.isInteger(turn) || turn < 10 || turn > 600) G.err('每回合秒數要在 10–600 之間');
-          room = newRoom(turn);
+          if (b.rules != null && (typeof b.rules !== 'object' || Array.isArray(b.rules))) G.err('規則格式不對');
+          room = newRoom(turn, Object.fromEntries(RULES.map((k) => [k, b.rules?.[k] === true])));
         } else {
           room = rooms.get(String(b.code ?? '').toUpperCase());
           if (!room) G.err('找不到這個房間');

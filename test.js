@@ -180,8 +180,8 @@ const plain = (p) => p.hand.find((x) => x.t !== 's').id;
   G.act(g, a.id, { type: 'discard', card: a.hand.find((x) => x.t === 's').id, target: b.id });
   assert.equal(g.players[g.turn], c, 'b 被跳過');
   assert.equal(b.skip, 2);
-  const ev = G.view(g, a.id).skipEv;
-  assert.deepEqual([ev.by, ev.to], [a.id, b.id], 'view 帶出誰跳過誰');
+  const ev = G.view(g, a.id).ev;
+  assert.deepEqual([ev.kind, ev.by, ev.to], ['s', a.id, b.id], 'view 帶出誰跳過誰');
   // 跳過牌不能被撿
   throws(() => G.act(g, c.id, { type: 'draw', from: 'discard' }), /不能撿/);
   G.act(g, c.id, { type: 'draw', from: 'pile' });
@@ -366,7 +366,7 @@ function bot(g, p) {
   const tryAct = (a) => { try { G.act(g, p.id, a); return true; } catch (e) { if (!e.user) throw e; return false; } };
   // 抽牌
   const top = g.disc.at(-1);
-  if (top && top.t !== 's' && Math.random() < 0.3) tryAct({ type: 'draw', from: 'discard' });
+  if (top && (top.t === 'n' || top.t === 'w') && Math.random() < 0.3) tryAct({ type: 'draw', from: 'discard' });
   else tryAct({ type: 'draw', from: 'pile' });
   // 暴力嘗試放階段：隨機洗牌湊
   if (!p.laid) {
@@ -388,20 +388,23 @@ function bot(g, p) {
   }
   if (g.status !== 'play' || g.players[g.turn] !== p) return;
   const c = p.hand[Math.floor(Math.random() * p.hand.length)];
-  const t = g.players.find((q) => q.in && q !== p && q.skip === 0);
-  tryAct({ type: 'discard', card: c.id, target: t && t.id }) || tryAct({ type: 'discard', card: c.id });
+  const t = g.players.find((q) => q.in && q !== p && q.skip === 0), o = g.players.find((q) => q.in && q !== p);
+  const give = p.hand.find((x) => x !== c);
+  tryAct({ type: 'discard', card: c.id, target: t && t.id, give: give && give.id, num: 1 + Math.floor(Math.random() * 12), color: 'RBGY'[Math.floor(Math.random() * 4)] })
+    || tryAct({ type: 'discard', card: c.id, target: o && o.id, give: give && give.id, num: 1 + Math.floor(Math.random() * 12), color: 'RBGY'[Math.floor(Math.random() * 4)] });
   void my;
 }
 function simulate(nPlayers, opts) {
-  const g = rig(nPlayers, opts);
+  const g = opts.rules ? rigR(nPlayers, opts.rules, { target: opts.target }) : rig(nPlayers, opts);
+  const size = G.deck(opts.rules).length;
   let steps = 0;
   while (g.status !== 'over') {
     assert.ok(++steps < 60000, `${nPlayers} 人局無法結束（卡死）`);
     if (g.status === 'roundEnd') { G.act(g, g.players[0].id, { type: 'next' }); continue; }
     // 不變量：牌數守恆（每回合 108 = 手牌 + 組合 + 牌堆 + 棄牌）
     const total = g.players.reduce((a, p) => a + p.hand.length, 0) + g.groups.reduce((a, x) => a + x.cards.length, 0) + g.draw.length + g.disc.length;
-    assert.equal(total, 108);
-    assert.equal(new Set([].concat(...g.players.map((p) => p.hand.map((c) => c.id)), ...g.groups.map((x) => x.cards.map((c) => c.id)), g.draw.map((c) => c.id), g.disc.map((c) => c.id))).size, 108, '不得有重複牌');
+    assert.equal(total, size);
+    assert.equal(new Set([].concat(...g.players.map((p) => p.hand.map((c) => c.id)), ...g.groups.map((x) => x.cards.map((c) => c.id)), g.draw.map((c) => c.id), g.disc.map((c) => c.id))).size, size, '不得有重複牌');
     bot(g, g.players[g.turn]);
   }
   assert.ok(g.winners.length >= 1);
@@ -410,6 +413,185 @@ function simulate(nPlayers, opts) {
 for (let np = 2; np <= 6; np++) {
   const phasesGame = simulate(np, { target: np >= 5 ? 3 : 4 });
   assert.ok(phasesGame.round >= 3);
+}
+
+
+// --- 特殊規則（建房時可選；預設全關 = 標準規則）---
+const ALL = { catchUp: true, first: true, rv: true, sh: true, xn: true, xc: true };
+const sp = (t) => ({ id: Math.random(), t });
+const total = (g) => g.players.reduce((a, p) => a + p.hand.length, 0) + g.groups.reduce((a, x) => a + x.cards.length, 0) + g.draw.length + g.disc.length;
+function rigR(nPlayers, rules, opts = {}) {
+  const ps = [...Array(nPlayers)].map((_, i) => ({ id: 'p' + i, name: 'P' + i }));
+  for (;;) { const g = G.create(ps, { target: 10, ...opts, rules }); if (g.disc[0].t === 'n') return g; }
+}
+{
+  // 牌組：沒開 = 108；開哪種就多 4 張那種；特殊牌每張 25 分
+  assert.equal(G.deck().length, 108);
+  assert.equal(G.deck(ALL).length, 124);
+  assert.equal(G.deck({ rv: true }).filter((c) => c.t === 'rv').length, 4);
+  assert.equal(G.deck({ rv: true }).length, 112);
+  ['rv', 'sh', 'xn', 'xc'].forEach((t) => assert.equal(G.pts(sp(t)), 25));
+  // 特殊牌不能放階段、不能接牌、不能從棄牌堆撿
+  throws(() => G.build('set', 3, [n(7), n(7), sp('rv')]), /特殊牌/);
+  const g = rigR(2, ALL);
+  const a = g.players[g.turn];
+  g.disc.push(sp('xn'));
+  throws(() => G.act(g, a.id, { type: 'draw', from: 'discard' }), /不能撿/);
+}
+{
+  // 落後 2 階段以上多發一張；跟最高階段比；沒開規則就不發
+  const ps = [0, 1, 2].map((i) => ({ id: 'p' + i, name: 'P' + i }));
+  const g = G.create(ps, { target: 10, rules: { catchUp: true } });
+  g.players[0].phase = 5; g.players[1].phase = 4; g.players[2].phase = 3;
+  g.status = 'roundEnd'; G.act(g, 'p0', { type: 'next' });
+  assert.deepEqual(g.players.map((p) => p.hand.length), [10, 10, 11], '差 1 不算，差 2 多一張');
+  assert.equal(total(g), 108);
+  g.players[2].phase = 1; g.status = 'roundEnd'; G.act(g, 'p0', { type: 'next' });
+  assert.equal(g.players[2].hand.length, 11, '差再多也只多一張');
+  const off = G.create(ps, { target: 10 });
+  off.players[2].phase = 1; off.players[0].phase = 9; off.status = 'roundEnd'; G.act(off, 'p0', { type: 'next' });
+  assert.equal(off.players[2].hand.length, 10, '沒開規則不多發');
+  // 離開的人不影響最高階段
+  const lv = G.create(ps, { target: 10, rules: { catchUp: true } });
+  lv.players[0].phase = 9; lv.players[1].phase = 3; lv.players[2].phase = 3;
+  G.leave(lv, 'p0'); lv.status = 'roundEnd'; G.act(lv, 'p1', { type: 'next' });
+  assert.deepEqual([lv.players[1].hand.length, lv.players[2].hand.length], [10, 10], '最高階段只算還在場的人');
+}
+{
+  // 先放下 −10：只有「第一個」放下的人；後面放下的不算；出完牌的 0 分照樣 −10（變負分）；沒開規則不扣
+  const ids = (xs) => xs.map((x) => x.id);
+  const lay = (g, p) => {
+    p.hand = [n(5), n(5, 'B'), n(5, 'G'), n(9), n(9, 'B'), n(9, 'G'), n(1), n(2)];
+    g.turn = g.players.indexOf(p); g.stage = 'act';
+    G.act(g, p.id, { type: 'lay', groups: [ids(p.hand.slice(0, 3)), ids(p.hand.slice(3, 6))] });
+  };
+  const play = (rules) => {
+    const g = rigR(3, rules);
+    const [a, b, c] = g.players;
+    lay(g, a); lay(g, b); // a 先、b 後
+    c.hand = [n(3)];
+    a.hand = [n(1)]; b.hand = [n(4), n(4, 'B')];
+    g.turn = g.players.indexOf(a); g.stage = 'act';
+    G.act(g, a.id, { type: 'discard', card: a.hand[0].id }); // a 出完牌
+    const gain = Object.fromEntries(g.summary.rows.map((r) => [r.id, r.gain]));
+    return { g, gain, a, b, c };
+  };
+  let { g, gain, a, b, c } = play({ first: true });
+  assert.equal(g.first, a.id);
+  assert.deepEqual([gain[a.id], gain[b.id], gain[c.id]], [-10, 5 + 5, 5], 'a 先放下又出完牌 = −10；b 後放下不算');
+  assert.equal(a.score, -10, '分數可以是負的');
+  assert.equal(g.summary.rows.find((r) => r.id === a.id).first, true);
+  ({ gain, a, b, c } = play({}));
+  assert.deepEqual([gain[a.id], gain[b.id], gain[c.id]], [0, 10, 5], '沒開規則不扣');
+  // 先放下的人中途離開 → 作廢，不轉給別人
+  g = rigR(3, { first: true });
+  lay(g, g.players[0]);
+  assert.equal(g.first, g.players[0].id);
+  G.leave(g, g.players[0].id);
+  assert.equal(g.first, null, '先放下的人離開 → −10 作廢');
+  lay(g, g.players[1]);
+  assert.equal(g.first, null, '桌上已有組合（他留下的），後面的人拿不到');
+  // 新回合重設
+  g.status = 'roundEnd'; G.act(g, g.players[1].id, { type: 'next' });
+  assert.equal(g.first, null);
+}
+{
+  // 迴轉：方向反過來；2 人局無差別；下一回合恢復
+  const g = rigR(4, ALL);
+  const i = g.turn, a = g.players[i];
+  a.hand = [sp('rv'), n(1), n(2)];
+  G.act(g, a.id, { type: 'draw', from: 'pile' });
+  G.act(g, a.id, { type: 'discard', card: a.hand.find((x) => x.t === 'rv').id });
+  assert.equal(g.dir, -1);
+  assert.equal(g.turn, (i + 3) % 4, '改成往回走');
+  assert.equal(G.view(g, a.id).ev.kind, 'rv');
+  const g2 = rigR(2, ALL), b = g2.players[g2.turn];
+  b.hand = [sp('rv'), n(1), n(2)];
+  G.act(g2, b.id, { type: 'draw', from: 'pile' });
+  G.act(g2, b.id, { type: 'discard', card: b.hand.find((x) => x.t === 'rv').id });
+  assert.notEqual(g2.players[g2.turn], b, '2 人局迴轉照樣換人');
+  g.status = 'roundEnd'; G.act(g, a.id, { type: 'next' });
+  assert.equal(g.dir, 1, '新回合方向重設');
+}
+{
+  // 換位子：手牌跟著人走，輪次接著位子打亂前的下一位，莊家還是同一個人
+  let moved = false;
+  for (let t = 0; t < 30 && !moved; t++) {
+    const g = rigR(5, ALL);
+    const a = g.players[g.turn], dealer = g.players[g.dealer];
+    a.hand = [sp('sh'), n(1), n(2)];
+    const all = total(g); // 自訂手牌後的總數（被換掉的牌不見了，所以不能寫死 124）；這裡只驗證「換位子前後牌數不變」
+    const hands = new Map(g.players.map((p) => [p, p.hand.map((c) => c.id).join()]));
+    const before = g.players.map((p) => p.id).join();
+    G.act(g, a.id, { type: 'draw', from: 'pile' });
+    hands.set(a, null);
+    const ids = g.players.map((p) => p.id);
+    G.act(g, a.id, { type: 'discard', card: a.hand.find((x) => x.t === 'sh').id });
+    assert.deepEqual([...g.players.map((p) => p.id)].sort(), [...ids].sort(), '人不增不減');
+    assert.equal(g.players[g.dealer], dealer, '莊家還是同一個人');
+    assert.equal(g.players[(g.turn - 1 + 5) % 5], a, '下一位 = 他新座位的下家');
+    for (const [p, h] of hands) if (h) assert.equal(p.hand.map((c) => c.id).join(), h, '手牌跟著人走');
+    assert.equal(total(g), all, '換位子不增減牌');
+    moved = g.players.map((p) => p.id).join() !== before;
+  }
+  assert.ok(moved, '座位應該被打亂');
+}
+{
+  // 交換牌：結果前先選好要換出去的牌；落空時什麼都不換；只換得到數字牌
+  const setup = (t) => {
+    const g = rigR(3, ALL);
+    const [a, b] = [g.players[g.turn], g.players[(g.turn + 1) % 3]];
+    a.hand = [sp(t), n(1), n(2)];
+    b.hand = [n(7), n(7, 'B'), w(), s(), n(9, 'G')];
+    G.act(g, a.id, { type: 'draw', from: 'pile' });
+    return { g, a, b, x: a.hand.find((c) => c.t === t), give: a.hand.find((c) => c.t === 'n' && c.n === 1) };
+  };
+  let { g, a, b, x, give } = setup('xn');
+  const bIds = b.hand.map((c) => c.id), aN = a.hand.length;
+  throws(() => G.act(g, a.id, { type: 'discard', card: x.id, give: give.id, num: 7 }), /交換的玩家/);
+  throws(() => G.act(g, a.id, { type: 'discard', card: x.id, target: b.id, num: 7 }), /換出去/);
+  throws(() => G.act(g, a.id, { type: 'discard', card: x.id, target: b.id, give: x.id, num: 7 }), /換出去/, '不能拿剛打出的牌來換');
+  throws(() => G.act(g, a.id, { type: 'discard', card: x.id, target: a.id, give: give.id, num: 7 }), /交換的玩家/, '不能選自己');
+  throws(() => G.act(g, a.id, { type: 'discard', card: x.id, target: b.id, give: give.id, num: 13 }), /1–12/);
+  assert.equal(g.turn, g.players.indexOf(a), '驗證失敗不會動到狀態');
+  G.act(g, a.id, { type: 'discard', card: x.id, target: b.id, give: give.id, num: 7 });
+  assert.ok(b.hand.some((c) => c.id === give.id), '對方拿到我換出去的牌');
+  const got = a.hand.find((c) => !bIds.includes(c.id) === false && c.t === 'n' && c.n === 7);
+  assert.ok(got, '我拿到對方的 7');
+  assert.equal(a.hand.length, aN - 1);
+  assert.equal(b.hand.length, 5, '雙方張數不變');
+  assert.equal(G.view(g, a.id).ev.got.n, 7, '當事人看得到換到什麼');
+  assert.equal(G.view(g, b.id).ev.give.id, give.id);
+  const spy = G.view(g, g.players.find((p) => p !== a && p !== b).id).ev;
+  assert.deepEqual([spy.ok, spy.give, spy.got], [true, undefined, undefined], '旁觀者只知道成功，不知道是哪張');
+  // 對方沒有該數字 → 落空：牌留在原位，這張牌仍然打出去、換下一位
+  ({ g, a, b, x, give } = setup('xn'));
+  const bBefore = b.hand.map((c) => c.id).join();
+  G.act(g, a.id, { type: 'discard', card: x.id, target: b.id, give: give.id, num: 3 });
+  assert.equal(b.hand.map((c) => c.id).join(), bBefore, '落空不換');
+  assert.ok(a.hand.some((c) => c.id === give.id));
+  assert.equal(G.view(g, a.id).ev.ok, false);
+  assert.notEqual(g.players[g.turn], a);
+  // 百搭、跳過牌指定不到：指定數字只會換到數字牌
+  ({ g, a, b, x, give } = setup('xc'));
+  throws(() => G.act(g, a.id, { type: 'discard', card: x.id, target: b.id, give: give.id, color: 'X' }), /顏色/);
+  G.act(g, a.id, { type: 'discard', card: x.id, target: b.id, give: give.id, color: 'G' });
+  assert.ok(a.hand.some((c) => c.t === 'n' && c.c === 'G' && c.n === 9), '指定顏色換到綠 9');
+  // 最後一張牌是交換牌：直接出完，不需要指定
+  ({ g, a } = setup('xn'));
+  a.laid = true; a.hand = [sp('xn')];
+  G.act(g, a.id, { type: 'discard', card: a.hand[0].id });
+  assert.equal(g.status, 'roundEnd');
+  // 逾時代打：手上全是特殊牌也不會卡住
+  ({ g, a } = setup('xc'));
+  a.hand = [sp('xc'), sp('xn'), sp('sh')];
+  g.stage = 'draw'; G.autoPlay(g, a.id);
+  assert.notEqual(g.players[g.turn], a, '代打能處理需要選擇的特殊牌');
+}
+// 隨機整局：原有的特殊規則（落後補牌、先放先贏、迴轉、換位子、兩種交換）同時開，不變量照常成立
+for (let np = 2; np <= 6; np++) {
+  const g = simulate(np, { target: np >= 5 ? 3 : 4, rules: ALL });
+  assert.ok(g.round >= 3);
 }
 
 // --- HTTP 冒煙測試 ---
@@ -468,6 +650,7 @@ for (let np = 2; np <= 6; np++) {
   assert.ok(moved, '位子應該被打亂');
   assert.equal((await post('start', host)).status, 200);
   assert.equal((await post('shuffle', host)).status, 400, '遊戲開始後不能排位子');
+  assert.deepEqual(Object.values(v.settings.rules), Array(6).fill(false), '沒指定規則 = 全關');
   v = await sseOnce(guests[2]);
   assert.equal(v.game.hand.length, 10, '玩家只看到自己的 10 張牌');
   assert.ok(v.game.players.every((p) => p.n === 10));
@@ -487,9 +670,25 @@ for (let np = 2; np <= 6; np++) {
   v = await sseOnce(guests[1]);
   assert.deepEqual(v.rx.map((r) => [r.seq, r.e]), [[1, '😮'], [2, '😡']]);
   assert.equal((await post('react', { ...guests[1], e: '😴' })).status, 200, '睡覺表情');
+  // 規則鍵名：server 與前端要一致（用簡單的逐行比對，index.html 的 RULES 每條規則一行）
+  const read = (f) => require('node:fs').readFileSync(require('node:path').join(__dirname, f), 'utf8');
+  const serverKeys = read('server.js').match(/const RULES = \[(.*?)\];/)[1].match(/\w+/g);
+  const pageBlock = read('index.html').split('const RULES = [')[1].split('\n];')[0];
+  const pageKeys = pageBlock.split('\n').map((l) => l.match(/^\s*\['(\w+)'/)?.[1]).filter(Boolean);
+  assert.deepEqual(pageKeys, serverKeys, 'server 與前端的規則鍵名要一致');
   const wl = (f) => require('node:fs').readFileSync(require('node:path').join(__dirname, f), 'utf8').match(/const EMOJI = (\[.*?\]);/)[1];
   assert.equal(wl('server.js'), wl('index.html'), 'server 與前端的表情白名單要一致');
   const room = server.rooms.get(host.code);
+  { // 建房選規則：只認白名單內、值為 true 的；格式不對直接拒絕
+    assert.equal((await post('create', { name: 'x', rules: 'all' })).status, 400);
+    assert.equal((await post('create', { name: 'x', rules: [] })).status, 400);
+    const r = (await post('create', { name: 'R', rules: { rv: true, sh: 'yes', hack: true, catchUp: true } })).json;
+    assert.deepEqual(server.rooms.get(r.code).settings.rules, { catchUp: true, first: false, rv: true, sh: false, xn: false, xc: false });
+    const g = (await post('join', { code: r.code, name: 'S' })).json;
+    await post('start', r);
+    assert.equal(server.rooms.get(r.code).game.draw.length + server.rooms.get(r.code).game.disc.length + 20, 112, '只開迴轉 = 112 張');
+    await post('leave', g);
+  }
   const cardsIn = (g) => g.players.reduce((a, p) => a + p.hand.length, 0) + g.groups.reduce((a, x) => a + x.cards.length, 0) + g.draw.length + g.disc.length;
 
   // 遊戲中途退出：玩家從房間移除，但引擎裡只標記 left；牌守恆；輪到他時輪次換人
