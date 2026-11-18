@@ -25,8 +25,8 @@ button,.card{-webkit-user-select:none;user-select:none}
 .player{background:var(--panel2);border-radius:10px;padding:8px 12px;min-width:120px;flex:1;border:2px solid transparent}
 .player[data-a]{cursor:pointer}.player[data-a]:active{filter:brightness(1.2)}.player:focus-visible{outline:2px solid var(--accent)}.player.turn{border-color:var(--accent)}.player.out{opacity:.4}
 .pick{margin-top:4px;font-size:var(--s1);display:flex;align-items:center;gap:8px}.pick .card{box-shadow:none}
-.player b{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.player small{color:var(--mute)}
-.cnt{font-size:var(--s3);font-weight:600;margin-right:4px}
+.player .nm{display:block;min-width:0;overflow-wrap:anywhere;line-height:1.25}.player small{color:var(--mute)}.player .ft{display:flex;justify-content:space-between;align-items:flex-end;gap:4px;margin-top:4px}
+.cnt{font-size:var(--s3);font-weight:600;line-height:1;white-space:nowrap}.cnt small{font-size:var(--s1);font-weight:400}
 .table{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start}
 .piles{display:flex;gap:12px}
 .pile{text-align:center;font-size:var(--s1);color:var(--mute)}
@@ -41,7 +41,7 @@ button,.card{-webkit-user-select:none;user-select:none}
 .card.sm{width:34px;height:48px}.card.sm b{font-size:var(--s2)}
 .card.R{background:var(--R)}.card.B{background:var(--B)}.card.G{background:var(--G)}.card.Y{background:var(--Y);color:#2a2200}
 .card.W{background:conic-gradient(var(--R),var(--Y),var(--G),var(--B),var(--R))}.card.W b,.card.W i,.card.W u{text-shadow:0 0 4px #000,0 0 2px #000}
-.card.S{background:#222}.card.X{background:#5b3a8c}.card.X b{font-size:var(--s2)}.card.back{background:repeating-linear-gradient(45deg,#7b2d8f,#7b2d8f 6px,#5d2070 6px,#5d2070 12px)}
+.card.S{background:#222}.card.X{background:#5b3a8c}.card.back{background:repeating-linear-gradient(45deg,#7b2d8f,#7b2d8f 6px,#5d2070 6px,#5d2070 12px)}
 .card.new{outline:3px solid #fff;box-shadow:0 0 12px 3px var(--accent)}
 .card.new::after{content:'新';position:absolute;top:-8px;left:-8px;background:var(--accent);color:#2a2200;font-size:var(--s1);line-height:16px;border-radius:8px;padding:0 8px}
 .card.pop{animation:pop .7s cubic-bezier(.2,1.4,.4,1)}
@@ -53,7 +53,7 @@ button,.card{-webkit-user-select:none;user-select:none}
 .tray{position:sticky;bottom:0;z-index:2;margin:auto -16px 0;padding:8px 16px calc(12px + env(safe-area-inset-bottom));background:var(--panel);border-top:1px solid #2f7d5f;box-shadow:0 -8px 16px #0a2a1f99}
 .tray>b{display:block}.tray .hand{padding:12px 0 8px}
 .act button{flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;gap:8px}
-.players{margin:12px 0}.ic{min-width:44px;min-height:44px;padding:0}
+.players{margin:12px 0;align-items:stretch}.ic{min-width:44px;min-height:44px;padding:0}
 .slot.can{outline:2px dashed var(--accent);cursor:pointer}
 .pile .card{width:56px;height:80px}.pile .card b{font-size:var(--s3)}
 @keyframes glow{to{box-shadow:0 0 0 3px var(--accent),0 0 16px 4px var(--accent)}}
@@ -101,7 +101,18 @@ input[readonly]{width:100%}
 .rxp{position:absolute;right:0;top:calc(100% + 8px);z-index:4;display:flex;flex-wrap:wrap;justify-content:center;gap:4px;width:max-content;max-width:calc(100vw - 16px);padding:8px;background:var(--panel);border:1px solid #2f7d5f;border-radius:12px;box-shadow:0 8px 16px #0a2a1f99}
 .rxp button{background:transparent;font-size:var(--s3);min-width:44px;min-height:44px;padding:0}
 @keyframes ban{0%{transform:translate(-50%,-50%) scale(.3) rotate(-8deg);opacity:0}12%{transform:translate(-50%,-50%) scale(1.15);opacity:1}20%,80%{transform:translate(-50%,-50%) scale(1);opacity:1}100%{transform:translate(-50%,-50%);opacity:0}}
-.xp{background:#0c2f23;border-radius:8px;padding:8px;margin-top:8px}.xp .row{margin-top:8px}.xp button.on{outline:3px solid var(--accent)}.rules label{display:flex;gap:8px;align-items:flex-start;margin-top:8px}.rules input{min-height:0;width:20px;height:20px;margin:2px 0 0;padding:0;flex:none}
+.fld{display:flex;flex-direction:column;gap:4px;flex:1;min-width:120px}.fld label{color:var(--mute);font-size:var(--s1)}.fld select,.fld input{width:100%}
+.rhd{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}.rhd h2{margin:0}.rhd button{min-height:44px}
+.rule{display:flex;gap:12px;align-items:center;min-height:56px;padding:8px 12px;margin-top:8px;border-radius:10px;background:#0c2f23;border:2px solid transparent;cursor:pointer}
+.rule:has(input:checked){border-color:var(--accent);background:#1d6a4f}.rule:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.rule input{position:absolute;opacity:0;width:44px;height:44px;margin:0}.rule i{flex:none;width:24px;height:24px;border-radius:50%;border:2px solid var(--mute);display:grid;place-items:center;font-style:normal;color:transparent;font-size:var(--s1);font-weight:600}
+.rule:has(input:checked) i{background:var(--accent);border-color:var(--accent);color:#2a2200}.rule span{flex:1;min-width:0}.rule small{display:block;color:var(--mute)}
+.cta{position:sticky;bottom:0;z-index:2;margin:16px -16px 0;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:var(--bg);border-top:1px solid #2f7d5f}.cta button{width:100%;min-height:48px;font-size:var(--s2)}
+.xs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--panel);border-radius:16px 16px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom));box-shadow:0 -8px 24px #0a2a1fcc;max-height:75vh;max-height:75dvh;overflow:auto}
+.xs h3{margin:16px 0 8px;font-size:var(--s2);font-weight:600;color:var(--mute)}.xs h3:first-child{margin-top:0}.xs .row{gap:8px}
+.xs button.on{background:var(--accent);color:#2a2200}.xs .nums button{min-width:44px;min-height:44px;padding:0}.xs .give .card{box-shadow:none}.xs .give .card.sel{outline:3px solid var(--accent);transform:translateY(-4px)}
+.xs .go{width:100%;min-height:48px;margin-top:16px}
+.card.X b{font-size:var(--s3)}.card.X i{font-size:11px;line-height:1.1;text-align:center;max-width:100%}
 .trophy{display:inline-block;animation:pop .7s cubic-bezier(.2,1.4,.4,1)}
 </style>
 </head>
@@ -117,14 +128,15 @@ const EMOJI = ['😮', '😡', '😂', '👏', '😭', '😎', '🙏', '😴']; 
 const SYM = { R: '●', B: '■', G: '▲', Y: '◆' }, CN = { R: '紅', B: '藍', G: '綠', Y: '黃' };
 // 房間規則（鍵名跟 server.js 的 RULES 同一份，test.js 會比對）；每條都在建房畫面和房間畫面列出說明
 const RULES = [
-  ['catchUp', '落後補牌', '階段落後最高者 2 階以上，每回合多發 1 張牌。'],
-  ['first', '先放先贏', '第一個放下階段的人，該回合 −10 分（可能變負分）。'],
-  ['rv', '迴轉牌 ×4', '打出後出牌方向反過來；2 人局無效果。不能放階段、不能撿，25 分。'],
-  ['sh', '換位子牌 ×4', '打出後全員座位隨機重排，手牌跟著人走。不能放階段、不能撿，25 分。'],
-  ['xn', '數字交換牌 ×4', '指定一人和一個數字，先選好要換出的牌，再從他手上同數字的牌隨機換一張；他沒有就落空。不能放階段、不能撿，25 分。'],
-  ['xc', '顏色交換牌 ×4', '同上，改指定顏色。不能放階段、不能撿，25 分。'],
+  ['catchUp', '落後補牌', '階段落後最高者 2 階以上，每回合多發 1 張牌'],
+  ['first', '先放先贏', '第一個放下階段的人，該回合 −10 分（可能變負分）'],
+  ['rv', '迴轉牌 ×4', '打出後出牌方向反過來；2 人局無效果'],
+  ['sh', '換位子牌 ×4', '打出後全員座位隨機重排，手牌跟著人走'],
+  ['xn', '數字交換牌 ×4', '指定一人和一個數字，用自己選好的牌，換他手上該數字的隨機一張；他沒有就落空'],
+  ['xc', '顏色交換牌 ×4', '同上，改指定顏色'],
 ];
-const SP = { rv: ['⟲', '迴轉'], sh: ['⇄', '換位'], xn: ['#', '換數字'], xc: ['◐', '換顏色'] }; // 特殊牌：[牌面, 名稱]
+const SP_NOTE = '特殊牌每張 25 分，不能放階段、不能接牌、不能從棄牌堆撿。'; // 四種特殊牌共通，只寫一次
+const SP = { rv: ['⟲', '迴轉'], sh: ['⇄', '換位'], xn: ['#', '換數'], xc: ['◐', '換色'] }; // 特殊牌：[牌面, 名稱]
 const lab = ([t, n]) => (t === 'set' ? `${n} 張同數字` : t === 'run' ? `${n} 張連續順子` : `${n} 張同顏色`);
 const store = {
   get() { try { return JSON.parse(localStorage.getItem('p10') || 'null'); } catch { return null; } },
@@ -297,15 +309,22 @@ function qrBox(link) {
 }
 
 function lobby() {
+  const rules = RULES.map(([k, t, d]) => `<label class="rule"><input type="checkbox" data-r="${k}"><i aria-hidden="true">✓</i><span><b>${t}</b><small>${d}</small></span></label>`).join('');
   return `<h1>🃏 Phase 10 線上</h1>
-  <div class="panel"><h2>你的名字</h2><input id="name" maxlength="12" placeholder="最多 12 字" value="${esc(localStorage.getItem('p10name') || '')}"></div>
-  ${urlRoom ? '' : `<div class="panel"><h2>開新房間</h2><div class="row"><label for="target">目標</label><select id="target">${[...Array(10)].map((_, i) => `<option value="${i + 1}" ${i === 9 ? 'selected' : ''}>第 ${i + 1} 階段</option>`).join('')}</select><label for="turn">每回合秒數</label><input id="turn" type="number" inputmode="numeric" min="10" max="600" value="60" style="width:96px"><button data-a="create">建立房間</button></div>
-    <p class="mute" style="margin:8px 0 0">時間到會自動代打（抽牌堆、棄最大張）。10–600 秒。</p>
-    <h2 style="margin-top:16px">特殊規則（全不勾 = 標準 Phase 10）</h2><div class="rules">${RULES.map(([k, t, d]) => `<label><input type="checkbox" data-r="${k}"><span><b>${t}</b><br><small class="mute">${d}</small></span></label>`).join('')}</div></div>`}
+  <div class="panel"><h2>你的名字</h2><input id="name" maxlength="12" placeholder="最多 12 字" value="${esc(localStorage.getItem('p10name') || '')}" style="width:100%"></div>
+  ${urlRoom ? '' : `<div class="panel"><h2>開新房間</h2>
+    <div class="row"><div class="fld"><label for="target">目標階段</label><select id="target">${[...Array(10)].map((_, i) => `<option value="${i + 1}" ${i === 9 ? 'selected' : ''}>第 ${i + 1} 階段</option>`).join('')}</select></div>
+    <div class="fld"><label for="turn">每回合秒數</label><input id="turn" type="number" inputmode="numeric" min="10" max="600" value="60"></div></div>
+    <p class="mute" style="margin:8px 0 0">時間到會自動代打（抽牌堆、棄最大張）。</p>
+    <div class="rhd" style="margin-top:24px"><h2>特殊規則</h2><button class="ghost" data-a="allRules" aria-pressed="false">全選</button></div>
+    <p class="mute" style="margin:0 0 8px">都不選就是標準 Phase 10。</p>
+    <div class="rules">${rules}</div>
+    <p class="mute" style="margin:12px 0 0">${SP_NOTE}</p></div>`}
   <div class="panel"><h2>${urlRoom ? '你被邀請加入房間' : '加入房間'}</h2>
-    <div class="row"><input id="code" maxlength="4" size="6" placeholder="房間代碼" value="${esc(urlRoom)}" style="text-transform:uppercase" autocapitalize="characters" autocorrect="off" autocomplete="off" spellcheck="false"><button data-a="join">加入</button>
-    ${urlRoom ? '<button class="ghost" data-a="home">改為開新房間</button>' : ''}</div></div>
-  <p class="mute">2–6 人。建立房間後把邀請連結傳給朋友即可。</p>`;
+    <div class="row"><input id="code" maxlength="4" size="6" placeholder="房間代碼" value="${esc(urlRoom)}" style="text-transform:uppercase;flex:1" autocapitalize="characters" autocorrect="off" autocomplete="off" spellcheck="false"><button data-a="join" style="min-height:44px">加入</button>
+    ${urlRoom ? '<button class="ghost" data-a="home" style="min-height:44px">改為開新房間</button>' : ''}</div></div>
+  <p class="mute">2–6 人。建立房間後把邀請連結傳給朋友即可。</p>
+  ${urlRoom ? '' : '<div class="cta"><button data-a="create">建立房間</button></div>'}`;
 }
 
 function room() {
@@ -320,7 +339,7 @@ function room() {
     ${s.players.map((p, i) => `<div><span class="mute">${i + 1}.</span> <span class="dot ${p.online ? 'on' : ''}"></span>${esc(p.name)} ${p.id === s.host ? '<span class="crown">👑 房主</span>' : ''} ${p.id === s.me ? '<span class="mute">（你）</span>' : ''}</div>`).join('')}</div>
   <div class="panel"><h2>規則</h2>${set}
     <p>每回合 ${st.turn} 秒，超時自動代打。</p>
-    ${RULES.filter(([k]) => st.rules[k]).map(([, t, d]) => `<p style="margin:4px 0"><b>${t}</b> <small class="mute">${d}</small></p>`).join('') || '<p class="mute">標準規則</p>'}
+    ${RULES.some(([k]) => st.rules[k]) ? `<ul style="margin:8px 0;padding-left:20px">${RULES.filter(([k]) => st.rules[k]).map(([, t, d]) => `<li style="margin-top:8px"><b>${t}</b><br><small class="mute">${d}</small></li>`).join('')}</ul>${['rv', 'sh', 'xn', 'xc'].some((k) => st.rules[k]) ? `<p class="mute" style="margin:8px 0">${SP_NOTE}</p>` : ''}` : '<p class="mute">標準規則</p>'}
     <p class="mute">每人發 10 張牌。只有完成當前階段的人，下一回合才能進下一階段；沒完成就繼續挑戰同一階段。有人完成目標階段後，該回合結束時比總分（低者勝）。</p></div>
   <div class="row">${host ? `<button data-a="start" ${n < 2 ? 'disabled' : ''}>開始遊戲</button>${n < 2 ? '<span class="mute">至少需要 2 人</span>' : ''}` : '<span class="mute">等待房主開始…</span>'}
   <button class="ghost" data-a="leave">離開房間</button></div>`;
@@ -364,8 +383,8 @@ function game() {
   if (!canAct || !picked.length) endFor = null;
 
   const players = g.players.map((p) => `<div class="player ${g.turn === p.id ? 'turn' : ''} ${p.in ? '' : 'out'}" data-pid="${p.id}" ${p.in ? `data-a="hist" data-v="${p.id}" role="button" tabindex="0" aria-haspopup="dialog"` : ''}>
-    <div class="row" style="flex-wrap:nowrap;justify-content:space-between"><b>${esc(p.name)}${p.id === me ? '（你）' : ''} ${online[p.id] || p.left ? '' : '💤'}</b>${p.left ? '' : `<span class="cnt" aria-label="${p.n} 張">${p.n}<small>張${p.in ? ' ›' : ''}</small></span>`}</div>
-    <small>${p.left ? '已離開' : `階段 ${p.phase > 10 ? 10 : p.phase} ${p.laid ? '✅' : ''} · ${p.score} 分${p.skip === 1 ? ' · ⏭將被跳過' : ''}`}</small>
+    <b class="nm">${esc(p.name)}${p.id === me ? '（你）' : ''}</b>
+    <div class="ft"><small>${p.left ? '已離開' : `<span style="white-space:nowrap">階段 ${p.phase > 10 ? 10 : p.phase}${p.laid ? ' ✅' : ''}</span><br>${p.score} 分${online[p.id] ? '' : ' 💤'}${p.skip === 1 ? '<br>⏭將被跳過' : ''}`}</small>${p.left ? '' : `<span class="cnt" aria-label="${p.n} 張">${p.n}<small>張${p.in ? ' ›' : ''}</small></span>`}</div>
     ${p.id === me || !p.pick ? '' : `<div class="pick">${p.pick.from === 'pile' ? '🂠 抽牌堆' : `♻ 撿棄牌 ${card(p.pick.card, { tag: 'span', cls: 'sm' })}`}</div>`}</div>`).join('');
 
   // 排名：先比階段（高者優先）再比分數（低者優先）。同條件並列同名次。
@@ -410,12 +429,16 @@ function game() {
   const swapOk = swap && xs.target && xs.v && xs.give;
   const discard = !canAct ? '' : kind === 's' && targets.length
     ? `<span>跳過誰？</span>${targets.map((p) => `<button data-a="discard" data-v="${p.id}">${esc(p.name)}</button>`).join('')}`
-    : swap ? wb('打出並交換', 'swap', swapOk ? '' : '請選好對象、' + (kind === 'xn' ? '數字' : '顏色') + '和要換出的牌', swapOk ? '' : 'ghost')
+    : swap ? ''
     : wb('棄牌並結束回合', 'discard', one ? '' : actSlot !== null ? '正在放階段：再點一次該組可取消' : picked.length > 1 ? '一次只能棄一張牌' : '先點一張要棄的牌', layBtn && !layWhy ? 'ghost' : '');
-  // 交換牌：結果出來前先選好三件事。換出的牌從手牌點選（不能是這張交換牌本身）
-  const swapUI = canAct && swap ? `<div class="xp"><div>跟誰換？</div><div class="row">${others.map((p) => `<button class="${xs.target === p.id ? 'on' : 'ghost'}" data-a="xt" data-v="${p.id}">${esc(p.name)}</button>`).join('')}</div>
-    <div style="margin-top:8px">指定${kind === 'xn' ? '數字' : '顏色'}</div><div class="row">${kind === 'xn' ? [...Array(12)].map((_, i) => `<button class="${xs.v === i + 1 ? 'on' : 'ghost'}" data-a="xv" data-v="${i + 1}" style="padding:8px">${i + 1}</button>`).join('') : ['R', 'B', 'G', 'Y'].map((c) => `<button class="${xs.v === c ? 'on' : 'ghost'}" data-a="xv" data-v="${c}">${CN[c]}</button>`).join('')}</div>
-    <div style="margin-top:8px">要換出哪張？${xs.give ? '' : '<span class="mute">（點下方手牌，看結果前先決定）</span>'}</div></div>` : '';
+  // 交換牌：結果出來前先選好三件事（對象、數字／顏色、要換出的牌），放在底部抽屜裡；換出的牌也在抽屜內選，不跟手牌區的「已選」標示混在一起
+  const give = hand.filter((c) => c.id !== one?.id);
+  const swapUI = canAct && swap ? `<div class="overlay sheet" style="background:#0006"><div class="bd" data-a="xcancel"></div><div class="xs" role="dialog" aria-label="${one.t === 'xn' ? '數字' : '顏色'}交換">
+    <div class="row" style="justify-content:space-between;flex-wrap:nowrap"><h2 style="margin:0;color:var(--ink)">${one.t === 'xn' ? '數字' : '顏色'}交換牌</h2><button class="ghost ic" data-a="xcancel" aria-label="取消">✕</button></div>
+    <h3>跟誰換</h3><div class="row">${others.map((p) => `<button class="${xs.target === p.id ? 'on' : 'ghost'}" data-a="xt" data-v="${p.id}" aria-pressed="${xs.target === p.id}" style="min-height:44px">${esc(p.name)}</button>`).join('')}</div>
+    <h3>指定${one.t === 'xn' ? '數字' : '顏色'}</h3><div class="row nums">${one.t === 'xn' ? [...Array(12)].map((_, i) => `<button class="${xs.v === i + 1 ? 'on' : 'ghost'}" data-a="xv" data-v="${i + 1}" aria-pressed="${xs.v === i + 1}">${i + 1}</button>`).join('') : ['R', 'B', 'G', 'Y'].map((c) => `<button class="${xs.v === c ? 'on' : 'ghost'}" data-a="xv" data-v="${c}" aria-pressed="${xs.v === c}" style="min-height:44px">${CN[c]}</button>`).join('')}</div>
+    <h3>你要換出哪張 <small class="mute">（看結果前先決定）</small></h3><div class="row give">${give.map((c) => card(c, { cls: c.id === xs.give ? 'sel' : '', attrs: `data-a="xg" data-v="${c.id}" aria-pressed="${c.id === xs.give}"` })).join('')}</div>
+    <button class="go ${swapOk ? '' : 'ghost'}" data-a="swap" ${swapOk ? '' : 'disabled'}>${swapOk ? '打出並交換' : '還沒選完'}</button></div></div>` : '';
   const drawWhy = !myTurn ? `還沒輪到你，現在是 ${name(g.turn)}` : g.stage === 'act' ? '這回合已經抽過牌了' : '';
   const topWhy = drawWhy || (!g.top ? '棄牌堆是空的' : g.top.t !== 'n' && g.top.t !== 'w' ? '跳過牌和特殊牌不能撿' : '');
 
@@ -436,8 +459,8 @@ function game() {
     <div class="row" style="justify-content:space-between"><h2 style="margin:0;color:var(--ink)">${who}本回合的撿棄牌</h2><button class="ghost ic" data-a="hist" aria-label="關閉">✕</button></div>
     ${hp.hist.length ? hp.hist.map((h, i) => `<div class="pick" style="font-size:var(--s2);margin-top:12px"><span class="mute">${i + 1}.</span>${h.from === 'pile' ? '🂠 抽牌堆' : `♻ 撿棄牌 ${card(h.card, { tag: 'span', cls: 'sm' })}`}<span>→</span>${h.disc ? `棄 ${card(h.disc, { tag: 'span', cls: 'sm' })}` : '<span class="mute">出牌中…</span>'}</div>`).reverse().join('') : `<p class="mute">${who}還沒出過牌。輪到之後，這裡會列出每一手撿了或抽了什麼、棄了哪張。</p>`}</div></div>` : '';
 
-  return `<div class="row"><b style="flex:1">房間 ${s.code} · 第 ${g.round} 回合${g.playoff ? '（加賽）' : ''}</b>
-    <span class="mute">${g.rules.rv ? (g.dir < 0 ? '⟲ 反向 · ' : '⟳ 順向 · ') : ''}目標：階段 ${g.target}</span><b class="cd" aria-live="off"></b>
+  return `<div class="row"><b style="flex:1;min-width:0">${s.code} · 第 ${g.round} 回合${g.playoff ? '（加賽）' : ''}</b>
+    <span class="mute" style="white-space:nowrap">${g.rules.rv ? `<span title="${g.dir < 0 ? '反向' : '順向'}" aria-label="${g.dir < 0 ? '反向' : '順向'}">${g.dir < 0 ? '⟲' : '⟳'}</span> ` : ''}目標 ${g.target}</span><b class="cd" aria-live="off"></b>
     <span class="rxw"><button class="ghost ic" data-a="rxMenu" aria-label="送表情" aria-expanded="${rxOpen}">😀</button>${rxOpen ? `<div class="rxp">${EMOJI.map((e) => `<button data-a="react" data-v="${e}" aria-label="${e}">${e}</button>`).join('')}</div>` : ''}</span>
     <button class="ghost ic" data-a="sheet" aria-label="排名、階段表、動態">📋</button></div>
   <div class="row players">${players}</div>
@@ -454,7 +477,7 @@ function game() {
   </div>
   ${g.status !== 'play' ? overlay(g, s) : `<div class="tray"><div class="row" style="justify-content:space-between;flex-wrap:nowrap"><b>${status}</b><button class="ghost" data-a="sort" aria-label="切換手牌排序">排序：${byColor ? '顏色' : '數字'}</button></div>
     <div class="hand">${free.map((c) => card(c, { cls: `${sel.has(c.id) || c.id === xs.give ? 'sel' : ''} ${c.id === seen.drawn ? 'new' : ''} ${fresh.includes(c.id) ? 'pop' : ''}`, attrs: `data-a="card" data-v="${c.id}"` })).join('')}</div>
-    ${swapUI}${layBtn + discard && `<div class="row act">${layBtn}${discard}</div>`}</div>`}${sheetUI}${histUI}`; // 手牌＋棄牌固定在螢幕底部（拇指區），其餘在上方捲動；排名／階段表／動態收進 📋 面板
+    ${layBtn + discard && `<div class="row act">${layBtn}${discard}</div>`}</div>`}${swapUI}${sheetUI}${histUI}`; // 手牌＋棄牌固定在螢幕底部（拇指區），其餘在上方捲動；排名／階段表／動態收進 📋 面板
 }
 
 // 結算：依「我贏／別人贏」給不同開場；每人顯示剩下的牌，讓「+N 分」看得出來源；按鈕固定在 modal 底部
@@ -482,10 +505,12 @@ function overlay(g, s) {
 }
 
 function render() {
-  const keep = $('#name')?.value;
+  const form = [...document.querySelectorAll('#name,#target,#turn,[data-r]')].map((e) => [e, e.type === 'checkbox' ? e.checked : e.value]); // 建房表單：重繪不能洗掉使用者已填／已勾的
+  const keep = Object.fromEntries(form.map(([e, v]) => [e.id || e.dataset.r, v]));
   if (!snap?.game) seen = null; // 離開／重開一場遊戲後不要沿用舊手牌
   $('#app').innerHTML = !sess ? lobby() : !snap ? '<p>連線中…</p>' : snap.game ? game() : room();
-  if (keep !== undefined && $('#name')) $('#name').value = keep;
+  for (const e of document.querySelectorAll('#name,#target,#turn,[data-r]')) { const v = keep[e.id || e.dataset.r]; if (v !== undefined) e.type === 'checkbox' ? (e.checked = v) : (e.value = v); }
+  const all = [...document.querySelectorAll('[data-r]')]; if (all.length && all.every((b) => b.checked)) { const b = $('[data-a="allRules"]'); if (b) b.textContent = '全不選'; }
   tick();
 }
 // 倒數只改文字，不重繪 DOM；最後 10 秒變紅
@@ -506,6 +531,10 @@ const A = {
   async create() { const rules = Object.fromEntries(RULES.map(([k]) => [k, !!$(`[data-r="${k}"]`)?.checked])); const r = await post('create', { name: $('#name').value, turn: +$('#turn').value, target: +$('#target').value, rules }).catch((e) => toast(e.message)); if (r) { localStorage.setItem('p10name', $('#name').value); enter(r); } },
   async join() { const r = await post('join', { name: $('#name').value, code: $('#code').value }).catch((e) => toast(e.message)); if (r) { localStorage.setItem('p10name', $('#name').value); enter(r); } },
   home() { history.replaceState(null, '', '/'); location.reload(); },
+  allRules(v, btn) { // 一次勾選：現在全勾了就全部取消，否則全部勾起來
+    const boxes = [...document.querySelectorAll('[data-r]')], on = !boxes.every((b) => b.checked);
+    boxes.forEach((b) => (b.checked = on)); btn.textContent = on ? '全不選' : '全選'; btn.setAttribute('aria-pressed', on);
+  },
   async copy() {
     const l = inviteLink(snap.code);
     // 手機優先叫出系統分享面板（LINE／訊息一步到位）；使用者按取消不算失敗
@@ -527,9 +556,7 @@ const A = {
   draw: (v) => call('act', { action: { type: 'draw', from: v } }),
   card(v) {
     endFor = null;
-    const cur = snap.game.hand.find((c) => c.id === [...sel][0]);
-    if (actSlot === null && sel.size === 1 && (cur?.t === 'xn' || cur?.t === 'xc') && +v !== cur.id && snap.game.hand.length > 1) xs.give = xs.give === +v ? null : +v; // 已選了交換牌：再點別張 = 決定要換出的牌
-    else if (actSlot === null) sel.has(+v) ? sel.delete(+v) : sel.add(+v);
+    if (actSlot === null) sel.has(+v) ? sel.delete(+v) : sel.add(+v);
     else { // 有作用中的組：點牌就直接放入；這組滿了自動換到下一個還沒滿的組
       const req = phaseReq(), cnt = (gi) => Object.values(slots).filter((x) => x === gi).length, full = (gi) => cnt(gi) >= req[gi][1];
       slots[v] = actSlot;
@@ -561,6 +588,8 @@ const A = {
   },
   discard: (v) => call('act', { action: { type: 'discard', card: [...sel][0], target: v } }).then((r) => r && sel.clear()),
   xt(v) { xs.target = v; render(); },
+  xg(v) { xs.give = xs.give === +v ? null : +v; render(); },
+  xcancel() { sel.clear(); xs = { target: null, v: null, give: null }; render(); },
   xv(v) { xs.v = /\d/.test(v) ? +v : v; render(); },
   swap() {
     const kind = snap.game.hand.find((c) => c.id === [...sel][0]).t;
@@ -609,6 +638,11 @@ $('#app').addEventListener('click', (e) => {
 $('#app').addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[role=button]')) { e.preventDefault(); e.target.click(); } }); // div 型按鈕（玩家卡、組合、放階段欄）要自己補鍵盤操作
 $('#app').addEventListener('focusout', (e) => { if (e.target.matches?.('select') && snap) render(); }); // 補上選單開著時被略過的重繪
 $('#app').addEventListener('change', (e) => {
+  if (e.target.dataset.r !== undefined) { // 建房頁的規則勾選：全勾了按鈕顯示「全不選」
+    const boxes = [...document.querySelectorAll('[data-r]')], all = boxes.every((b) => b.checked), btn = $('[data-a="allRules"]');
+    if (btn) { btn.textContent = all ? '全不選' : '全選'; btn.setAttribute('aria-pressed', all); }
+    return;
+  }
   const k = e.target.dataset.c;
   if (k) e.target.blur(); // 選完就放開焦點，不然「焦點在 select 時略過重繪」會讓房主一直看不到新加入的玩家
   if (k) call('settings', { [k]: k === 'target' ? +e.target.value : e.target.value });
