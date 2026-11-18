@@ -438,7 +438,8 @@ function game() {
     <h3>跟誰換</h3><div class="row">${others.map((p) => `<button class="${xs.target === p.id ? 'on' : 'ghost'}" data-a="xt" data-v="${p.id}" aria-pressed="${xs.target === p.id}" style="min-height:44px">${esc(p.name)}</button>`).join('')}</div>
     <h3>指定${one.t === 'xn' ? '數字' : '顏色'}</h3><div class="row nums">${one.t === 'xn' ? [...Array(12)].map((_, i) => `<button class="${xs.v === i + 1 ? 'on' : 'ghost'}" data-a="xv" data-v="${i + 1}" aria-pressed="${xs.v === i + 1}">${i + 1}</button>`).join('') : ['R', 'B', 'G', 'Y'].map((c) => `<button class="${xs.v === c ? 'on' : 'ghost'}" data-a="xv" data-v="${c}" aria-pressed="${xs.v === c}" style="min-height:44px">${CN[c]}</button>`).join('')}</div>
     <h3>你要換出哪張 <small class="mute">（看結果前先決定）</small></h3><div class="row give">${give.map((c) => card(c, { cls: c.id === xs.give ? 'sel' : '', attrs: `data-a="xg" data-v="${c.id}" aria-pressed="${c.id === xs.give}"` })).join('')}</div>
-    <button class="go ${swapOk ? '' : 'ghost'}" data-a="swap" ${swapOk ? '' : 'disabled'}>${swapOk ? '打出並交換' : '還沒選完'}</button></div></div>` : '';
+    <button class="go ${swapOk ? '' : 'ghost'}" data-a="swap" ${swapOk ? '' : 'disabled'}>${swapOk ? '打出並交換' : '還沒選完'}</button>
+    <button class="ghost go" data-a="plain" style="margin-top:8px">不交換，直接棄牌</button></div></div>` : '';
   const drawWhy = !myTurn ? `還沒輪到你，現在是 ${name(g.turn)}` : g.stage === 'act' ? '這回合已經抽過牌了' : '';
   const topWhy = drawWhy || (!g.top ? '棄牌堆是空的' : g.top.t !== 'n' && g.top.t !== 'w' ? '跳過牌和特殊牌不能撿' : '');
 
@@ -590,6 +591,7 @@ const A = {
   xt(v) { xs.target = v; render(); },
   xg(v) { xs.give = xs.give === +v ? null : +v; render(); },
   xcancel() { sel.clear(); xs = { target: null, v: null, give: null }; render(); },
+  plain() { return call('act', { action: { type: 'discard', card: [...sel][0], plain: true } }).then((r) => { if (r) { sel.clear(); xs = { target: null, v: null, give: null }; } }); },
   xv(v) { xs.v = /\d/.test(v) ? +v : v; render(); },
   swap() {
     const kind = snap.game.hand.find((c) => c.id === [...sel][0]).t;

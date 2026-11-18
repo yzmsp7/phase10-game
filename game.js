@@ -243,7 +243,7 @@ function act(g, pid, a) {
         const ok = others.filter((q) => q.skip === 0);
         if (ok.length) target = ok.find((q) => q.id === a.target) || err('請選擇要跳過的玩家');
       }
-      if (live && (c.t === 'xn' || c.t === 'xc')) { // 全部驗證完才動手，錯了不會留下半套狀態
+      if (live && !a.plain && (c.t === 'xn' || c.t === 'xc')) { // plain = 當普通牌直接棄掉、不觸發交換。全部驗證完才動手，錯了不會留下半套狀態
         const num = c.t === 'xn';
         target = others.find((q) => q.id === a.target) || err('請選擇要交換的玩家');
         give = p.hand.find((x) => x.id === a.give && x !== c) || err('請選一張要換出去的牌');
@@ -317,4 +317,4 @@ function view(g, pid) {
   };
 }
 
-module.exports = { PHASES, deck, build, hit, create, act, leave, autoPlay, view, pts, err };
+module.exports = { PHASES, deck, build, hit, create, act, leave, autoPlay, view, pts, err, shuffle }; // err / shuffle 也給 fuji.js 共用

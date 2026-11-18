@@ -577,6 +577,14 @@ function rigR(nPlayers, rules, opts = {}) {
   throws(() => G.act(g, a.id, { type: 'discard', card: x.id, target: b.id, give: give.id, color: 'X' }), /顏色/);
   G.act(g, a.id, { type: 'discard', card: x.id, target: b.id, give: give.id, color: 'G' });
   assert.ok(a.hand.some((c) => c.t === 'n' && c.c === 'G' && c.n === 9), '指定顏色換到綠 9');
+  // plain：當普通牌棄掉，不指定任何東西、不換牌、沒有交換事件，照樣換下一位
+  ({ g, a, b, x } = setup('xc'));
+  const bPlain = b.hand.map((c) => c.id).join(), aPlain = a.hand.length;
+  G.act(g, a.id, { type: 'discard', card: x.id, plain: true });
+  assert.equal(b.hand.map((c) => c.id).join(), bPlain);
+  assert.equal(a.hand.length, aPlain - 1);
+  assert.ok(!g.ev || g.ev.kind !== 'xc', '沒有交換事件');
+  assert.notEqual(g.players[g.turn], a);
   // 最後一張牌是交換牌：直接出完，不需要指定
   ({ g, a } = setup('xn'));
   a.laid = true; a.hand = [sp('xn')];
