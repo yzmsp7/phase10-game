@@ -425,11 +425,12 @@ function rigR(nPlayers, rules, opts = {}) {
   for (;;) { const g = G.create(ps, { target: 10, ...opts, rules }); if (g.disc[0].t === 'n') return g; }
 }
 {
-  // 牌組：沒開 = 108；開哪種就多 4 張那種；特殊牌每張 25 分
+  // 牌組：沒開 = 108；開哪種就多幾張（迴轉、換位子、換顏色 2 張，換數字 4 張）；特殊牌每張 25 分
   assert.equal(G.deck().length, 108);
-  assert.equal(G.deck(ALL).length, 124);
-  assert.equal(G.deck({ rv: true }).filter((c) => c.t === 'rv').length, 4);
-  assert.equal(G.deck({ rv: true }).length, 112);
+  assert.equal(G.deck(ALL).length, 118);
+  assert.equal(G.deck({ rv: true }).filter((c) => c.t === 'rv').length, 2);
+  assert.equal(G.deck({ xn: true }).filter((c) => c.t === 'xn').length, 4);
+  assert.equal(G.deck({ rv: true }).length, 110);
   ['rv', 'sh', 'xn', 'xc'].forEach((t) => assert.equal(G.pts(sp(t)), 25));
   // 特殊牌不能放階段、不能接牌、不能從棄牌堆撿
   throws(() => G.build('set', 3, [n(7), n(7), sp('rv')]), /特殊牌/);
@@ -520,7 +521,7 @@ function rigR(nPlayers, rules, opts = {}) {
     const g = rigR(5, ALL);
     const a = g.players[g.turn], dealer = g.players[g.dealer];
     a.hand = [sp('sh'), n(1), n(2)];
-    const all = total(g); // 自訂手牌後的總數（被換掉的牌不見了，所以不能寫死 124）；這裡只驗證「換位子前後牌數不變」
+    const all = total(g); // 自訂手牌後的總數（被換掉的牌不見了，所以不能寫死 118）；這裡只驗證「換位子前後牌數不變」
     const hands = new Map(g.players.map((p) => [p, p.hand.map((c) => c.id).join()]));
     const before = g.players.map((p) => p.id).join();
     G.act(g, a.id, { type: 'draw', from: 'pile' });
@@ -699,7 +700,7 @@ for (let np = 2; np <= 6; np++) {
     assert.deepEqual(server.rooms.get(r.code).settings.rules, { catchUp: true, first: false, rv: true, sh: false, xn: false, xc: false });
     const g = (await post('join', { code: r.code, name: 'S' })).json;
     await post('start', r);
-    assert.equal(server.rooms.get(r.code).game.draw.length + server.rooms.get(r.code).game.disc.length + 20, 112, '只開迴轉 = 112 張');
+    assert.equal(server.rooms.get(r.code).game.draw.length + server.rooms.get(r.code).game.disc.length + 20, 110, '只開迴轉 = 110 張');
     await post('leave', g);
   }
   const cardsIn = (g) => g.players.reduce((a, p) => a + p.hand.length, 0) + g.groups.reduce((a, x) => a + x.cards.length, 0) + g.draw.length + g.disc.length;

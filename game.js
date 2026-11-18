@@ -23,8 +23,8 @@ function shuffle(a) {
   return a;
 }
 
-// t: n=數字牌 w=百搭 s=跳過；房間開了才有的特殊牌（各 4 張）：rv=迴轉 sh=換位子 xn=指定數字交換 xc=指定顏色交換
-const SPECIAL = ['rv', 'sh', 'xn', 'xc'];
+// t: n=數字牌 w=百搭 s=跳過；房間開了才有的特殊牌（值 = 張數）：rv=迴轉 sh=換位子 xn=指定數字交換 xc=指定顏色交換
+const SPECIAL = { rv: 2, sh: 2, xn: 4, xc: 2 };
 const CN = { R: '紅', B: '藍', G: '綠', Y: '黃' };
 const playable = (c) => c.t === 'n' || c.t === 'w'; // 只有數字牌和百搭能用在階段／接牌／從棄牌堆撿
 function deck(rules = {}) {
@@ -32,7 +32,7 @@ function deck(rules = {}) {
   for (let k = 0; k < 2; k++) for (const c of COLORS) for (let n = 1; n <= 12; n++) d.push({ id: id++, t: 'n', c, n });
   for (let i = 0; i < 8; i++) d.push({ id: id++, t: 'w' });
   for (let i = 0; i < 4; i++) d.push({ id: id++, t: 's' });
-  for (const t of SPECIAL) if (rules[t]) for (let i = 0; i < 4; i++) d.push({ id: id++, t });
+  for (const [t, k] of Object.entries(SPECIAL)) if (rules[t]) for (let i = 0; i < k; i++) d.push({ id: id++, t });
   return d;
 }
 
