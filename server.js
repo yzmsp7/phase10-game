@@ -6,17 +6,21 @@ const path = require('node:path');
 const os = require('node:os');
 const { randomInt, randomUUID } = require('node:crypto');
 const G = require('./game');
+const F = require('./fuji');
 
-const MAX = 6, MIN = 2, TURN_SEC = 60; // 每回合預設秒數；建房時可改（10–600），手機切去 LINE 回訊息再回來要來得及，所以下限不能太短
+const TURN_SEC = 60; // 每回合預設秒數；建房時可改（10–600），手機切去 LINE 回訊息再回來要來得及，所以下限不能太短
+const KINDS = { phase10: { eng: G, min: 2, max: 6 }, fuji: { eng: F, min: 3, max: 8 } }; // 遊戲種類：規則引擎（同一組介面 create/act/leave/autoPlay/view）與人數；新增遊戲在這裡加一行
+const K = (room) => KINDS[room.kind];
 const EMOJI = ['😮', '😡', '😂', '👏', '😭', '😎', '🙏', '😴']; // 白名單；index.html 有同一份，改的時候兩邊一起改
 const RULES = ['catchUp', 'first', 'rv', 'sh', 'xn', 'xc']; // 建房時可開的特殊規則（見 game.js），全部預設關 = 標準 Phase 10；index.html 有同一份鍵名，test.js 會比對
 const rooms = new Map();
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
 
-function newRoom(turn, rules, target) {
+function newRoom(kind, turn, extra) {
   let code;
   do { code = Array.from({ length: 4 }, () => CODE_CHARS[randomInt(CODE_CHARS.length)]).join(''); } while (rooms.has(code));
-  const r = { code, players: [], host: null, settings: { target, turn, rules }, game: null, rx: [], clients: new Map(), touched: Date.now(), timer: null, dl: null };
+  const r = { code, kind, players: [], host: null, settings: { turn, ...extra }, // extra：phase10 才有 target、rules；富士流沒有額外設定
+     game: null, rx: [], clients: new Map(), touched: Date.now(), timer: null, dl: null };
   rooms.set(code, r);
   return r;
 }
@@ -35,11 +39,11 @@ const online = (room, id) => (room.clients.get(id)?.size ?? 0) > 0;
 
 function snapshot(room, pid) {
   return {
-    code: room.code, me: pid, host: room.host, settings: room.settings,
+    code: room.code, kind: room.kind, min: K(room).min, max: K(room).max, me: pid, host: room.host, settings: room.settings,
     turnLeft: room.dl && Math.max(0, room.dl.at - Date.now()), // 剩餘毫秒（不傳絕對時間，免得被手機時鐘誤差影響）
     players: room.players.map((p) => ({ id: p.id, name: p.name, online: online(room, p.id) })),
     rx: room.rx, // 最近 5 筆表情；seq 遞增，前端只播自己沒看過的
-    game: room.game ? G.view(room.game, pid) : null,
+    game: room.game ? K(room).eng.view(room.game, pid) : null,
   };
 }
 
@@ -63,7 +67,7 @@ function watch(room) {
   room.timer = setTimeout(() => {
     if (room.game !== g || g.status !== 'play' || g.turnNo !== no) return;
     room.dl = null; // 代打若失敗（牌堆空）也會重新倒數，不會空轉
-    try { G.autoPlay(g, cur); } catch (e) { console.error(e); }
+    try { K(room).eng.autoPlay(g, cur); } catch (e) { console.error(e); }
     broadcast(room);
   }, Math.max(0, room.dl.at - Date.now()));
   room.timer.unref();
@@ -80,7 +84,7 @@ const actions = {
   settings(room, p, b) {
     if (room.host !== p.id) G.err('只有房主可以改設定');
     if (room.game) G.err('遊戲進行中不能改設定');
-    if (Number.isInteger(b.target) && b.target >= 1 && b.target <= 10) room.settings.target = b.target;
+    if (room.kind === 'phase10' && Number.isInteger(b.target) && b.target >= 1 && b.target <= 10) room.settings.target = b.target;
   },
   shuffle(room, p) { // 隨機排座位：座位 = room.players 的順序，G.create 照這個順序發牌、輪流
     if (room.host !== p.id) G.err('只有房主可以排位子');
@@ -91,12 +95,12 @@ const actions = {
   start(room, p) {
     if (room.host !== p.id) G.err('只有房主可以開始');
     if (room.game) G.err('遊戲已經開始');
-    if (room.players.length < MIN) G.err(`至少要 ${MIN} 人才能開始`);
-    room.game = G.create(room.players, room.settings);
+    if (room.players.length < K(room).min) G.err(`至少要 ${K(room).min} 人才能開始`);
+    room.game = K(room).eng.create(room.players, room.settings);
   },
   act(room, p, b) {
     if (!room.game) G.err('遊戲還沒開始');
-    G.act(room.game, p.id, b.action ?? {});
+    K(room).eng.act(room.game, p.id, b.action ?? {});
   },
   react(room, p, b) { // 表情：不是遊戲規則，只是暫時事件，不進 game、不存檔
     if (!EMOJI.includes(b.e)) G.err('不支援的表情');
@@ -112,7 +116,7 @@ const actions = {
   leave(room, p) {
     const playing = room.game && room.game.status !== 'over';
     // 遊戲中途退出：牌放回棄牌堆、輪次換人；只剩 1 人就關房間（一個人沒辦法玩）
-    if (playing && G.leave(room.game, p.id) < 2) return close(room, `${p.name} 離開了，只剩一人，房間已關閉`);
+    if (playing && K(room).eng.leave(room.game, p.id) < 2) return close(room, `${p.name} 離開了，只剩一人，房間已關閉`);
     room.players = room.players.filter((x) => x !== p);
     room.clients.get(p.id)?.forEach((res) => res.end());
     room.clients.delete(p.id);
@@ -168,21 +172,23 @@ const server = http.createServer(async (req, res) => {
       if (name === 'create' || name === 'join') {
         let room;
         if (name === 'create') {
+          const kind = b.kind ?? 'phase10';
+          if (!Object.hasOwn(KINDS, kind)) G.err('不支援的遊戲');
           const turn = b.turn ?? TURN_SEC;
           if (!Number.isInteger(turn) || turn < 10 || turn > 600) G.err('每回合秒數要在 10–600 之間');
           if (b.rules != null && (typeof b.rules !== 'object' || Array.isArray(b.rules))) G.err('規則格式不對');
           const target = b.target ?? 10;
           if (!Number.isInteger(target) || target < 1 || target > 10) G.err('目標階段要在 1–10 之間');
-          room = newRoom(turn, Object.fromEntries(RULES.map((k) => [k, b.rules?.[k] === true])), target);
+          room = newRoom(kind, turn, kind === 'phase10' ? { target, rules: Object.fromEntries(RULES.map((k) => [k, b.rules?.[k] === true])) } : {});
         } else {
           room = rooms.get(String(b.code ?? '').toUpperCase());
           if (!room) G.err('找不到這個房間');
           if (room.game) G.err('遊戲已經開始，無法加入');
-          if (room.players.length >= MAX) G.err(`房間已滿（最多 ${MAX} 人）`);
+          if (room.players.length >= K(room).max) G.err(`房間已滿（最多 ${K(room).max} 人）`);
         }
         let p;
         try { p = addPlayer(room, b.name); } catch (e) { if (!room.players.length) rooms.delete(room.code); throw e; }
-        return json(res, 200, { code: room.code, token: p.token });
+        return json(res, 200, { code: room.code, token: p.token, kind: room.kind });
       }
       const a = findAuth(b.code, b.token);
       if (!a) return json(res, 404, { error: '房間不存在或已過期' });
@@ -206,6 +212,6 @@ setInterval(() => {
 
 if (require.main === module) {
   const port = process.env.PORT || 3000;
-  server.listen(port, '0.0.0.0', () => console.log(`Phase 10 → http://localhost:${port}`));
+  server.listen(port, '0.0.0.0', () => console.log(`Phase 10 / 富士流 → http://localhost:${port}`));
 }
 module.exports = Object.assign(server, { rooms }); // rooms 只給測試改狀態用

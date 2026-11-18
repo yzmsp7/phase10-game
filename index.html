@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Phase 10 線上</title>
+<title>Phase 10・富士流</title>
 <style>
 /* 字級只有 4 級、字重只有 400/600；間距走 4/8 格線。--mute 在 --panel2 上 4.84:1（原 #a8c7b8 只有 3.57） */
 :root{--s1:12px;--s2:16px;--s3:20px;--s4:28px;--bg:#0f3d2e;--panel:#165740;--panel2:#1d6a4f;--ink:#f6f3ea;--mute:#cfe3d8;--accent:#f6c945;--R:#d64545;--B:#3b73d4;--G:#2e9e5b;--Y:#e0b020}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:var(--s2)/1.4 system-ui,-apple-system,"Noto Sans TC",sans-serif;touch-action:manipulation;padding:0 env(safe-area-inset-right) 0 env(safe-area-inset-left)}
-#app:has(.tray){padding-bottom:0;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column} /* 內容不滿一屏時，sticky 托盤會浮在半空 → 撐滿一屏，用 margin-top:auto 把托盤推到最底 */
+#app:has(.tray),#app:has(.cta){padding-bottom:0;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column} /* 內容不滿一屏時，sticky 托盤會浮在半空 → 撐滿一屏，用 margin-top:auto 把托盤推到最底 */
 #app{max-width:1000px;margin:0 auto;padding:12px 16px 40px}
 h1{margin:8px 0 16px;font-size:var(--s4);letter-spacing:.5px}h2{font-size:var(--s2);margin:0 0 8px;color:var(--mute);font-weight:600}
 .panel{background:var(--panel);border-radius:12px;padding:16px;margin-bottom:12px}
@@ -78,6 +78,7 @@ tr.me{color:var(--accent);font-weight:600}h2 small{font-weight:400}
 .hand{gap:4px}.card{width:40px;height:56px}.card.sm{width:32px;height:46px}
 button,select,input{min-height:40px}
 .tray{margin:auto -8px 0;padding:8px 8px calc(12px + env(safe-area-inset-bottom))}
+.cta{margin:auto -8px 0;padding:12px 8px calc(12px + env(safe-area-inset-bottom))} /* 負邊距要跟 #app 的左右內距（8）一樣，否則整頁會橫向溢出 */
 .slotH{flex-wrap:wrap}.big{letter-spacing:4px}
 input[readonly]{width:100%}
 }
@@ -107,13 +108,30 @@ input[readonly]{width:100%}
 .rule:has(input:checked){border-color:var(--accent);background:#1d6a4f}.rule:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
 .rule input{position:absolute;opacity:0;width:44px;height:44px;margin:0}.rule i{flex:none;width:24px;height:24px;border-radius:50%;border:2px solid var(--mute);display:grid;place-items:center;font-style:normal;color:transparent;font-size:var(--s1);font-weight:600}
 .rule:has(input:checked) i{background:var(--accent);border-color:var(--accent);color:#2a2200}.rule span{flex:1;min-width:0}.rule small{display:block;color:var(--mute)}
-.cta{position:sticky;bottom:0;z-index:2;margin:16px -16px 0;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:var(--bg);border-top:1px solid #2f7d5f}.cta button{width:100%;min-height:48px;font-size:var(--s2)}
+.cta{position:sticky;bottom:0;z-index:2;margin:auto -16px 0;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:var(--bg);border-top:1px solid #2f7d5f}.cta button{width:100%;min-height:48px;font-size:var(--s2)}
 .xs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--panel);border-radius:16px 16px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom));box-shadow:0 -8px 24px #0a2a1fcc;max-height:75vh;max-height:75dvh;overflow:auto}
 .xs h3{margin:16px 0 8px;font-size:var(--s2);font-weight:600;color:var(--mute)}.xs h3:first-child{margin-top:0}.xs .row{gap:8px}
 .xs button.on{background:var(--accent);color:#2a2200}.xs .nums button{min-width:44px;min-height:44px;padding:0}.xs .give .card{box-shadow:none}.xs .give .card.sel{outline:3px solid var(--accent);transform:translateY(-4px)}
 .xs .go{width:100%;min-height:48px;margin-top:16px}
 .card.X b{font-size:var(--s3)}.card.X i{font-size:11px;line-height:1.1;text-align:center;max-width:100%}
 .trophy{display:inline-block;animation:pop .7s cubic-bezier(.2,1.4,.4,1)}
+/* 首頁選遊戲、房間、富士流牌桌（手機優先；字級只用 --s1..4，間距 4/8 格線） */
+.gsel{display:flex;gap:8px}.gsel button{flex:1;min-height:96px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:12px 8px;line-height:1.2}.gsel .gi{font-size:var(--s4);line-height:1}.gsel small{font-weight:400}
+.how{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}.how div{background:#0c2f23;border-radius:12px;padding:12px 8px;text-align:center;font-size:var(--s1);line-height:1.3}.how span{display:block;font-size:var(--s4);line-height:1.2;margin-bottom:4px}
+.fold{background:transparent;color:var(--mute);font-weight:400;width:100%;min-height:44px;padding:8px 0;display:flex;align-items:center;gap:8px;text-align:left}.fold::before{content:'▸'}.fold[aria-expanded=true]::before{content:'▾'}.foldb{padding-bottom:8px}
+.av{flex:none;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:600;color:#fff;background:hsl(var(--h) 45% 38%)}
+.pl{display:flex;align-items:center;gap:12px;min-height:48px}.pl .nmx{flex:1;min-width:0;overflow-wrap:anywhere}
+.cta .row{flex-wrap:nowrap}.cta .row button{width:auto}.cta .w{flex:1;display:flex}.cta .w button,.cta .row>button:not(.ghost){flex:1}.cta .ghost{flex:none}
+.card.F{background:hsl(var(--h,210) 60% 40%)}.card.md{width:44px;height:60px}.card.md b{font-size:var(--s3)}
+.fgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:8px 0}
+.ftile{display:flex;gap:8px;align-items:center;min-height:84px;padding:8px;border-radius:12px;background:var(--panel2);border:2px solid transparent;min-width:0}
+.ftile.turn{border-color:var(--accent);box-shadow:0 0 16px 2px #f6c94555}.ftile.out{opacity:.4}.ftile.hit{border:2px dashed #ff8a80}
+.fslot{flex:none;width:44px;height:60px;border-radius:7px}.fslot.e{border:2px dashed #ffffff40}
+.ftx{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:4px}.ftx .nm{font-weight:600;line-height:1.25;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;max-width:100%}.ftx small{color:var(--mute)}
+.pill{display:inline-block;border-radius:8px;padding:0 8px;font-size:var(--s1);line-height:20px;background:#0c2f23;white-space:nowrap}.pill.hot{background:var(--accent);color:#2a2200}.pill.wash{background:#a52a2a;color:#fff}
+.recent{padding:12px;margin-bottom:12px;min-height:96px}.recent .old{font-size:var(--s1);color:var(--mute)}.recent .last{font-size:var(--s2)}
+.hand.f{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:8px;padding:16px 0 8px}.hand.f .card{width:100%;max-width:64px;height:auto;aspect-ratio:5/7;justify-self:center}.hand.f .card b{font-size:var(--s4)}.hand.f.wait .card:not(.sel){opacity:.7}
+.fhint{min-height:40px;font-size:var(--s1);color:var(--mute);text-align:center;display:flex;align-items:center;justify-content:center;padding-bottom:8px}.fhint b{color:var(--accent)}
 </style>
 </head>
 <body>
@@ -142,14 +160,30 @@ const store = {
   get() { try { return JSON.parse(localStorage.getItem('p10') || 'null'); } catch { return null; } },
   set(v) { try { v ? localStorage.setItem('p10', JSON.stringify(v)) : localStorage.removeItem('p10'); } catch {} },
 };
+// 遊戲種類（鍵名跟 server.js 的 KINDS 同一份）。邀請連結帶 &game=，收到的人直接進該遊戲的加入畫面；舊連結沒帶 = Phase 10
+const GAMES = { phase10: { name: 'Phase 10', icon: '🃏', people: '2–6', sub: '湊齊 10 個階段' }, fuji: { name: '富士流', icon: '🌊', people: '3–8', sub: '順水流走，先出完' } };
+const FUJI_RULES = [
+  '每次輪到自己就打出一張牌，放在面前。',
+  '輪回自己時，面前的牌如果還在，就順水流走：棄掉，不用抽牌。',
+  '你打出的牌比場上別人的牌大，那些較小的牌會被沖走，主人要補抽一張。',
+  '場上比你大的牌，大家相安無事。',
+  '相同數字會結盟，數值是場上所有相同數字的總和；同盟同進退，可能還沒輪到自己就流走或被沖走。',
+  '最先出完手牌、且最後一張牌順水流走的人獲勝。',
+];
+const fujiRules = () => `<ul style="margin:8px 0;padding-left:20px">${FUJI_RULES.map((t) => `<li style="margin-top:8px">${t}</li>`).join('')}</ul>`;
 const urlRoom = (new URLSearchParams(location.search).get('room') || '').toUpperCase();
+const urlGame = Object.hasOwn(GAMES, new URLSearchParams(location.search).get('game')) ? new URLSearchParams(location.search).get('game') : 'phase10';
+const folds = new Set(); // 展開中的摺疊區塊：render 會重建 DOM，<details> 的開合會被洗掉，所以自己存
+const fold = (key, title, body) => `<button class="fold" data-a="fold" data-v="${key}" aria-expanded="${folds.has(key)}">${title}</button>${folds.has(key) ? `<div class="foldb">${body}</div>` : ''}`;
+const av = (n) => `<span class="av" style="--h:${Math.abs([...n].reduce((a, c) => (a * 31 + c.codePointAt(0)) | 0, 7)) % 360}" aria-hidden="true">${esc([...n][0] ?? '?')}</span>`; // 名字首字 + 依名字決定的底色
+let pick = (() => { try { const k = localStorage.getItem('p10pick'); return Object.hasOwn(GAMES, k) ? k : 'phase10'; } catch { return 'phase10'; } })(); // 首頁選的遊戲，下次進來沿用
 let dl = null, sess = store.get(), snap = null, es = null, sel = new Set(), slots = {}, los = {}, seen = null, sheet = false, endFor = null, actSlot = null, byColor = false, rxOpen = false, rxSeq = null, histFor = null, drag = null, noClick = false, xs = { target: null, v: null, give: null }; // xs = 交換牌的三個選擇（對象／數字或顏色／要換出的牌）。 // drag = 正在拖的百搭（拖曳中不重繪，不然 DOM 重建會把它弄丟）；noClick = 剛拖完，吃掉隨後的 click。 histFor = 正在看誰的撿棄牌歷史（玩家 id）。 rxOpen = 表情選單開著；rxSeq = 已播到的表情編號（null = 還沒收到第一筆快照）。每次 render 會重建 DOM，UI 狀態要存在這：sheet = 底部資訊面板開著；endFor = 正在選「接前/接後」的順子；actSlot = 放階段時作用中的那一組
 if (sess && urlRoom && sess.code !== urlRoom) sess = null; // 邀請連結指向另一間房 → 先顯示加入畫面
 // 在 localhost 開頁面時，邀請連結／QR 要換成手機連得到的區網 IP（undefined = 查詢中，null = 查不到）。部署後網址不是 localhost，這段不會跑。
 const isLocal = /^(localhost|127\.|\[?::1)/.test(location.hostname);
 let lanHost = isLocal ? undefined : null;
 if (isLocal) fetch('/api/lan').then((r) => r.json()).then((j) => j.ip || null, () => null).then((ip) => { lanHost = ip; if (snap && !snap.game) render(); });
-const inviteLink = (code) => `${lanHost ? `${location.protocol}//${lanHost}${location.port ? ':' + location.port : ''}` : location.origin}/?room=${code}`;
+const inviteLink = (code, kind) => `${lanHost ? `${location.protocol}//${lanHost}${location.port ? ':' + location.port : ''}` : location.origin}/?room=${code}&game=${kind}`;
 
 function toast(m) {
   const t = $('#toast'); t.textContent = m; t.style.display = 'block';
@@ -200,11 +234,11 @@ function connect() {
 // 手機切去別的 App 再回來，iOS 的 EventSource 常常是死的 → 回前景一律重連
 document.addEventListener('visibilitychange', () => { if (!document.hidden && sess) connect(); });
 function exit() {
-  es?.close(); sess = snap = null; xs = { target: null, v: null, give: null }; sel.clear(); slots = {}; los = {}; rxOpen = false; histFor = null; store.set(null);
+  es?.close(); sess = snap = null; xs = { target: null, v: null, give: null }; sel.clear(); slots = {}; los = {}; rxOpen = false; histFor = null; sheet = false; folds.clear(); store.set(null);
   history.replaceState(null, '', '/'); render();
 }
 function enter(r) {
-  sess = r; store.set(r); history.replaceState(null, '', '/?room=' + r.code); connect();
+  sess = r; store.set(r); history.replaceState(null, '', `/?room=${r.code}&game=${r.kind || 'phase10'}`); connect();
 }
 
 const phaseReq = () => snap.game.phases[snap.game.players.find((p) => p.id === snap.me).phase - 1];
@@ -309,40 +343,53 @@ function qrBox(link) {
 }
 
 function lobby() {
+  const kind = urlRoom ? urlGame : pick, GM = GAMES[kind], fj = kind === 'fuji'; // 收到邀請連結 = 直接是那個遊戲，不顯示選單
   const rules = RULES.map(([k, t, d]) => `<label class="rule"><input type="checkbox" data-r="${k}"><i aria-hidden="true">✓</i><span><b>${t}</b><small>${d}</small></span></label>`).join('');
-  return `<h1>🃏 Phase 10 線上</h1>
-  <div class="panel"><h2>你的名字</h2><input id="name" maxlength="12" placeholder="最多 12 字" value="${esc(localStorage.getItem('p10name') || '')}" style="width:100%"></div>
-  ${urlRoom ? '' : `<div class="panel"><h2>開新房間</h2>
-    <div class="row"><div class="fld"><label for="target">目標階段</label><select id="target">${[...Array(10)].map((_, i) => `<option value="${i + 1}" ${i === 9 ? 'selected' : ''}>第 ${i + 1} 階段</option>`).join('')}</select></div>
-    <div class="fld"><label for="turn">每回合秒數</label><input id="turn" type="number" inputmode="numeric" min="10" max="600" value="60"></div></div>
-    <p class="mute" style="margin:8px 0 0">時間到會自動代打（抽牌堆、棄最大張）。</p>
-    <div class="rhd" style="margin-top:24px"><h2>特殊規則</h2><button class="ghost" data-a="allRules" aria-pressed="false">全選</button></div>
-    <p class="mute" style="margin:0 0 8px">都不選就是標準 Phase 10。</p>
-    <div class="rules">${rules}</div>
-    <p class="mute" style="margin:12px 0 0">${SP_NOTE}</p></div>`}
-  <div class="panel"><h2>${urlRoom ? '你被邀請加入房間' : '加入房間'}</h2>
-    <div class="row"><input id="code" maxlength="4" size="6" placeholder="房間代碼" value="${esc(urlRoom)}" style="text-transform:uppercase;flex:1" autocapitalize="characters" autocorrect="off" autocomplete="off" spellcheck="false"><button data-a="join" style="min-height:44px">加入</button>
-    ${urlRoom ? '<button class="ghost" data-a="home" style="min-height:44px">改為開新房間</button>' : ''}</div></div>
-  <p class="mute">2–6 人。建立房間後把邀請連結傳給朋友即可。</p>
-  ${urlRoom ? '' : '<div class="cta"><button data-a="create">建立房間</button></div>'}`;
+  const picker = `<div class="panel"><h2>想玩哪一個？</h2><div class="gsel">${Object.entries(GAMES).map(([k, x]) => `<button class="${k === kind ? '' : 'ghost'}" data-a="pick" data-v="${k}" aria-pressed="${k === kind}"><span class="gi">${x.icon}</span><b>${x.name}</b><small>${x.people} 人</small></button>`).join('')}</div><p class="mute" style="margin:12px 0 0">${GM.sub}</p></div>`;
+  const turnFld = '<div class="fld"><label for="turn">每回合秒數</label><input id="turn" type="number" inputmode="numeric" min="10" max="600" value="60"></div>';
+  const create = fj
+    ? `<div class="panel"><h2>開新房間</h2><div class="row">${turnFld}</div><p class="mute" style="margin:8px 0 0">時間到會自動代打（出最小的牌）。</p>
+      <div class="how"><div><span>🃏</span>每次出一張牌</div><div><span>💦</span>大的沖走小的</div><div><span>🌊</span>沒被沖走就流走</div></div>${fold('howto', '完整玩法', fujiRules())}</div>`
+    : `<div class="panel"><h2>開新房間</h2>
+      <div class="row"><div class="fld"><label for="target">目標階段</label><select id="target">${[...Array(10)].map((_, i) => `<option value="${i + 1}" ${i === 9 ? 'selected' : ''}>第 ${i + 1} 階段</option>`).join('')}</select></div>${turnFld}</div>
+      <p class="mute" style="margin:8px 0 0">時間到會自動代打（抽牌堆、棄最大張）。</p>
+      <div class="rhd" style="margin-top:24px"><h2>特殊規則</h2><button class="ghost" data-a="allRules" aria-pressed="false">全選</button></div>
+      <p class="mute" style="margin:0 0 8px">都不選就是標準 Phase 10。</p>
+      <div class="rules">${rules}</div>
+      <p class="mute" style="margin:12px 0 0">${SP_NOTE}</p></div>`;
+  const code = `<input id="code" maxlength="4" size="6" placeholder="房間代碼" value="${esc(urlRoom)}" style="text-transform:uppercase;flex:1" autocapitalize="characters" autocorrect="off" autocomplete="off" spellcheck="false">`;
+  const name = `<div class="panel"><h2>你的名字</h2><input id="name" maxlength="12" placeholder="最多 12 字" value="${esc(localStorage.getItem('p10name') || '')}" style="width:100%"></div>`;
+  // 邀請進來：先看到自己被邀請玩什麼，填名字，按底部大按鈕加入；沒被邀請：選遊戲 → 名字 → 開房（底部大按鈕）／輸入代碼加入
+  return urlRoom
+    ? `<h1>${GM.icon} ${GM.name}</h1>
+      <div class="panel"><h2>你被邀請加入房間</h2><div class="row">${code}</div><button class="ghost" data-a="home" style="min-height:44px;margin-top:8px">改為開新房間</button></div>
+      ${name}<div class="cta"><button data-a="join">加入${GM.name}</button></div>`
+    : `<h1>🎴 線上牌桌</h1>${picker}${name}${create}
+      <div class="panel"><h2>已經有房間代碼？</h2><div class="row">${code}<button data-a="join" style="min-height:44px">加入</button></div></div>
+      <div class="cta"><button data-a="create">建立${GM.name}房間</button></div>`;
 }
 
 function room() {
-  const s = snap, host = s.me === s.host, n = s.players.length, st = s.settings;
-  const link = inviteLink(s.code);
+  const s = snap, host = s.me === s.host, n = s.players.length, st = s.settings, fj = s.kind === 'fuji', GM = GAMES[s.kind];
+  const link = inviteLink(s.code, s.kind), need = Math.max(0, s.min - n);
   const set = host
     ? `<div class="row"><select data-c="target">${[...Array(10)].map((_, i) => `<option value="${i + 1}" ${st.target === i + 1 ? 'selected' : ''}>目標：第 ${i + 1} 階段</option>`).join('')}</select></div>`
     : `<div>先完成第 ${st.target} 階段者結束遊戲</div>`;
-  return `<h1>房間 <span class="big">${s.code}</span></h1>
-  <div class="panel"><h2>邀請朋友</h2><div class="row"><input readonly value="${esc(link)}" size="34" onfocus="this.select()"><button data-a="copy">${navigator.share ? '分享邀請' : '複製連結'}</button></div>${qrBox(link)}</div>
-  <div class="panel"><div class="row" style="justify-content:space-between"><h2 style="margin:0">玩家（${n}/6）</h2>${host && n > 1 ? '<button class="ghost" data-a="shuffle">🔀 隨機排位子</button>' : ''}</div>
-    ${s.players.map((p, i) => `<div><span class="mute">${i + 1}.</span> <span class="dot ${p.online ? 'on' : ''}"></span>${esc(p.name)} ${p.id === s.host ? '<span class="crown">👑 房主</span>' : ''} ${p.id === s.me ? '<span class="mute">（你）</span>' : ''}</div>`).join('')}</div>
-  <div class="panel"><h2>規則</h2>${set}
+  const rulesPanel = fj
+    ? `<div class="panel"><h2>規則</h2><p style="margin:0">每回合 ${st.turn} 秒，超時自動代打（出最小的牌）。3–6 人每人發 6 張，7–8 人發 5 張。</p>${fold('rules', '完整玩法', fujiRules())}</div>`
+    : `<div class="panel"><h2>規則</h2>${set}
     <p>每回合 ${st.turn} 秒，超時自動代打。</p>
     ${RULES.some(([k]) => st.rules[k]) ? `<ul style="margin:8px 0;padding-left:20px">${RULES.filter(([k]) => st.rules[k]).map(([, t, d]) => `<li style="margin-top:8px"><b>${t}</b><br><small class="mute">${d}</small></li>`).join('')}</ul>${['rv', 'sh', 'xn', 'xc'].some((k) => st.rules[k]) ? `<p class="mute" style="margin:8px 0">${SP_NOTE}</p>` : ''}` : '<p class="mute">標準規則</p>'}
-    <p class="mute">每人發 10 張牌。只有完成當前階段的人，下一回合才能進下一階段；沒完成就繼續挑戰同一階段。有人完成目標階段後，該回合結束時比總分（低者勝）。</p></div>
-  <div class="row">${host ? `<button data-a="start" ${n < 2 ? 'disabled' : ''}>開始遊戲</button>${n < 2 ? '<span class="mute">至少需要 2 人</span>' : ''}` : '<span class="mute">等待房主開始…</span>'}
-  <button class="ghost" data-a="leave">離開房間</button></div>`;
+    <p class="mute">每人發 10 張牌。只有完成當前階段的人，下一回合才能進下一階段；沒完成就繼續挑戰同一階段。有人完成目標階段後，該回合結束時比總分（低者勝）。</p></div>`;
+  // 主動作（分享邀請）一顆大按鈕；連結和 QR 只有面對面才需要，收起來。開始遊戲固定在底部（拇指區）
+  return `<h1>${GM.icon} ${GM.name}</h1>
+  <div class="panel"><div class="row" style="justify-content:space-between;flex-wrap:nowrap"><div><div class="mute">房間代碼</div><div class="big">${s.code}</div></div><button data-a="copy" style="min-height:48px">${navigator.share ? '分享邀請' : '複製連結'}</button></div>
+    ${fold('qr', '面對面？用 QR code 或連結加入', `<input readonly value="${esc(link)}" onfocus="this.select()" style="width:100%">${qrBox(link)}`)}</div>
+  <div class="panel"><div class="rhd"><h2>玩家 ${n}/${s.max}</h2>${host && n > 1 ? '<button class="ghost" data-a="shuffle">🔀 隨機排位子</button>' : ''}</div>
+    ${s.players.map((p) => `<div class="pl">${av(p.name)}<span class="nmx">${esc(p.name)}${p.id === s.me ? ' <span class="mute">（你）</span>' : ''}${p.id === s.host ? ' <span class="crown">👑</span>' : ''}</span><span class="dot ${p.online ? 'on' : ''}" role="img" aria-label="${p.online ? '在線' : '離線'}" style="margin:0"></span></div>`).join('')}
+    <p class="mute" style="margin:8px 0 0">${need ? `再邀請 ${need} 位朋友就能開始（${s.min}–${s.max} 人）` : host ? '人數夠了，可以開始！' : '人數夠了，等房主開始'}</p></div>
+  ${rulesPanel}
+  <div class="cta"><div class="row"><button class="ghost" data-a="leave" style="min-height:48px">離開</button>${host ? `<span class="w" data-why="${need ? `至少需要 ${s.min} 人` : ''}"><button data-a="start" ${need ? 'disabled' : ''}>開始遊戲</button></span>` : '<span class="mute" style="flex:1;text-align:center">等待房主開始…</span>'}</div></div>`;
 }
 
 function game() {
@@ -505,12 +552,73 @@ function overlay(g, s) {
     <div class="row act foot">${foot}</div></div></div>`;
 }
 
+// 富士流：牌面只有數字，越大越紅
+const fcard = (c, o = {}) => `<${o.tag || 'button'} class="card F ${o.cls || ''}" style="--h:${Math.round(210 + (c.n - 2) * 140 / 18)}" aria-label="${c.n}" ${o.attrs || ''}><b>${c.n}</b></${o.tag || 'button'}>`;
+function fuji() {
+  const s = snap, g = s.game, me = s.me, myTurn = g.turn === me;
+  const name = (id) => g.players.find((p) => p.id === id)?.name ?? '?', nm = (id) => (id === me ? '你' : esc(name(id)));
+  const online = Object.fromEntries(s.players.map((p) => [p.id, p.online]));
+  if (g.status !== 'play') sheet = false;
+  const ids = new Set(g.hand.map((c) => c.id));
+  sel.forEach((id) => ids.has(id) || sel.delete(id));
+  // 新事件（第一次 render／重連只記錄不重播）：我的牌被沖走 = 這場的小高潮（橫幅＋震動）；流走只輕輕提示
+  seen ??= {};
+  const ev = g.ev, fresh = !!ev && seen.evNo !== undefined && ev.no !== seen.evNo;
+  if (fresh) {
+    const out = ev.out.find((o) => o.id === me), gone = ev.gone.find((x) => x.id === me);
+    if (out) { skipBanner(`💦 你的 ${out.n} 被 ${nm(ev.by)} 沖走了<div class="mute" style="margin-top:8px;font-size:var(--s2)">補抽 1 張</div>`); navigator.vibrate?.([60, 40, 60]); }
+    else if (gone) { toast(`🌊 你的 ${gone.n} 順水流走`); navigator.vibrate?.(30); }
+  }
+  seen.evNo = ev ? ev.no : null;
+  const hand = [...g.hand].sort((a, b) => a.n - b.n), one = hand.find((c) => sel.has(c.id));
+  // 選牌預覽：只用桌上公開的牌，規則同 fuji.js act()（同盟合計嚴格大於才沖走）
+  const mates = one ? g.players.filter((p) => p.card?.n === one.n) : [], total = one ? one.n * (mates.length + 1) : 0;
+  const wash = new Set(one ? g.players.filter((p) => p.card && p.card.n !== one.n && p.sum < total).map((p) => p.id) : []);
+  const tiles = g.players.map((p) => {
+    const c = p.card, tag = wash.has(p.id) ? '<span class="pill wash">💦 會被沖走</span>'
+      : one && c?.n === one.n ? `<span class="pill hot">🤝 結盟 → ${total}</span>`
+      : c && p.sum > c.n ? `<span class="pill">🤝 同盟 ${p.sum}</span>`
+      : c && !p.n && p.in ? '<span class="pill hot">⚡ 差一步獲勝</span>' : '';
+    return `<div class="ftile ${g.turn === p.id ? 'turn' : ''} ${p.in ? '' : 'out'} ${wash.has(p.id) ? 'hit' : ''}" data-pid="${p.id}">
+      <div class="fslot ${c ? '' : 'e'}">${c ? fcard(c, { tag: 'div', cls: `md ${fresh && ev.by === p.id ? 'pop' : ''}` }) : ''}</div>
+      <div class="ftx"><span class="nm">${esc(p.name)}${p.id === me ? '（你）' : ''}</span><small>${p.left ? '已離開' : `${p.n} 張手牌${online[p.id] ? '' : ' 💤'}`}</small>${tag}</div></div>`;
+  }).join('');
+  const lines = g.log.slice(-3);
+  const recent = `<div class="panel recent"><div class="mute" style="margin-bottom:8px">牌堆 ${g.drawCount} · 棄牌 ${g.discCount}</div>${lines.map((l, i) => `<div class="${i === lines.length - 1 ? 'last' : 'old'}">${esc(l)}</div>`).join('')}</div>`;
+  const why = !myTurn ? `還沒輪到你，現在是 ${name(g.turn)}` : one ? '' : '先點一張要打出的牌';
+  const hint = !one ? (myTurn ? '點一張牌，會預覽誰被沖走' : `等 ${esc(name(g.turn))} 出牌…`)
+    : `${mates.length ? `與 ${mates.map((p) => esc(p.name)).join('、')} 結盟，合計 <b>${total}</b>。` : ''}${wash.size ? `沖走 <b>${[...wash].map((id) => esc(name(id))).join('、')}</b>` : '沒有人會被沖走'}`;
+  const tray = g.status !== 'play' ? fujiOver(g, s) : `<div class="tray"><div class="row" style="justify-content:space-between;flex-wrap:nowrap"><b class="${myTurn ? 'crown' : ''}">${myTurn ? '輪到你了' : `輪到 ${esc(name(g.turn))}`}</b><b class="cd" aria-live="off"></b></div>
+    <div class="hand f ${myTurn ? '' : 'wait'}">${hand.map((c) => fcard(c, { cls: sel.has(c.id) ? 'sel' : '', attrs: `data-a="fcard" data-v="${c.id}" aria-pressed="${sel.has(c.id)}"` })).join('') || '<div class="mute" style="text-align:center;padding:24px 0">你的牌都打出去了，等最後一張順水流走</div>'}</div>
+    <div class="fhint" aria-live="polite">${hint}</div>
+    <div class="row act"><span class="w" data-why="${esc(why)}"><button data-a="fplay" ${why ? 'disabled' : ''}>${one ? `打出 ${one.n}` : '打出'}</button></span></div></div>`;
+  const sheetUI = sheet && g.status === 'play' ? `<div class="overlay sheet"><div class="bd" data-a="sheet"></div><div class="modal" role="dialog" aria-label="玩法與動態">
+    <div class="row" style="justify-content:space-between"><h2 style="margin:0">玩法與動態</h2><button class="ghost ic" data-a="sheet" aria-label="關閉">✕</button></div>
+    ${fujiRules()}<h2 style="margin-top:16px">最近動態</h2><div class="log">${g.log.map(esc).join('<br>')}</div>
+    <button class="ghost" data-a="leave" style="width:100%;margin-top:16px">離開房間</button></div></div>` : '';
+  return `<div class="row" style="flex-wrap:nowrap"><b style="flex:1;min-width:0">🌊 富士流 · ${s.code}</b>
+    <span class="rxw"><button class="ghost ic" data-a="rxMenu" aria-label="送表情" aria-expanded="${rxOpen}">😀</button>${rxOpen ? `<div class="rxp">${EMOJI.map((e) => `<button data-a="react" data-v="${e}" aria-label="${e}">${e}</button>`).join('')}</div>` : ''}</span>
+    <button class="ghost ic" data-a="sheet" aria-label="玩法、動態、離開">📋</button></div>
+  <div class="fgrid">${tiles}</div>${recent}${tray}${sheetUI}`;
+}
+function fujiOver(g, s) {
+  const me = s.me, host = me === s.host, win = g.winners.includes(me), nm = (id) => esc(g.players.find((p) => p.id === id).name);
+  // 排行榜：獲勝者在前，其餘依剩牌少者優先；同條件並列同名次（跟 Phase 10 結算同一個樣式）
+  const cmp = (a, b) => g.winners.includes(b.id) - g.winners.includes(a.id) || a.n - b.n;
+  const sorted = g.players.filter((p) => !p.left).sort(cmp);
+  const board = sorted.map((p) => { const r = sorted.findIndex((q) => !cmp(q, p));
+    return `<div class="res rk ${p.id === me ? 'me' : ''}"><div class="row" style="justify-content:space-between;flex-wrap:nowrap"><b><span style="display:inline-block;min-width:2em">${['🥇', '🥈', '🥉'][r] ?? r + 1}</span>${esc(p.name)}${p.id === me ? '（你）' : ''}</b><span>${g.winners.includes(p.id) ? '出完了' : `剩 ${p.n} 張`}</span></div></div>`; }).join('');
+  const foot = host ? '<button data-a="back">回到房間再來一局</button><button class="ghost" data-a="leave">離開房間</button>' : `<span class="mute">等 ${nm(s.host)} 開新局…</span><button class="ghost" data-a="leave">離開房間</button>`;
+  return `<div class="overlay"><div class="modal res-m"><div class="body"><div class="hd">${win ? '<span class="trophy">🏆</span> 你贏了！' : `🏆 ${g.winners.map(nm).join('、')} 獲勝`}</div>${win ? '' : '<div class="mute">差一點，再來一局！</div>'}${board}</div>
+    <div class="row act foot">${foot}</div></div></div>`;
+}
+
 function render() {
-  const form = [...document.querySelectorAll('#name,#target,#turn,[data-r]')].map((e) => [e, e.type === 'checkbox' ? e.checked : e.value]); // 建房表單：重繪不能洗掉使用者已填／已勾的
+  const form = [...document.querySelectorAll('#name,#code,#target,#turn,[data-r]')].map((e) => [e, e.type === 'checkbox' ? e.checked : e.value]); // 建房表單：重繪不能洗掉使用者已填／已勾的
   const keep = Object.fromEntries(form.map(([e, v]) => [e.id || e.dataset.r, v]));
   if (!snap?.game) seen = null; // 離開／重開一場遊戲後不要沿用舊手牌
-  $('#app').innerHTML = !sess ? lobby() : !snap ? '<p>連線中…</p>' : snap.game ? game() : room();
-  for (const e of document.querySelectorAll('#name,#target,#turn,[data-r]')) { const v = keep[e.id || e.dataset.r]; if (v !== undefined) e.type === 'checkbox' ? (e.checked = v) : (e.value = v); }
+  $('#app').innerHTML = !sess ? lobby() : !snap ? '<p>連線中…</p>' : snap.game ? (snap.kind === 'fuji' ? fuji() : game()) : room();
+  for (const e of document.querySelectorAll('#name,#code,#target,#turn,[data-r]')) { const v = keep[e.id || e.dataset.r]; if (v !== undefined) e.type === 'checkbox' ? (e.checked = v) : (e.value = v); }
   const all = [...document.querySelectorAll('[data-r]')]; if (all.length && all.every((b) => b.checked)) { const b = $('[data-a="allRules"]'); if (b) b.textContent = '全不選'; }
   tick();
 }
@@ -529,7 +637,13 @@ function tick() {
 setInterval(tick, 250);
 
 const A = {
-  async create() { const rules = Object.fromEntries(RULES.map(([k]) => [k, !!$(`[data-r="${k}"]`)?.checked])); const r = await post('create', { name: $('#name').value, turn: +$('#turn').value, target: +$('#target').value, rules }).catch((e) => toast(e.message)); if (r) { localStorage.setItem('p10name', $('#name').value); enter(r); } },
+  async create() {
+    const body = { kind: pick, name: $('#name').value, turn: +$('#turn').value };
+    if (pick === 'phase10') Object.assign(body, { target: +$('#target').value, rules: Object.fromEntries(RULES.map(([k]) => [k, !!$(`[data-r="${k}"]`)?.checked])) });
+    const r = await post('create', body).catch((e) => toast(e.message)); if (r) { localStorage.setItem('p10name', $('#name').value); enter(r); }
+  },
+  fold(v) { folds.has(v) ? folds.delete(v) : folds.add(v); render(); },
+  pick(v) { pick = v; try { localStorage.setItem('p10pick', v); } catch {} render(); },
   async join() { const r = await post('join', { name: $('#name').value, code: $('#code').value }).catch((e) => toast(e.message)); if (r) { localStorage.setItem('p10name', $('#name').value); enter(r); } },
   home() { history.replaceState(null, '', '/'); location.reload(); },
   allRules(v, btn) { // 一次勾選：現在全勾了就全部取消，否則全部勾起來
@@ -537,9 +651,9 @@ const A = {
     boxes.forEach((b) => (b.checked = on)); btn.textContent = on ? '全不選' : '全選'; btn.setAttribute('aria-pressed', on);
   },
   async copy() {
-    const l = inviteLink(snap.code);
+    const l = inviteLink(snap.code, snap.kind), gn = GAMES[snap.kind].name;
     // 手機優先叫出系統分享面板（LINE／訊息一步到位）；使用者按取消不算失敗
-    if (navigator.share) { try { return await navigator.share({ title: 'Phase 10', text: '來玩 Phase 10！', url: l }); } catch (e) { if (e.name === 'AbortError') return; } }
+    if (navigator.share) { try { return await navigator.share({ title: gn, text: `來玩 ${gn}！`, url: l }); } catch (e) { if (e.name === 'AbortError') return; } }
     try { await navigator.clipboard.writeText(l); toast('已複製邀請連結'); } catch { prompt('複製這個連結傳給朋友：', l); }
   },
   start: () => call('start'),
@@ -555,6 +669,8 @@ const A = {
   back: () => call('back'),
   next: () => call('act', { action: { type: 'next' } }),
   draw: (v) => call('act', { action: { type: 'draw', from: v } }),
+  fcard(v) { sel = new Set(sel.has(+v) ? [] : [+v]); render(); }, // 富士流一次只能選一張
+  fplay: () => call('act', { action: { type: 'play', card: [...sel][0] } }).then((r) => r && sel.clear()),
   card(v) {
     endFor = null;
     if (actSlot === null) sel.has(+v) ? sel.delete(+v) : sel.add(+v);

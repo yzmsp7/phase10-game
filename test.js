@@ -603,6 +603,108 @@ for (let np = 2; np <= 6; np++) {
   assert.ok(g.round >= 3);
 }
 
+// --- 富士流 ---
+{
+  const F = require('./fuji');
+  const fd = F.deck();
+  assert.equal(fd.length, 90);
+  assert.equal(fd.filter((c) => c.n === 2).length, 16);
+  assert.equal(fd.filter((c) => c.n === 8).length, 5);
+  assert.equal(Math.max(...fd.map((c) => c.n)), 20);
+  assert.equal(new Set(fd.map((c) => c.id)).size, 90);
+  const ppl = (k) => Array.from({ length: k }, (_, i) => ({ id: 'p' + i, name: 'P' + i }));
+  assert.equal(F.create(ppl(6)).players[0].hand.length, 6, '3–6 人發 6 張');
+  assert.equal(F.create(ppl(7)).players[0].hand.length, 5, '7–8 人發 5 張');
+  // 手牌固定的小牌局：p0 先出；牌堆放幾張已知的牌
+  const mk = (hands, k = hands.length) => {
+    const g = F.create(ppl(k));
+    g.turn = 0; g.draw = [100, 101, 102, 103].map((id) => ({ id, n: 2 })); g.log = [];
+    g.players.forEach((p, i) => { p.hand = (hands[i] || []).map((n, j) => ({ id: i * 10 + j, n })); p.card = null; });
+    return g;
+  };
+  const play = (g, i, n) => F.act(g, g.players[i].id, { type: 'play', card: g.players[i].hand.find((c) => c.n === n).id });
+  let g = mk([[5, 9], [3, 9], [7, 9]]);
+  play(g, 0, 5); play(g, 1, 3);
+  assert.equal(g.players[0].card.n, 5, '比別人大的不會被沖走');
+  play(g, 2, 7); // 7 沖走 5 和 3，各抽 1
+  assert.ok(g.players[0].card === null && g.players[1].card === null, '較小的被沖走');
+  assert.deepEqual([g.players[0].hand.length, g.players[1].hand.length, g.players[2].hand.length], [2, 2, 1], '被沖走的人手牌數不變');
+  assert.equal(g.disc.length, 2);
+  const e1 = F.view(g, 'p0').ev; // 結構化事件：前端靠它提示「你的牌被沖走／流走」
+  assert.deepEqual([e1.by, e1.n, e1.out.map((o) => o.id + o.n)], ['p2', 7, ['p05', 'p13']]);
+  // 輪回自己：面前的牌還在 → 流走、不補牌
+  g = mk([[5, 9], [3, 9], [2, 9]]);
+  play(g, 0, 5); play(g, 1, 3); play(g, 2, 2);
+  assert.equal(g.players[0].card, null, '輪回來時 5 順水流走');
+  assert.equal(g.players[0].hand.length, 1, '流走不補牌');
+  assert.equal(g.players[1].card.n, 3, '別人的牌不受影響');
+  // 同盟：8+8=16 擋住 9、10；打出 17 才沖得走；同盟一起被沖走、各抽 1
+  g = mk([[8, 20], [3, 8, 20], [9, 17], [10, 17]]);
+  play(g, 0, 8); play(g, 1, 8);
+  assert.equal(g.players[0].card.n, 8); assert.equal(F.view(g, 'p0').players[1].sum, 16, '同盟合計 16');
+  play(g, 2, 9);
+  assert.ok(g.players[0].card && g.players[1].card && g.players[2].card, '9 小於同盟 16，誰都沒被沖走');
+  play(g, 3, 10); // 10 沖走 9；輪回 p0 → 同盟 8+8 一起流走
+  assert.equal(g.players[2].card, null, '9 被 10 沖走'); assert.equal(g.players[2].hand.length, 2, '被沖走的補 1 張');
+  assert.ok(g.players[0].card === null && g.players[1].card === null, '同盟一起流走，10 小於 16 沖不走它們');
+  assert.equal(g.players[3].card.n, 10);
+  // 回到 p0：同盟一起流走（p1 還沒輪到也走了）
+  const g2 = mk([[8, 20], [8, 20], [4, 20]]);
+  play(g2, 0, 8); play(g2, 1, 8); play(g2, 2, 4);
+  assert.ok(g2.players[0].card === null && g2.players[1].card === null, '同盟成功是一體的：輪到 p0 時 p1 的牌一起流走');
+  assert.deepEqual(F.view(g2, 'p2').ev.gone.map((x) => x.id), ['p0', 'p1'], '流走的事件記在觸發它的那一手上');
+  assert.equal(g2.players[1].hand.length, 1, '同盟流走不補牌');
+  // 同盟被沖走：p0、p1 的 8 都被 17 沖掉，各抽 1
+  const g3 = mk([[8, 20], [8, 20], [17, 20]]);
+  play(g3, 0, 8); play(g3, 1, 8); play(g3, 2, 17);
+  assert.ok(g3.players[0].card === null && g3.players[1].card === null && g3.players[2].card.n === 17);
+  assert.deepEqual(g3.players.map((p) => p.hand.length), [2, 2, 1], '同盟失敗是一體的，各抽 1');
+  // 合計剛好相等不沖：8+8=16 vs 單張 16
+  const g4 = mk([[8, 20], [8, 20], [16, 20]]);
+  play(g4, 0, 8); play(g4, 1, 8); play(g4, 2, 16);
+  assert.deepEqual(g4.players.map((p) => p.hand.length), [1, 1, 1], '16 不大於 16，沒人被沖走（沒人補牌）');
+  assert.equal(g4.players[2].card.n, 16);
+  // 勝利：最後一張打出且流走才算；中途被沖走要補牌繼續
+  let w = mk([[5], [3, 9], [4, 9]]);
+  play(w, 0, 5); play(w, 1, 3);
+  assert.equal(w.status, 'play', '最後一張打出還沒流走，不算贏');
+  play(w, 2, 4);
+  assert.equal(w.status, 'over'); assert.deepEqual(w.winners, ['p0']);
+  w = mk([[5], [3, 9], [7, 9]]);
+  play(w, 0, 5); play(w, 1, 3); play(w, 2, 7); // 沖走 5：p0 抽 1
+  assert.equal(w.status, 'play'); assert.equal(w.players[0].hand.length, 1, '最後一張被沖走要補牌');
+  // 同盟一起贏：兩人的最後一張同數字、一起流走
+  w = mk([[6], [6], [2, 9]]);
+  play(w, 0, 6); play(w, 1, 6); play(w, 2, 2);
+  assert.deepEqual(w.winners.sort(), ['p0', 'p1'], '同盟一起流走，兩人同時出完');
+  // 錯誤：不是自己的回合／沒有這張牌
+  g = mk([[5], [3], [4]]);
+  throws(() => F.act(g, 'p1', { type: 'play', card: 10 }), /還沒輪到/);
+  throws(() => F.act(g, 'p0', { type: 'play', card: 999 }), /沒有這張牌/);
+  throws(() => F.act(g, 'p0', { type: 'x' }), /未知/);
+  // 中途退出：牌回棄牌堆、輪到他就換人、同盟重算
+  g = mk([[8, 9], [8, 9], [4, 9]]);
+  play(g, 0, 8);
+  assert.equal(F.leave(g, 'p1'), 2);
+  assert.equal(g.players[1].in, false); assert.equal(g.turn, 2, '輪到他的回合直接換人');
+  assert.equal(F.view(g, 'p0').players[0].sum, 8, '同盟少一人，合計重算');
+  // 牌守恆 + 隨機機器人整局（3–8 人）：一定會結束、牌不多不少
+  for (let np = 3; np <= 8; np++) for (let t = 0; t < 20; t++) {
+    const s = F.create(ppl(np));
+    const total = () => s.players.reduce((a, p) => a + p.hand.length + (p.card ? 1 : 0), 0) + s.draw.length + s.disc.length;
+    let steps = 0;
+    while (s.status === 'play') {
+      const p = s.players[s.turn];
+      F.act(s, p.id, { type: 'play', card: p.hand[randomInt(p.hand.length)].id });
+      assert.equal(total(), 90, '牌數守恆');
+      assert.ok(++steps < 5000, '整局要能結束');
+    }
+    assert.ok(s.winners.length >= 1);
+  }
+  F.autoPlay(mk([[5, 2], [3], [4]]), 'p0'); // 代打不會丟錯
+}
+function randomInt(n) { return require('node:crypto').randomInt(n); }
+
 // --- HTTP 冒煙測試 ---
 (async () => {
   const server = require('./server');
@@ -702,6 +804,37 @@ for (let np = 2; np <= 6; np++) {
     await post('start', r);
     assert.equal(server.rooms.get(r.code).game.draw.length + server.rooms.get(r.code).game.disc.length + 20, 110, '只開迴轉 = 110 張');
     await post('leave', g);
+  }
+  { // 富士流：建房種類、人數 3–8、無效種類被拒、設定不套用 Phase 10 的欄位；前端與伺服器的遊戲鍵名一致
+    assert.equal((await post('create', { name: 'x', kind: 'chess' })).status, 400, '不支援的遊戲');
+    assert.equal((await post('create', { name: 'x', kind: '__proto__' })).status, 400, '原型鍵也要擋');
+    assert.equal(server.rooms.get(host.code).kind, 'phase10', '沒帶 kind = Phase 10（舊連結相容）');
+    assert.equal(host.kind, 'phase10');
+    const f = (await post('create', { name: 'F0', kind: 'fuji', target: 3, rules: { rv: true } })).json;
+    const fr = server.rooms.get(f.code);
+    assert.equal(f.kind, 'fuji'); assert.deepEqual(Object.keys(fr.settings), ['turn'], '富士流沒有階段與特殊規則');
+    const v0 = await sseOnce(f);
+    assert.deepEqual([v0.kind, v0.min, v0.max], ['fuji', 3, 8]);
+    assert.equal((await post('join', { code: f.code, name: 'F1' })).json.kind, 'fuji');
+    assert.equal((await post('start', f)).status, 400, '富士流 2 人不能開');
+    assert.equal((await post('settings', { ...f, target: 2 })).status, 200); assert.equal(fr.settings.target, undefined, '富士流忽略 target');
+    const fs2 = [];
+    for (let i = 2; i < 8; i++) fs2.push((await post('join', { code: f.code, name: 'F' + i })).json);
+    assert.equal((await post('join', { code: f.code, name: '第九人' })).status, 400, '富士流滿 8 人');
+    assert.equal((await post('start', f)).status, 200);
+    const fv = await sseOnce(fs2[0]);
+    assert.equal(fv.game.hand.length, 5, '8 人每人 5 張');
+    assert.ok(fv.game.players.every((p) => p.n === 5));
+    assert.ok(!JSON.stringify(fv.game).includes('"hand":[{"id"') || fv.game.players.every((p) => !('hand' in p)), '看不到別人手牌');
+    const turnTok = fr.players.find((q) => q.id === fr.game.players[fr.game.turn].id).token;
+    const turnP = { code: f.code, token: turnTok };
+    assert.equal((await post('act', { ...turnP, action: { type: 'play', card: -1 } })).status, 400, '沒這張牌');
+    const my = fr.game.players[fr.game.turn];
+    assert.equal((await post('act', { ...turnP, action: { type: 'play', card: my.hand[0].id } })).status, 200, '輪到的人出牌');
+    assert.ok(fr.game.turnNo >= 2, '出牌後換人');
+    assert.equal((await post('start', f)).status, 400, '已開始');
+    const wl = (f2) => [...read(f2).matchAll(/^(?:const KINDS = \{| *const GAMES = \{)(.*)$/gm)].map((m) => [...m[1].matchAll(/\b(\w+): \{/g)].map((x) => x[1]).filter((k) => k !== 'eng').join());
+    assert.equal(wl('server.js')[0], 'phase10,fuji'); assert.equal(wl('index.html')[0], 'phase10,fuji', '伺服器與前端的遊戲鍵名要一致');
   }
   const cardsIn = (g) => g.players.reduce((a, p) => a + p.hand.length, 0) + g.groups.reduce((a, x) => a + x.cards.length, 0) + g.draw.length + g.disc.length;
 
