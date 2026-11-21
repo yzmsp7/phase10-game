@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Phase 10・富士流</title>
+<title>Phase 10・富士流・貓貓食堂</title>
 <style>
 /* 字級只有 4 級、字重只有 400/600；間距走 4/8 格線。--mute 在 --panel2 上 4.84:1（原 #a8c7b8 只有 3.57） */
 :root{--s1:12px;--s2:16px;--s3:20px;--s4:28px;--bg:#0f3d2e;--panel:#165740;--panel2:#1d6a4f;--ink:#f6f3ea;--mute:#cfe3d8;--accent:#f6c945;--R:#d64545;--B:#3b73d4;--G:#2e9e5b;--Y:#e0b020}
@@ -187,6 +187,80 @@ input[readonly]{width:100%}
 .fhint{min-height:24px;padding:2px 0 6px}
 }
 @media(max-height:500px){.ftable{max-width:310px}}
+/* 貓貓食堂：暖木居酒屋牌桌主題（4 級字級、4/8 格線、手機優先、90° 橫置牌面） */
+body.cats-mode{--bg:#21140d;--panel:#332015;--panel2:#442b1c;--ink:#fbf4e8;--mute:#e4cdb6;--accent:#f6c453;background:radial-gradient(circle at 50% 0%,#352014 0%,#21140d 70%)}
+body.cats-mode .tray{border-top-color:#68432b;box-shadow:0 -8px 20px #120a06cc}
+body.cats-mode .fmeta,body.cats-mode .fticker{border-color:#68432b}
+body.cats-mode .rxp{border-color:#68432b;box-shadow:0 8px 20px #120a06cc}
+body.cats-mode .slot{background:#24150d}
+.cstage{flex:1;display:flex;align-items:center;justify-content:center;padding:4px 0;min-height:0}
+.ctable{position:relative;width:100%;max-width:440px;aspect-ratio:1/0.98;margin:0 auto;user-select:none;-webkit-user-select:none}
+.cfelt{position:absolute;inset:9.5%;border-radius:50%;background:radial-gradient(circle at 50% 42%,#6e4326 0%,#4b2c18 62%,#321c0f 100%);border:4px solid #8a5733;box-shadow:inset 0 0 28px #180c06bb,0 12px 28px #0d0603cc,0 0 0 5px #24140b,inset 0 0 0 2px #c88d5533}
+.chub{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:60px;height:60px;border-radius:50%;background:radial-gradient(circle at 50% 35%,#3e2517,#24140b);border:1.5px solid #9d693e;box-shadow:0 4px 14px #100703bb,inset 0 1px 0 #f6c45344;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;z-index:1;pointer-events:none}
+.chub b{font-size:var(--s2);line-height:1.05;color:var(--accent);font-variant-numeric:tabular-nums}.chub small{font-size:var(--s1);line-height:1.1;color:var(--mute);transform:scale(.84)}
+.chub-ptr{position:absolute;inset:-7px;transform:rotate(var(--ang,90deg));transition:transform .45s cubic-bezier(.22,1,.36,1)}
+.chub-ptr::after{content:'';position:absolute;left:50%;top:50%;width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:9px solid var(--accent);transform:translate(-50%,calc(-50% - 35px));filter:drop-shadow(0 0 5px #f6c453cc)}
+.ccwrap{position:absolute;transform:translate(-50%,-50%);z-index:2;display:flex;align-items:center;justify-content:center}
+.ccard{position:relative;width:52px;height:70px;border-radius:9px;border:2px solid #e7d1b2;background:linear-gradient(180deg,#fffaf1 0%,#f3e3c9 100%);color:#311e12;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:2px;font-weight:600;box-shadow:inset 0 1px 0 #ffffffdd,0 5px 12px #140a04aa;transition:transform .28s cubic-bezier(.2,1.2,.4,1),box-shadow .2s ease;flex:none;font-variant-numeric:tabular-nums}
+.ccard.t1{background:linear-gradient(180deg,#f7f1e8 0%,#e5d6c3 100%);border-color:#c9b49c}
+.ccard.t2{background:linear-gradient(180deg,#fff7e6 0%,#f7ddb3 100%);border-color:#dfa55b}
+.ccard.t3{background:linear-gradient(180deg,#fff9df 0%,#fce19b 100%);border-color:#e5a935;box-shadow:inset 0 1px 0 #fff,0 5px 14px #2a1404aa,0 0 0 1px #f6c45366}
+.ccard b{font-size:var(--s3);line-height:1}.ccard em{font-style:normal;font-size:var(--s2);line-height:1.05}.ccard span{font-size:10px;line-height:1.1;opacity:.85;white-space:nowrap}
+.ccard.side{transform:rotate(-90deg);border-color:#e25b5b;background:linear-gradient(180deg,#ffeaea 0%,#f3c2c2 100%);color:#5c1414;box-shadow:0 4px 12px #3b0808aa}
+.ccard.pos{border-color:#5ec982;box-shadow:inset 0 1px 0 #fff,0 0 0 2px #5ec98266,0 6px 14px #140a04aa}
+.ccard.pre{opacity:.78;border-style:dashed;border-color:var(--accent);box-shadow:0 0 14px #f6c45366}
+.ccard.back{background:repeating-linear-gradient(135deg,#6d3222,#6d3222 6px,#572518 6px,#572518 12px);border-color:#d8a363;color:#f6c453}
+.ccard.back b{font-size:var(--s3)}
+.ccard.flip{animation:cflip .48s cubic-bezier(.18,1.25,.35,1) both}
+.ccard.side.flip{animation:cflipSide .52s cubic-bezier(.18,1.25,.35,1) both}
+@keyframes cflip{from{transform:scale(.55) rotateY(90deg);opacity:.3}to{transform:none;opacity:1}}
+@keyframes cflipSide{0%{transform:scale(.55) rotateY(90deg);opacity:.3}55%{transform:scale(1.06) rotate(-12deg);opacity:1}100%{transform:rotate(-90deg);opacity:1}}
+.cempty{width:52px;height:70px;border-radius:9px;border:1.5px dashed #e4cdb644;background:#1c100944;display:flex;align-items:center;justify-content:center;font-size:var(--s2);color:#e4cdb644}
+.cempty.need{border-color:var(--accent);background:#f6c45318;box-shadow:0 0 14px #f6c45333;color:var(--accent)}
+.cbadge{position:absolute;left:50%;bottom:-11px;transform:translateX(-50%);border-radius:8px;padding:0 6px;font-size:var(--s1);font-weight:600;line-height:18px;white-space:nowrap;box-shadow:0 2px 6px #120804bb;z-index:4;pointer-events:none;font-variant-numeric:tabular-nums}
+.cbadge.pos{background:#237a46;color:#fff;border:1px solid #6be09788}
+.cbadge.neg{background:#b82e2e;color:#fff;border:1px solid #ff9e9e88}
+.cbadge.hot{background:var(--accent);color:#2d1a00}
+.ctag{position:absolute;top:-9px;right:-8px;background:#24140b;color:var(--accent);border:1px solid #f6c45399;border-radius:8px;padding:0 5px;font-size:10px;line-height:16px;font-weight:600;z-index:4;pointer-events:none;white-space:nowrap}
+.cseat{position:absolute;transform:translate(-50%,-50%);z-index:3;width:94px;padding:5px 7px;border-radius:12px;background:#2c1b12ee;border:2px solid #68432b;box-shadow:0 4px 12px #0f0703bb;text-align:left;cursor:pointer;transition:border-color .2s,box-shadow .2s,transform .2s}
+.cseat.me{background:#3c2518f0;border-color:#9b6740}
+.cseat.ldr{border-color:var(--accent);box-shadow:0 0 18px 2px #f6c45366,0 4px 12px #0f0703bb;transform:translate(-50%,-50%) scale(1.04)}
+.cseat.out{opacity:.4}
+.cseat:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.cseat-top{display:flex;align-items:center;gap:5px;min-width:0}
+.cseat .fnm{flex:1;min-width:0;font-size:var(--s1);font-weight:600;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cseat-meta{display:flex;align-items:center;justify-content:space-between;gap:4px;margin-top:3px;font-size:var(--s1);line-height:1.15;color:var(--mute);white-space:nowrap;font-variant-numeric:tabular-nums}
+.cseat-st{margin-top:2px;font-size:10px;line-height:1.2;display:flex;align-items:center;justify-content:space-between;gap:4px}
+.cpill{display:inline-flex;align-items:center;gap:2px;padding:1px 5px;border-radius:6px;font-size:10px;font-weight:600}
+.cpill.ok{background:#237a4644;color:#8cf0b2;border:1px solid #5ec98255}
+.cpill.wait{background:#f6c45322;color:var(--accent);border:1px solid #f6c45344}
+.cat-av{flex:none;width:26px;height:26px;display:inline-block}
+.cat-av.lg{width:34px;height:34px}
+.hand.c{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;padding:8px 0 6px}
+.hand.c .ccard{width:100%;height:62px;padding:2px 1px;cursor:pointer}
+.hand.c .ccard b{font-size:var(--s2)}.hand.c .ccard em{font-size:15px}.hand.c .ccard span{font-size:10px}
+.hand.c .ccard.sel{transform:translateY(-7px);outline:3px solid var(--accent);box-shadow:0 8px 16px #0f0703cc,0 0 14px #f6c45366}
+.hand.c .ccard.picked{outline:3px solid #6be097;background:linear-gradient(180deg,#e8fff1,#c2f0d4)}
+.hand.c.locked .ccard:not(.picked){opacity:.55}
+.cmini-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;align-items:center}
+.cmini{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:40px;padding:0 5px;border-radius:7px;font-weight:600;font-size:var(--s1);font-variant-numeric:tabular-nums;border:1.5px solid}
+.cmini.pos{background:#e7f9ee;color:#144d2a;border-color:#5ec982}
+.cmini.neg{background:#fdeaea;color:#7a1818;border-color:#e25b5b;transform:rotate(-8deg)}
+.cmini.rem{background:#24150d;color:var(--mute);border-color:#68432b;height:30px;min-width:28px}
+.ctok{display:inline-flex;align-items:center;padding:2px 8px;border-radius:8px;font-size:var(--s1);font-weight:600;font-variant-numeric:tabular-nums}
+.ctok.p2{background:#f6c453;color:#2d1a00}.ctok.p1{background:#5ec982;color:#0e331c}.ctok.m1{background:#d64545;color:#fff}.ctok.z0{background:#553826;color:var(--mute)}
+@media(max-width:600px){
+.ctable{max-width:390px}
+.ccard,.cempty{width:46px;height:62px}.ccard b{font-size:var(--s2)}.ccard em{font-size:14px}.ccard span{font-size:9px}
+.cseat{width:84px;padding:4px 5px}.cat-av{width:22px;height:22px}
+.chub{width:52px;height:52px}.chub-ptr::after{transform:translate(-50%,calc(-50% - 30px))}
+.hand.c{gap:5px}.hand.c .ccard{height:58px}
+}
+@media(max-height:700px) and (max-width:600px){
+.ctable{max-width:348px}
+.hand.c .ccard{height:52px}.hand.c .ccard span{display:none}
+}
+@media(max-height:500px){.ctable{max-width:304px}}
 </style>
 </head>
 <body>
@@ -216,7 +290,7 @@ const store = {
   set(v) { try { v ? localStorage.setItem('p10', JSON.stringify(v)) : localStorage.removeItem('p10'); } catch {} },
 };
 // 遊戲種類（鍵名跟 server.js 的 KINDS 同一份）。邀請連結帶 &game=，收到的人直接進該遊戲的加入畫面；舊連結沒帶 = Phase 10
-const GAMES = { phase10: { name: 'Phase 10', icon: '🃏', people: '2–6', sub: '湊齊 10 個階段' }, fuji: { name: '富士流', icon: '🌊', people: '3–8', sub: '順水流走，先出完' } };
+const GAMES = { phase10: { name: 'Phase 10', icon: '🃏', people: '2–6', sub: '湊齊 10 個階段' }, fuji: { name: '富士流', icon: '🌊', people: '3–8', sub: '順水流走，先出完' }, cats: { name: '貓貓食堂', icon: '🐱', people: '3–6', sub: '猜首領去哪吃，別吃得比老大好！' } };
 const FUJI_RULES = [
   '每次輪到自己就打出一張牌，放在面前。',
   '輪回自己時，面前的牌如果還在，就順水流走：棄掉，不用抽牌。',
@@ -226,6 +300,47 @@ const FUJI_RULES = [
   '最先出完手牌、且最後一張牌順水流走的人獲勝。',
 ];
 const fujiRules = () => `<ul style="margin:8px 0;padding-left:20px">${FUJI_RULES.map((t) => `<li style="margin-top:8px">${t}</li>`).join('')}</ul>`;
+const CAT_SPOTS = [
+  null,
+  { icon: '🗑️', name: '垃圾桶', t: 1 }, { icon: '🌧️', name: '巷口水窪', t: 1 },
+  { icon: '📦', name: '紙箱窩', t: 1 }, { icon: '🧺', name: '公園長椅', t: 1 },
+  { icon: '🏪', name: '便利商店', t: 2 }, { icon: '🍢', name: '夜市攤販', t: 2 },
+  { icon: '🥖', name: '麵包店', t: 2 }, { icon: '🍜', name: '拉麵屋台', t: 2 },
+  { icon: '🐟', name: '魚市場', t: 3 }, { icon: '🍣', name: '迴轉壽司', t: 3 },
+  { icon: '🥩', name: '牛排館', t: 3 }, { icon: '👑', name: '貓皇餐廳', t: 3 },
+];
+const CAT_RULES = [
+  '每人拿一疊 1–12 號覓食地點卡（數字越大吃越好），隨機一人擔任首領。',
+  '每手所有玩家同時秘密蓋上一張牌，接著同時翻開與首領比對。',
+  '比首領大：太囂張了！卡片橫置作為「扣分」（−數字）。',
+  '比首領小：乖乖覓食！卡片正著放置作為「加分」（＋數字）。',
+  '與首領相同：志同道合！該玩家正放「加分」，但首領面子掛不住，首領自己的牌橫置「扣分」。',
+  '若沒有人跟首領相同，首領自己的牌正放「加分」。每手結束首領標記順時針傳給下一位。',
+  '12 張牌全出完時結算本輪總分：最高分 +2 分、第二名 +1 分、最低分 −1 分（同分並列；全員同分不加減）。',
+  '打完設定輪數（預設 3 輪）後，累計得分標記最高者榮獲「喵喵之王」稱號！',
+];
+const catsRules = () => `<ul style="margin:8px 0;padding-left:20px">${CAT_RULES.map((t) => `<li style="margin-top:8px">${t}</li>`).join('')}</ul>`;
+// 6 款貓貓頭像（橘貓、三花、黑貓、藍灰、暹羅、奶油白），純 inline SVG
+const CAT_BREEDS = [
+  { fur: '#eb9440', ear: '#f7c59f', eye: '#2b1a0e', mark: '<path d="M13 11v4M16 10v5M19 11v4" stroke="#b55d1c" stroke-width="1.3" stroke-linecap="round"/>' },
+  { fur: '#faf3e6', ear: '#f2b8a2', eye: '#2b1a0e', mark: '<path d="M7 13c2-3 5-3 6 0-2 2-4 2-6 0z" fill="#e68438"/><path d="M25 13c-2-3-5-2-5 1 2 2 4 2 5-1z" fill="#3a3238"/>' },
+  { fur: '#332d3a', ear: '#8e6c78', eye: '#f6c453', mark: '' },
+  { fur: '#7d8fa4', ear: '#c5b1bc', eye: '#f6d167', mark: '' },
+  { fur: '#efe1cc', ear: '#5a3e32', eye: '#4f91d8', mark: '<ellipse cx="16" cy="19.5" rx="5.5" ry="4.2" fill="#5a3e32"/>' },
+  { fur: '#fff6ec', ear: '#f4b6c2', eye: '#3c2618', mark: '<circle cx="10.5" cy="21" r="1.4" fill="#f4b6c2" opacity=".7"/><circle cx="21.5" cy="21" r="1.4" fill="#f4b6c2" opacity=".7"/>' },
+];
+const catAv = (idx, isLeader = false, lg = false) => {
+  const b = CAT_BREEDS[idx % CAT_BREEDS.length];
+  const crown = isLeader ? '<path d="M10 8l2-4 4 3 4-3 2 4z" fill="#f6c453" stroke="#7a4c00" stroke-width=".9" stroke-linejoin="round"/>' : '';
+  return `<svg class="cat-av ${lg ? 'lg' : ''}" viewBox="0 0 32 32" aria-hidden="true">
+    <path d="M6 16L7 6l7 5h4l7-5 1 10c0 7-4 11-10 11S6 23 6 16z" fill="${b.fur}" stroke="#24140b" stroke-width="1.4" stroke-linejoin="round"/>
+    <path d="M8.5 13.5L9 8.5l4 3zM23.5 13.5L23 8.5l-4 3z" fill="${b.ear}"/>
+    ${b.mark}
+    <circle cx="12" cy="18" r="1.5" fill="${b.eye}"/><circle cx="20" cy="18" r="1.5" fill="${b.eye}"/>
+    <path d="M14.6 20.5h2.8L16 22z" fill="#e27a84"/>
+    <path d="M13.5 23c1 .9 2 .9 2.5 0 .5.9 1.5.9 2.5 0" fill="none" stroke="${b.fur === '#332d3a' ? '#e4cdb6' : '#3a2214'}" stroke-width="1.1" stroke-linecap="round"/>
+    ${crown}</svg>`;
+};
 const urlRoom = (new URLSearchParams(location.search).get('room') || '').toUpperCase();
 const urlGame = Object.hasOwn(GAMES, new URLSearchParams(location.search).get('game')) ? new URLSearchParams(location.search).get('game') : 'phase10';
 const folds = new Set(); // 展開中的摺疊區塊：render 會重建 DOM，<details> 的開合會被洗掉，所以自己存
@@ -398,13 +513,17 @@ function qrBox(link) {
 }
 
 function lobby() {
-  const kind = urlRoom ? urlGame : pick, GM = GAMES[kind], fj = kind === 'fuji'; // 收到邀請連結 = 直接是那個遊戲，不顯示選單
+  const kind = urlRoom ? urlGame : pick, GM = GAMES[kind], fj = kind === 'fuji', ct = kind === 'cats'; // 收到邀請連結 = 直接是那個遊戲，不顯示選單
   const rules = RULES.map(([k, t, d]) => `<label class="rule"><input type="checkbox" data-r="${k}"><i aria-hidden="true">✓</i><span><b>${t}</b><small>${d}</small></span></label>`).join('');
   const picker = `<div class="panel"><h2>想玩哪一個？</h2><div class="gsel">${Object.entries(GAMES).map(([k, x]) => `<button class="${k === kind ? '' : 'ghost'}" data-a="pick" data-v="${k}" aria-pressed="${k === kind}"><span class="gi">${x.icon}</span><b>${x.name}</b><small>${x.people} 人</small></button>`).join('')}</div><p class="mute" style="margin:12px 0 0">${GM.sub}</p></div>`;
   const turnFld = '<div class="fld"><label for="turn">每回合秒數</label><input id="turn" type="number" inputmode="numeric" min="10" max="600" value="60"></div>';
+  const roundsFld = `<div class="fld"><label for="rounds">遊戲輪數</label><select id="rounds">${[...Array(10)].map((_, i) => `<option value="${i + 1}" ${i === 2 ? 'selected' : ''}>${i + 1} 輪${i === 2 ? '（標準）' : ''}</option>`).join('')}</select></div>`;
   const create = fj
     ? `<div class="panel"><h2>開新房間</h2><div class="row">${turnFld}</div><p class="mute" style="margin:8px 0 0">時間到會自動代打（出最小的牌）。</p>
       <div class="how"><div><span>🃏</span>每次出一張牌</div><div><span>💦</span>大的沖走小的</div><div><span>🌊</span>沒被沖走就流走</div></div>${fold('howto', '完整玩法', fujiRules())}</div>`
+    : ct
+    ? `<div class="panel"><h2>開新房間</h2><div class="row">${roundsFld}${turnFld}</div><p class="mute" style="margin:8px 0 0">每人一套 1–12 覓食地點卡；時間到會自動出最小的牌。</p>
+      <div class="how"><div><span>👑</span>輪流當首領</div><div><span>🐾</span>別比首領大</div><div><span>⚡</span>撞號扣首領</div></div>${fold('howto', '完整玩法', catsRules())}</div>`
     : `<div class="panel"><h2>開新房間</h2>
       <div class="row"><div class="fld"><label for="target">目標階段</label><select id="target">${[...Array(10)].map((_, i) => `<option value="${i + 1}" ${i === 9 ? 'selected' : ''}>第 ${i + 1} 階段</option>`).join('')}</select></div>${turnFld}</div>
       <p class="mute" style="margin:8px 0 0">時間到會自動代打（抽牌堆、棄最大張）。</p>
@@ -425,13 +544,18 @@ function lobby() {
 }
 
 function room() {
-  const s = snap, host = s.me === s.host, n = s.players.length, st = s.settings, fj = s.kind === 'fuji', GM = GAMES[s.kind];
+  const s = snap, host = s.me === s.host, n = s.players.length, st = s.settings, fj = s.kind === 'fuji', ct = s.kind === 'cats', GM = GAMES[s.kind];
   const link = inviteLink(s.code, s.kind), need = Math.max(0, s.min - n);
   const set = host
     ? `<div class="row"><select data-c="target">${[...Array(10)].map((_, i) => `<option value="${i + 1}" ${st.target === i + 1 ? 'selected' : ''}>目標：第 ${i + 1} 階段</option>`).join('')}</select></div>`
     : `<div>先完成第 ${st.target} 階段者結束遊戲</div>`;
+  const catSet = host
+    ? `<div class="row"><select data-c="rounds">${[...Array(10)].map((_, i) => `<option value="${i + 1}" ${st.rounds === i + 1 ? 'selected' : ''}>遊戲輪數：${i + 1} 輪${i === 2 ? '（標準）' : ''}</option>`).join('')}</select></div>`
+    : `<div>共進行 <b>${st.rounds} 輪</b>，最高分者成為喵喵之王</div>`;
   const rulesPanel = fj
     ? `<div class="panel"><h2>規則</h2><p style="margin:0">每回合 ${st.turn} 秒，超時自動代打（出最小的牌）。3–6 人每人發 6 張，7–8 人發 5 張。</p>${fold('rules', '完整玩法', fujiRules())}</div>`
+    : ct
+    ? `<div class="panel"><h2>規則</h2>${catSet}<p style="margin:8px 0 0">每手 ${st.turn} 秒，超時自動出最小的牌。每輪結算：第一名 +2、第二名 +1、最低分 −1。</p>${fold('rules', '完整玩法', catsRules())}</div>`
     : `<div class="panel"><h2>規則</h2>${set}
     <p>每回合 ${st.turn} 秒，超時自動代打。</p>
     ${RULES.some(([k]) => st.rules[k]) ? `<ul style="margin:8px 0;padding-left:20px">${RULES.filter(([k]) => st.rules[k]).map(([, t, d]) => `<li style="margin-top:8px"><b>${t}</b><br><small class="mute">${d}</small></li>`).join('')}</ul>${['rv', 'sh', 'xn', 'xc'].some((k) => st.rules[k]) ? `<p class="mute" style="margin:8px 0">${SP_NOTE}</p>` : ''}` : '<p class="mute">標準規則</p>'}
@@ -745,12 +869,214 @@ function fujiOver(g, s) {
     <div class="row act foot">${foot}</div></div></div>`;
 }
 
+// 貓貓食堂：覓食地點卡（1–12）與暖木圓桌
+const ccard = (n, o = {}) => {
+  const sp = CAT_SPOTS[n] || { icon: '🐾', name: '', t: 1 };
+  return `<${o.tag || 'button'} class="ccard t${sp.t} ${o.cls || ''}" aria-label="${o.label || `${n} ${sp.name}`}" ${o.attrs || ''}><b>${n}</b><em>${sp.icon}</em><span>${sp.name}</span></${o.tag || 'button'}>`;
+};
+const signNum = (v) => (v > 0 ? `+${v}` : v < 0 ? `−${Math.abs(v)}` : '0');
+
+function cats() {
+  const s = snap, g = s.game, me = s.me, mine = g.players.find((p) => p.id === me);
+  const name = (id) => g.players.find((p) => p.id === id)?.name ?? '?', nm = (id) => (id === me ? '你' : esc(name(id)));
+  const online = Object.fromEntries(s.players.map((p) => [p.id, p.online]));
+  const seatIdx = Object.fromEntries(g.players.map((p, i) => [p.id, i]));
+  if (g.status !== 'play') sheet = false, histFor = null;
+  const handSet = new Set(g.hand);
+  sel.forEach((v) => handSet.has(v) || sel.delete(v));
+  if (g.myPick != null) sel.clear();
+
+  seen ??= {};
+  const ev = g.ev, fresh = !!ev && seen.evNo !== undefined && ev.no !== seen.evNo;
+  if (fresh && g.status === 'play') {
+    const mp = ev.picks.find((x) => x.id === me);
+    if (mp) {
+      const sp = CAT_SPOTS[mp.n];
+      if (mp.why === 'leaderMatched') {
+        const who = ev.picks.filter((x) => !x.isLeader && x.n === mp.n).map((x) => nm(x.id)).join('、');
+        skipBanner(`⚡ 與 ${who} 撞號！<div style="margin-top:8px;font-size:var(--s2)">首領 ${mp.n} ${sp.icon} 橫置 <b style="color:#ff9e9e">−${mp.n}</b></div>`, 2600);
+        navigator.vibrate?.([60, 40, 60]);
+      } else if (mp.why === 'matched') {
+        skipBanner(`🎯 與首領撞號！<div style="margin-top:8px;font-size:var(--s2)">你正放 <b style="color:#8cf0b2">+${mp.n}</b> · 首領橫置 −${mp.n}</div>`, 2600);
+        navigator.vibrate?.([30, 30, 50]);
+      } else if (mp.why === 'over') {
+        skipBanner(`😿 吃得比首領（${ev.leaderCard}）好！<div style="margin-top:8px;font-size:var(--s2)">${mp.n} ${sp.icon} 橫置 <b style="color:#ff9e9e">−${mp.n}</b></div>`, 2400);
+        navigator.vibrate?.([60, 40, 60]);
+      } else if (mp.why === 'leaderSafe') {
+        toast(`👑 首領獨享！${mp.n} ${sp.name} 正放 +${mp.n}`);
+        navigator.vibrate?.(30);
+      } else {
+        toast(`🐾 安全覓食！${mp.n} ${sp.name} 正放 +${mp.n}`);
+      }
+    }
+  }
+  seen.evNo = ev ? ev.no : null;
+
+  const active = g.players.filter((p) => p.in);
+  const readyCount = active.filter((p) => p.ready).length;
+  const waitCount = active.length - readyCount;
+  const isLeaderMe = g.leader === me;
+  const selNum = sel.size ? [...sel][0] : null;
+
+  // 圓桌幾何：自己固定在 6 點鐘方向，其餘順時針排列
+  const N = g.players.length, myIdx = Math.max(0, g.players.findIndex((p) => p.id === me));
+  const ring = Array.from({ length: N }, (_, k) => g.players[(myIdx + k) % N]);
+  const [Rx, Ry, rx, ry] = N <= 4 ? [39, 42.5, 18.5, 18.5] : [40, 43.5, 20.5, 20.5];
+  const pos = ring.map((p, k) => {
+    const a = Math.PI / 2 + (2 * Math.PI * k) / N, ca = Math.cos(a), sa = Math.sin(a);
+    return { p, k, a, ca, sa, sx: 50 + Rx * ca, sy: 50 + Ry * sa, cx: 50 + rx * ca, cy: 50 + ry * sa };
+  });
+  const ldrPos = pos.find((x) => x.p.id === g.leader);
+  const ldrDeg = ldrPos ? (ldrPos.a * 180 / Math.PI) + 90 : 180;
+
+  const arrows = pos.map(({ a }) => {
+    const mid = a + Math.PI / N, ax = 50 + 35.5 * Math.cos(mid), ay = 50 + 35.5 * Math.sin(mid), deg = (mid * 180 / Math.PI) + 90;
+    return `<path d="M-1.5 -1.1 L1.5 0 L-1.5 1.1" fill="none" stroke="#f6c45366" stroke-width=".65" stroke-linecap="round" stroke-linejoin="round" transform="translate(${ax.toFixed(1)} ${ay.toFixed(1)}) rotate(${deg.toFixed(1)})"/>`;
+  }).join('');
+  let spotlight = '';
+  if (ldrPos && g.status === 'play') {
+    const sp = Math.min(0.38, (Math.PI / N) * 0.75), a1 = ldrPos.a - sp, a2 = ldrPos.a + sp;
+    const x1 = (50 + 39.5 * Math.cos(a1)).toFixed(1), y1 = (50 + 39.5 * Math.sin(a1)).toFixed(1);
+    const x2 = (50 + 39.5 * Math.cos(a2)).toFixed(1), y2 = (50 + 39.5 * Math.sin(a2)).toFixed(1);
+    spotlight = `<path d="M50 50 L${x1} ${y1} A39.5 39.5 0 0 1 ${x2} ${y2} Z" fill="url(#cspot)"/>`;
+  }
+  const svg = `<svg class="fsvg" viewBox="0 0 100 100" aria-hidden="true">
+    <defs><radialGradient id="cspot" cx="50%" cy="50%" r="50%"><stop offset="12%" stop-color="#f6c453" stop-opacity=".28"/><stop offset="100%" stop-color="#f6c453" stop-opacity=".02"/></radialGradient></defs>
+    ${spotlight}
+    <circle cx="50" cy="50" r="35.5" fill="none" stroke="#f6c45328" stroke-width=".5" stroke-dasharray="1.8 1.8"/>
+    ${arrows}</svg>`;
+
+  const lastById = Object.fromEntries((g.last?.picks ?? []).map((x) => [x.id, x]));
+
+  const seats = pos.map(({ p, sx, sy }) => {
+    const isMe = p.id === me, isLdr = g.leader === p.id && g.status === 'play';
+    const pill = p.left ? '<span class="mute">已離開</span>'
+      : p.ready ? `<span class="cpill ok">🐾 ${isMe && g.myPick != null ? `已蓋 ${g.myPick}` : '已蓋牌'}</span>`
+      : '<span class="cpill wait">💭 選牌中</span>';
+    const aria = `${p.name}${isMe ? '（你）' : ''}${isLdr ? '，本手首領' : ''}，本輪 ${signNum(p.roundScore)} 分，累計得分標記 ${p.tokens} 分，${p.ready ? '已蓋牌' : '尚未蓋牌'}`;
+    return `<div class="cseat ${isMe ? 'me' : ''} ${isLdr ? 'ldr' : ''} ${p.in ? '' : 'out'}" data-pid="${p.id}" data-a="hist" data-v="${p.id}" role="button" tabindex="0" aria-haspopup="dialog" aria-label="${esc(aria)}" style="left:${sx.toFixed(2)}%;top:${sy.toFixed(2)}%">
+      <div class="cseat-top">${catAv(seatIdx[p.id], isLdr)}<span class="fnm">${esc(p.name)}</span></div>
+      <div class="cseat-meta"><span>本輪 <b>${signNum(p.roundScore)}</b></span><span>🏅${p.tokens}${online[p.id] ? '' : ' 💤'}</span></div>
+      <div class="cseat-st">${pill}<span class="mute">${p.n}張 ›</span></div></div>`;
+  }).join('');
+
+  const cards = pos.map(({ p, cx, cy }) => {
+    const isMe = p.id === me, lp = lastById[p.id];
+    let inner = '';
+    if (isMe && selNum != null && g.myPick == null) {
+      inner = `${ccard(selNum, { tag: 'div', cls: 'pre', label: `預覽蓋牌 ${selNum}` })}<span class="cbadge hot">預覽</span>`;
+    } else if (lp && g.last.round === g.round) {
+      const side = lp.sign < 0;
+      const cls = `${side ? 'side' : 'pos'} ${fresh ? 'flip' : ''}`;
+      const badge = `<span class="cbadge ${side ? 'neg' : 'pos'}">${lp.why === 'matched' ? '⚡ ' : ''}${side ? `−${lp.n}` : `+${lp.n}`}</span>`;
+      const tag = lp.isLeader ? `<span class="ctag">${lp.why === 'leaderMatched' ? '👑 撞號' : '👑 上手首領'}</span>` : '';
+      inner = `${ccard(lp.n, { tag: 'div', cls, label: `${p.name} 上手出 ${lp.n}（${side ? '橫置扣分' : '正放加分'}）` })}${tag}${badge}`;
+    } else if (p.ready) {
+      inner = `<div class="ccard back" aria-label="${esc(p.name)} 已蓋牌"><b>🐾</b><span>已蓋牌</span></div>${isMe && g.myPick != null ? `<span class="cbadge hot">你蓋 ${g.myPick}</span>` : ''}`;
+    } else {
+      inner = `<div class="cempty ${isMe && g.status === 'play' ? 'need' : ''}" aria-hidden="true">🐾</div>`;
+    }
+    return `<div class="ccwrap" style="left:${cx.toFixed(2)}%;top:${cy.toFixed(2)}%">${inner}</div>`;
+  }).join('');
+
+  const lastLog = g.log.at(-1) || '準備開始覓食！';
+  const ticker = `<button class="fticker" data-a="sheet" aria-label="查看玩法與動態"><span>${esc(lastLog)}</span><i aria-hidden="true">›</i></button>`;
+  const table = `<div class="cstage"><div class="ctable" role="region" aria-label="貓貓食堂圓桌，首領依順時針輪流">
+    <div class="cfelt"></div>${svg}
+    <div class="chub" aria-label="已蓋牌 ${readyCount}/${active.length} 人">${g.status === 'play' ? `<div class="chub-ptr" style="--ang:${ldrDeg.toFixed(1)}deg" aria-hidden="true"></div>` : ''}<b>${readyCount}/${active.length}</b><small>已蓋牌</small></div>
+    ${cards}${seats}</div></div>`;
+
+  const roleText = g.myPick != null
+    ? `✅ 已蓋牌 ${g.myPick} ${CAT_SPOTS[g.myPick].icon}${CAT_SPOTS[g.myPick].name} · 等 ${waitCount} 人`
+    : isLeaderMe ? '👑 你是本手首領！選一張不想被撞號的牌'
+    : `🐾 首領：${esc(name(g.leader))} · 別比老大吃更好！`;
+  const selSpot = selNum != null ? CAT_SPOTS[selNum] : null;
+  const pickWhy = g.myPick != null ? '' : selNum != null ? '' : '先點一張要蓋下的覓食地點卡';
+  const ctaBtn = g.myPick != null
+    ? `<button class="ghost" data-a="cunpick">收回重選（已蓋 ${g.myPick} ${CAT_SPOTS[g.myPick].name}）</button>`
+    : `<span class="w" data-why="${esc(pickWhy)}"><button data-a="cpick" ${pickWhy ? 'disabled' : ''}>${selSpot ? `🐾 蓋牌：${selNum} ${selSpot.icon} ${selSpot.name}` : '選擇一張覓食卡蓋牌'}</button></span>`;
+
+  const tray = g.status !== 'play' ? catsOverlay(g, s, seatIdx) : `<div class="tray"><div class="row" style="justify-content:space-between;flex-wrap:nowrap"><b class="${isLeaderMe && g.myPick == null ? 'crown' : ''}" style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${roleText}</b><b class="cd" aria-live="off"></b></div>
+    <div class="hand c ${g.myPick != null ? 'locked' : ''}">${g.hand.map((n) => ccard(n, { cls: `${sel.has(n) ? 'sel' : ''} ${g.myPick === n ? 'picked' : ''}`, attrs: `data-a="ccard" data-v="${n}" aria-pressed="${sel.has(n) || g.myPick === n}"` })).join('')}</div>
+    <div class="row act">${ctaBtn}</div></div>`;
+
+  const sortedRank = g.players.filter((p) => !p.left).sort((a, b) => b.tokens - a.tokens || b.roundScore - a.roundScore);
+  const sheetUI = sheet && g.status === 'play' ? `<div class="overlay sheet"><div class="bd" data-a="sheet"></div><div class="modal" role="dialog" aria-label="計分板、玩法與動態">
+    <div class="row" style="justify-content:space-between"><h2 style="margin:0">🐱 食堂戰況（第 ${g.round}/${g.rounds} 輪）</h2><button class="ghost ic" data-a="sheet" aria-label="關閉">✕</button></div>
+    <table style="margin-top:8px"><tr><th>玩家</th><th>本輪淨分</th><th>得分標記</th></tr>
+      ${sortedRank.map((p) => `<tr class="${p.id === me ? 'me' : ''}"><td>${esc(p.name)}${p.id === g.leader ? ' 👑' : ''}</td><td>${signNum(p.roundScore)}</td><td>🏅 ${p.tokens}</td></tr>`).join('')}</table>
+    <h2 style="margin-top:16px">完整玩法</h2>${catsRules()}
+    <h2 style="margin-top:16px">最近動態</h2><div class="log">${g.log.map(esc).join('<br>')}</div>
+    <button class="ghost" data-a="leave" style="width:100%;margin-top:16px">離開房間</button></div></div>` : '';
+
+  const hp = g.players.find((p) => p.id === histFor);
+  const histUI = hp ? (() => {
+    const posCards = hp.played.filter((x) => x.sign > 0), negCards = hp.played.filter((x) => x.sign < 0);
+    const posSum = posCards.reduce((a, x) => a + x.n, 0), negSum = negCards.reduce((a, x) => a + x.n, 0);
+    const used = new Set(hp.played.map((x) => x.n));
+    const rem = Array.from({ length: 12 }, (_, i) => i + 1).filter((n) => !used.has(n));
+    return `<div class="overlay sheet"><div class="bd" data-a="hist"></div><div class="modal" role="dialog" aria-label="${esc(hp.name)} 本輪出牌紀錄">
+      <div class="row" style="justify-content:space-between;flex-wrap:nowrap"><div class="row" style="flex-wrap:nowrap">${catAv(seatIdx[hp.id], hp.id === g.leader, true)}<div><h2 style="margin:0;color:var(--ink)">${esc(hp.name)}${hp.id === me ? '（你）' : ''}</h2><small class="mute">本輪淨分 ${signNum(hp.roundScore)} · 得分標記 🏅 ${hp.tokens}</small></div></div><button class="ghost ic" data-a="hist" aria-label="關閉">✕</button></div>
+      <div style="margin-top:16px"><b>正放加分（+${posSum}）</b><div class="cmini-row">${posCards.length ? posCards.map((x) => `<span class="cmini pos" title="第 ${x.trick} 手">${x.n}${CAT_SPOTS[x.n].icon}</span>`).join('') : '<span class="mute">尚無</span>'}</div></div>
+      <div style="margin-top:14px"><b>橫置扣分（−${negSum}）</b><div class="cmini-row">${negCards.length ? negCards.map((x) => `<span class="cmini neg" title="第 ${x.trick} 手">−${x.n}${CAT_SPOTS[x.n].icon}</span>`).join('') : '<span class="mute">尚無，很會躲！</span>'}</div></div>
+      ${hp.in ? `<div style="margin-top:14px"><b>尚未出過（${rem.length} 張）</b><div class="cmini-row">${rem.map((n) => `<span class="cmini rem">${n}</span>`).join('')}</div></div>` : ''}
+    </div></div>`;
+  })() : '';
+
+  return `<div class="row" style="flex-wrap:nowrap"><b style="flex:1;min-width:0">🐱 貓貓食堂 · ${s.code}</b>
+    <span class="fmeta">輪 ${g.round}/${g.rounds} · 手 ${g.trick}/12</span>
+    <span class="rxw"><button class="ghost ic" data-a="rxMenu" aria-label="送表情" aria-expanded="${rxOpen}">😀</button>${rxOpen ? `<div class="rxp">${EMOJI.map((e) => `<button data-a="react" data-v="${e}" aria-label="${e}">${e}</button>`).join('')}</div>` : ''}</span>
+    <button class="ghost ic" data-a="sheet" aria-label="戰況、玩法、離開">📋</button></div>
+  ${ticker}${table}${tray}${sheetUI}${histUI}`;
+}
+
+function catsOverlay(g, s, seatIdx) {
+  const sm = g.summary, over = g.status === 'over', me = s.me, host = me === s.host;
+  const nm = (id) => esc(g.players.find((p) => p.id === id)?.name ?? '?');
+  const tokBadge = (d) => `<span class="ctok ${d === 2 ? 'p2' : d === 1 ? 'p1' : d === -1 ? 'm1' : 'z0'}">${d > 0 ? `+${d}` : d < 0 ? `−${Math.abs(d)}` : '±0'} 標記</span>`;
+  const head = over
+    ? (g.winners.includes(me) ? '<span class="trophy">👑</span> 你獲得「喵喵之王」稱號！' : `👑 ${g.winners.map(nm).join('、')} 成為喵喵之王！`)
+    : `🍽️ 第 ${sm.round}/${g.rounds} 輪食堂結算`;
+
+  const rows = sm.rows.map((r) => {
+    const pos = r.played.filter((x) => x.sign > 0), neg = r.played.filter((x) => x.sign < 0);
+    return `<div class="res ${r.id === me ? 'me' : ''}">
+      <div class="row" style="justify-content:space-between;flex-wrap:nowrap">
+        <div class="row" style="flex-wrap:nowrap;min-width:0">${catAv(seatIdx[r.id], false)}<b style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.name)}${r.id === me ? '（你）' : ''}</b></div>
+        <div class="row" style="flex-wrap:nowrap"><b>${signNum(r.roundScore)} 分</b>${tokBadge(r.delta)}</div>
+      </div>
+      <div class="row" style="justify-content:space-between;margin-top:6px;font-size:var(--s1)"><span class="mute">正放 +${pos.reduce((a, x) => a + x.n, 0)} · 橫置 −${neg.reduce((a, x) => a + x.n, 0)}</span><span>累計 <b>🏅 ${r.tokens}</b></span></div>
+      <div class="cmini-row" style="gap:4px">${r.played.map((x) => `<span class="cmini ${x.sign > 0 ? 'pos' : 'neg'}" style="min-width:26px;height:28px;font-size:11px">${x.sign > 0 ? x.n : `−${x.n}`}</span>`).join('')}</div>
+    </div>`;
+  }).join('');
+
+  const cmp = (a, b) => b.tokens - a.tokens || b.totalScore - a.totalScore;
+  const sorted = over ? g.players.filter((p) => !p.left).sort(cmp) : [];
+  const board = sorted.map((p) => {
+    const r = sorted.findIndex((q) => q.tokens === p.tokens);
+    const hist = p.roundDeltas.map((d) => `R${d.round} ${d.delta > 0 ? '+' : d.delta < 0 ? '−' : '±'}${Math.abs(d.delta)}`).join(' · ');
+    return `<div class="res rk ${p.id === me ? 'me' : ''}"><div class="row" style="justify-content:space-between;flex-wrap:nowrap">
+      <div class="row" style="flex-wrap:nowrap"><span style="display:inline-block;min-width:1.6em">${['👑', '🥈', '🥉'][r] ?? r + 1}</span>${catAv(seatIdx[p.id], g.winners.includes(p.id), true)}<div><b>${esc(p.name)}${p.id === me ? '（你）' : ''}</b><div style="font-size:var(--s1);font-weight:400;opacity:.82">${hist}（總淨分 ${signNum(p.totalScore)}）</div></div></div>
+      <b>🏅 ${p.tokens}</b></div></div>`;
+  }).join('');
+
+  const foot = over
+    ? (host ? '<button data-a="back">回到房間再來一局</button><button class="ghost" data-a="leave">離開房間</button>' : `<span class="mute">等 ${nm(s.host)} 開新局…</span><button class="ghost" data-a="leave">離開房間</button>`)
+    : `<button data-a="next">開始第 ${sm.round + 1} 輪</button>`;
+
+  return `<div class="overlay"><div class="modal res-m"><div class="body">
+    <div class="hd">${head}</div>${over ? '<div class="mute" style="margin-bottom:8px">🍣 享受貓貓食堂的豪華美食吧！</div>' : ''}
+    ${over ? board : rows}${sm.note ? `<p class="mute">${esc(sm.note)}</p>` : ''}</div>
+    <div class="row act foot">${foot}</div></div></div>`;
+}
+
 function render() {
-  const form = [...document.querySelectorAll('#name,#code,#target,#turn,[data-r]')].map((e) => [e, e.type === 'checkbox' ? e.checked : e.value]); // 建房表單：重繪不能洗掉使用者已填／已勾的
+  const form = [...document.querySelectorAll('#name,#code,#target,#rounds,#turn,[data-r]')].map((e) => [e, e.type === 'checkbox' ? e.checked : e.value]); // 建房表單：重繪不能洗掉使用者已填／已勾的
   const keep = Object.fromEntries(form.map(([e, v]) => [e.id || e.dataset.r, v]));
   if (!snap?.game) seen = null; // 離開／重開一場遊戲後不要沿用舊手牌
-  $('#app').innerHTML = !sess ? lobby() : !snap ? '<p>連線中…</p>' : snap.game ? (snap.kind === 'fuji' ? fuji() : game()) : room();
-  for (const e of document.querySelectorAll('#name,#code,#target,#turn,[data-r]')) { const v = keep[e.id || e.dataset.r]; if (v !== undefined) e.type === 'checkbox' ? (e.checked = v) : (e.value = v); }
+  document.body.classList.toggle('cats-mode', !!(snap?.game && snap.kind === 'cats'));
+  $('#app').innerHTML = !sess ? lobby() : !snap ? '<p>連線中…</p>' : snap.game ? (snap.kind === 'fuji' ? fuji() : snap.kind === 'cats' ? cats() : game()) : room();
+  for (const e of document.querySelectorAll('#name,#code,#target,#rounds,#turn,[data-r]')) { const v = keep[e.id || e.dataset.r]; if (v !== undefined) e.type === 'checkbox' ? (e.checked = v) : (e.value = v); }
   const all = [...document.querySelectorAll('[data-r]')]; if (all.length && all.every((b) => b.checked)) { const b = $('[data-a="allRules"]'); if (b) b.textContent = '全不選'; }
   tick();
 }
@@ -772,6 +1098,7 @@ const A = {
   async create() {
     const body = { kind: pick, name: $('#name').value, turn: +$('#turn').value };
     if (pick === 'phase10') Object.assign(body, { target: +$('#target').value, rules: Object.fromEntries(RULES.map(([k]) => [k, !!$(`[data-r="${k}"]`)?.checked])) });
+    if (pick === 'cats') body.rounds = +$('#rounds').value;
     const r = await post('create', body).catch((e) => toast(e.message)); if (r) { localStorage.setItem('p10name', $('#name').value); enter(r); }
   },
   fold(v) { folds.has(v) ? folds.delete(v) : folds.add(v); render(); },
@@ -803,6 +1130,9 @@ const A = {
   draw: (v) => call('act', { action: { type: 'draw', from: v } }),
   fcard(v) { sel = new Set(sel.has(+v) ? [] : [+v]); render(); }, // 富士流一次只能選一張
   fplay: () => call('act', { action: { type: 'play', card: [...sel][0] } }).then((r) => r && sel.clear()),
+  ccard(v) { if (snap?.game?.myPick != null) return toast('已蓋牌，點下方「收回重選」即可換牌'); sel = new Set(sel.has(+v) ? [] : [+v]); render(); }, // 貓貓食堂一次選一張蓋牌
+  cpick: () => call('act', { action: { type: 'pick', card: [...sel][0] } }).then((r) => r && sel.clear()),
+  cunpick: () => call('act', { action: { type: 'unpick' } }),
   fseat(v) {
     const p = snap?.game?.players?.find((x) => x.id === v);
     if (!p) return;
@@ -901,7 +1231,7 @@ $('#app').addEventListener('change', (e) => {
   }
   const k = e.target.dataset.c;
   if (k) e.target.blur(); // 選完就放開焦點，不然「焦點在 select 時略過重繪」會讓房主一直看不到新加入的玩家
-  if (k) call('settings', { [k]: k === 'target' ? +e.target.value : e.target.value });
+  if (k) call('settings', { [k]: k === 'target' || k === 'rounds' ? +e.target.value : e.target.value });
 });
 if (sess) connect(); else render();
 </script>

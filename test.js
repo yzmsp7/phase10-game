@@ -703,6 +703,130 @@ for (let np = 2; np <= 6; np++) {
   }
   F.autoPlay(mk([[5, 2], [3], [4]]), 'p0'); // 代打不會丟錯
 }
+
+// --- 貓貓食堂 ---
+{
+  const C = require('./cats');
+  const ppl = (k) => Array.from({ length: k }, (_, i) => ({ id: 'p' + i, name: 'P' + i }));
+  const mk = (k, rounds = 3) => { const g = C.create(ppl(k), { rounds }); g.leader = 0; g.turn = 0; return g; };
+  const pickAll = (g, cards) => cards.forEach((c, i) => C.act(g, g.players[i].id, { type: 'pick', card: c }));
+
+  // 初始狀態：每人 1–12 共 12 張、預設 3 輪、自訂輪數
+  let g = C.create(ppl(4));
+  assert.equal(g.rounds, 3);
+  assert.equal(g.round, 1);
+  assert.equal(g.trick, 1);
+  assert.ok(g.players.every((p) => p.hand.length === 12 && p.hand[0] === 1 && p.hand[11] === 12));
+  assert.equal(C.create(ppl(3), { rounds: 5 }).rounds, 5);
+
+  // 核心比對規則：
+  // 1) 沒有人跟首領相同：首領正放(+)、比首領小正放(+)、比首領大橫置(-)
+  g = mk(4);
+  pickAll(g, [6, 3, 9, 12]); // 首領 p0 出 6；p1 出 3(<6 +3)；p2 出 9(>6 -9)；p3 出 12(>6 -12)
+  assert.deepEqual(g.players.map((p) => p.roundScore), [6, 3, -9, -12]);
+  assert.equal(g.leader, 1, '首領標記順時針傳給下一位');
+  assert.equal(g.trick, 2);
+  assert.equal(g.last.matched, false);
+
+  // 2) 有玩家與首領數字相同：首領橫置(-)、同號玩家正放(+)、比首領小(+)、比首領大(-)
+  pickAll(g, [5, 7, 7, 10]); // 首領是 p1 出 7；p0 出 5(+5)；p2 出 7(+7 撞號)；p3 出 10(-10)；首領 p1 橫置(-7)
+  assert.deepEqual(g.players.map((p) => p.roundScore), [6 + 5, 3 - 7, -9 + 7, -12 - 10]);
+  assert.equal(g.last.matched, true);
+  assert.equal(g.leader, 2, '首領順時針傳給 p2');
+
+  // 3) 蓋牌隱藏（view 不洩漏別人蓋哪張，只看得到 ready 與自己的 myPick）、可 unpick 重選
+  C.act(g, 'p0', { type: 'pick', card: 4 });
+  const v1 = C.view(g, 'p1'), v0 = C.view(g, 'p0');
+  assert.equal(v1.players[0].ready, true);
+  assert.equal(v1.myPick, null);
+  assert.equal(v0.myPick, 4);
+  assert.ok(!JSON.stringify(v1).includes('"pick":4'), '不能洩漏別人蓋的牌');
+  C.act(g, 'p0', { type: 'unpick' });
+  assert.equal(C.view(g, 'p0').myPick, null);
+  throws(() => C.act(g, 'p0', { type: 'unpick' }), /還沒蓋牌/);
+  throws(() => C.act(g, 'p0', { type: 'pick', card: 6 }), /沒有這張/, '出過的牌不能再出');
+  throws(() => C.act(g, 'p0', { type: 'pick', card: 13 }), /沒有這張/);
+  throws(() => C.act(g, 'p0', { type: 'bogus' }), /未知/);
+
+  // 4) 一輪結算計分：最高 +2、第二 +1、最低 -1（3 人局、4 人局、同分情況）
+  // 4 人局正常名次：p0 最高(+2)、p1 第二(+1)、p2 第三(0)、p3 最低(-1)
+  g = mk(4, 2);
+  for (let t = 1; t <= 12; t++) {
+    // 故意安排最後分數：打完 12 張，直接測試第 12 手觸發 endRound
+    if (t < 12) pickAll(g, [t, t, t, t]);
+  }
+  g.players[0].roundScore = 40; g.players[1].roundScore = 25; g.players[2].roundScore = 10; g.players[3].roundScore = -5;
+  g.leader = 0;
+  pickAll(g, [12, 12, 12, 12]); // 撞號：p0 -12(28), p1 +12(37), p2 +12(22), p3 +12(7) → p1(37)+2, p0(28)+1, p2(22)0, p3(7)-1
+  assert.equal(g.status, 'roundEnd');
+  assert.deepEqual(g.players.map((p) => p.tokens), [1, 2, 0, -1]);
+  // 下一輪
+  C.act(g, 'p0', { type: 'next' });
+  assert.equal(g.round, 2);
+  assert.equal(g.trick, 1);
+  assert.ok(g.players.every((p) => p.hand.length === 12 && p.roundScore === 0));
+
+  // 3 人局：最高 +2、第二 +1、最低 -1
+  g = mk(3, 1);
+  for (let t = 1; t < 12; t++) pickAll(g, [t, t, t]);
+  g.players[0].roundScore = 30; g.players[1].roundScore = 20; g.players[2].roundScore = 10;
+  g.leader = 2; // p2 出 12（撞號 -12 → -2），p0 +12(42)，p1 +12(32)
+  pickAll(g, [12, 12, 12]);
+  assert.equal(g.status, 'over');
+  assert.deepEqual(g.players.map((p) => p.tokens), [2, 1, -1]);
+  assert.deepEqual(g.winners, ['p0']);
+
+  // 同分情況：兩人並列最高 → 皆 +2，不另發 +1，最低 -1
+  g = mk(4, 1);
+  for (let t = 1; t < 12; t++) pickAll(g, [t, t, t, t]);
+  g.players[0].roundScore = 20; g.players[1].roundScore = 20; g.players[2].roundScore = 10; g.players[3].roundScore = 0;
+  g.leader = 3; // p3 撞號 -12 → -12；p0/p1 32 並列第一；p2 22
+  pickAll(g, [12, 12, 12, 12]);
+  assert.deepEqual(g.players.map((p) => p.tokens), [2, 2, 0, -1]);
+  assert.deepEqual(g.winners.sort(), ['p0', 'p1']);
+
+  // 全員同分：皆 0 分
+  g = mk(3, 1);
+  for (let t = 1; t < 12; t++) pickAll(g, [t, t, t]);
+  g.players[0].roundScore = 24; g.players[1].roundScore = 0; g.players[2].roundScore = 0;
+  g.leader = 0; // p0 24-12=12, p1 0+12=12, p2 0+12=12
+  pickAll(g, [12, 12, 12]);
+  assert.deepEqual(g.players.map((p) => p.tokens), [0, 0, 0]);
+  assert.ok(g.summary.note.includes('同分'));
+
+  // 中途退出：若首領離開要交棒；若其他人皆已蓋牌要立即翻牌不卡死
+  g = mk(3, 1);
+  C.act(g, 'p1', { type: 'pick', card: 5 });
+  C.act(g, 'p2', { type: 'pick', card: 8 });
+  assert.equal(C.leave(g, 'p0'), 2); // p0 是首領且是唯一沒蓋牌的人 → 交棒給 p1 並立即以 p1(5) vs p2(8) 結算！
+  assert.equal(g.trick, 2, '剩餘玩家皆已蓋牌，應立即翻牌進下一手');
+  assert.equal(g.players[1].roundScore, 5, 'p1 接棒當首領且沒撞號 → +5');
+  assert.equal(g.players[2].roundScore, -8, 'p2 出 8 > 5 → 橫置 -8');
+
+  // 超時代打：替所有尚未蓋牌的人自動出最小張並完成該手
+  g = mk(3, 1);
+  C.act(g, 'p0', { type: 'pick', card: 7 });
+  C.autoPlay(g);
+  assert.equal(g.trick, 2, 'autoPlay 補齊未蓋牌玩家並翻牌');
+  assert.deepEqual(g.players.map((p) => p.roundScore), [7, 1, 1], 'p1/p2 各自動出最小張 1');
+
+  // 3–6 人完整隨機模擬（1–5 輪）：每局必然結束、手牌與分數完全守恆
+  for (let np = 3; np <= 6; np++) for (let rd = 1; rd <= 4; rd++) {
+    const s = C.create(ppl(np), { rounds: rd });
+    let steps = 0;
+    while (s.status !== 'over') {
+      assert.ok(++steps < 1000, '貓貓食堂不應卡死');
+      if (s.status === 'roundEnd') { C.act(s, s.players[0].id, { type: 'next' }); continue; }
+      for (const p of s.players) {
+        if (!p.in || s.status !== 'play') continue;
+        C.act(s, p.id, { type: 'pick', card: p.hand[randomInt(p.hand.length)] });
+      }
+    }
+    assert.equal(s.round, rd);
+    assert.ok(s.winners.length >= 1);
+    assert.ok(s.players.every((p) => p.roundDeltas.length === rd && p.hand.length === 0));
+  }
+}
 function randomInt(n) { return require('node:crypto').randomInt(n); }
 
 // --- HTTP 冒煙測試 ---
@@ -834,7 +958,37 @@ function randomInt(n) { return require('node:crypto').randomInt(n); }
     assert.ok(fr.game.turnNo >= 2, '出牌後換人');
     assert.equal((await post('start', f)).status, 400, '已開始');
     const wl = (f2) => [...read(f2).matchAll(/^(?:const KINDS = \{| *const GAMES = \{)(.*)$/gm)].map((m) => [...m[1].matchAll(/\b(\w+): \{/g)].map((x) => x[1]).filter((k) => k !== 'eng').join());
-    assert.equal(wl('server.js')[0], 'phase10,fuji'); assert.equal(wl('index.html')[0], 'phase10,fuji', '伺服器與前端的遊戲鍵名要一致');
+    assert.equal(wl('server.js')[0], 'phase10,fuji,cats'); assert.equal(wl('index.html')[0], 'phase10,fuji,cats', '伺服器與前端的遊戲鍵名要一致');
+  }
+  { // 貓貓食堂：人數 3–6、輪數預設 3 且可自訂（1–10）、房主可在等待室修改輪數、同時蓋牌同步與隱藏
+    for (const bad of [0, 11, 2.5, '3']) assert.equal((await post('create', { name: 'c', kind: 'cats', rounds: bad })).status, 400, `輪數 ${bad} 不合法`);
+    const cDef = (await post('create', { name: 'CDef', kind: 'cats' })).json;
+    assert.equal(server.rooms.get(cDef.code).settings.rounds, 3, '預設 3 輪');
+    const c = (await post('create', { name: 'C0', kind: 'cats', rounds: 5 })).json;
+    const cr = server.rooms.get(c.code);
+    assert.equal(c.kind, 'cats'); assert.equal(cr.settings.rounds, 5);
+    const cv0 = await sseOnce(c);
+    assert.deepEqual([cv0.kind, cv0.min, cv0.max, cv0.settings.rounds], ['cats', 3, 6, 5]);
+    assert.equal((await post('settings', { ...c, rounds: 2 })).status, 200);
+    assert.equal(cr.settings.rounds, 2, '房主可在房內改輪數');
+    const c1 = (await post('join', { code: c.code, name: 'C1' })).json;
+    assert.equal((await post('start', c)).status, 400, '貓貓食堂 2 人不能開');
+    const c2 = (await post('join', { code: c.code, name: 'C2' })).json;
+    for (let i = 3; i < 6; i++) await post('join', { code: c.code, name: 'C' + i });
+    assert.equal((await post('join', { code: c.code, name: '第七隻貓' })).status, 400, '貓貓食堂滿 6 人');
+    assert.equal((await post('start', c)).status, 200);
+    assert.equal((await post('act', { ...c, action: { type: 'pick', card: 8 } })).status, 200);
+    const cv1 = await sseOnce(c1);
+    assert.equal(cv1.game.hand.length, 12);
+    assert.equal(cv1.game.players[0].ready, true, '別人看得到 C0 已蓋牌');
+    assert.equal(cv1.game.myPick, null, '看不到別人蓋哪張');
+    // 全部人蓋牌 → 同時翻牌進入第 2 手
+    for (const p of cr.players.slice(1)) {
+      assert.equal((await post('act', { code: c.code, token: p.token, action: { type: 'pick', card: 5 } })).status, 200);
+    }
+    assert.equal(cr.game.trick, 2, '全員蓋牌後翻牌進第 2 手');
+    assert.ok(cr.game.last && cr.game.last.picks.length === 6);
+    void c2;
   }
   const cardsIn = (g) => g.players.reduce((a, p) => a + p.hand.length, 0) + g.groups.reduce((a, x) => a + x.cards.length, 0) + g.draw.length + g.disc.length;
 

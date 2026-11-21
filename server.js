@@ -7,9 +7,10 @@ const os = require('node:os');
 const { randomInt, randomUUID } = require('node:crypto');
 const G = require('./game');
 const F = require('./fuji');
+const C = require('./cats');
 
 const TURN_SEC = 60; // 每回合預設秒數；建房時可改（10–600），手機切去 LINE 回訊息再回來要來得及，所以下限不能太短
-const KINDS = { phase10: { eng: G, min: 2, max: 6 }, fuji: { eng: F, min: 3, max: 8 } }; // 遊戲種類：規則引擎（同一組介面 create/act/leave/autoPlay/view）與人數；新增遊戲在這裡加一行
+const KINDS = { phase10: { eng: G, min: 2, max: 6 }, fuji: { eng: F, min: 3, max: 8 }, cats: { eng: C, min: 3, max: 6 } }; // 遊戲種類：規則引擎（同一組介面 create/act/leave/autoPlay/view）與人數；新增遊戲在這裡加一行
 const K = (room) => KINDS[room.kind];
 const EMOJI = ['😮', '😡', '😂', '👏', '😭', '😎', '🙏', '😴']; // 白名單；index.html 有同一份，改的時候兩邊一起改
 const RULES = ['catchUp', 'first', 'rv', 'sh', 'xn', 'xc']; // 建房時可開的特殊規則（見 game.js），全部預設關 = 標準 Phase 10；index.html 有同一份鍵名，test.js 會比對
@@ -85,6 +86,7 @@ const actions = {
     if (room.host !== p.id) G.err('只有房主可以改設定');
     if (room.game) G.err('遊戲進行中不能改設定');
     if (room.kind === 'phase10' && Number.isInteger(b.target) && b.target >= 1 && b.target <= 10) room.settings.target = b.target;
+    if (room.kind === 'cats' && Number.isInteger(b.rounds) && b.rounds >= 1 && b.rounds <= 10) room.settings.rounds = b.rounds;
   },
   shuffle(room, p) { // 隨機排座位：座位 = room.players 的順序，G.create 照這個順序發牌、輪流
     if (room.host !== p.id) G.err('只有房主可以排位子');
@@ -179,7 +181,11 @@ const server = http.createServer(async (req, res) => {
           if (b.rules != null && (typeof b.rules !== 'object' || Array.isArray(b.rules))) G.err('規則格式不對');
           const target = b.target ?? 10;
           if (!Number.isInteger(target) || target < 1 || target > 10) G.err('目標階段要在 1–10 之間');
-          room = newRoom(kind, turn, kind === 'phase10' ? { target, rules: Object.fromEntries(RULES.map((k) => [k, b.rules?.[k] === true])) } : {});
+          const rounds = b.rounds ?? C.DEFAULT_ROUNDS;
+          if (kind === 'cats' && (!Number.isInteger(rounds) || rounds < 1 || rounds > 10)) G.err('遊戲輪數要在 1–10 之間');
+          const extra = kind === 'phase10' ? { target, rules: Object.fromEntries(RULES.map((k) => [k, b.rules?.[k] === true])) }
+            : kind === 'cats' ? { rounds } : {};
+          room = newRoom(kind, turn, extra);
         } else {
           room = rooms.get(String(b.code ?? '').toUpperCase());
           if (!room) G.err('找不到這個房間');
@@ -212,6 +218,6 @@ setInterval(() => {
 
 if (require.main === module) {
   const port = process.env.PORT || 3000;
-  server.listen(port, '0.0.0.0', () => console.log(`Phase 10 / 富士流 → http://localhost:${port}`));
+  server.listen(port, '0.0.0.0', () => console.log(`Phase 10 / 富士流 / 貓貓食堂 → http://localhost:${port}`));
 }
 module.exports = Object.assign(server, { rooms }); // rooms 只給測試改狀態用
