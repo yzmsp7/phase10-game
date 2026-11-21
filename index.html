@@ -122,16 +122,71 @@ input[readonly]{width:100%}
 .av{flex:none;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:600;color:#fff;background:hsl(var(--h) 45% 38%)}
 .pl{display:flex;align-items:center;gap:12px;min-height:48px}.pl .nmx{flex:1;min-width:0;overflow-wrap:anywhere}
 .cta .row{flex-wrap:nowrap}.cta .row button{width:auto}.cta .w{flex:1;display:flex}.cta .w button,.cta .row>button:not(.ghost){flex:1}.cta .ghost{flex:none}
-.card.F{background:hsl(var(--h,210) 60% 40%)}.card.md{width:44px;height:60px}.card.md b{font-size:var(--s3)}
-.fgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:8px 0}
-.ftile{display:flex;gap:8px;align-items:center;min-height:84px;padding:8px;border-radius:12px;background:var(--panel2);border:2px solid transparent;min-width:0}
-.ftile.turn{border-color:var(--accent);box-shadow:0 0 16px 2px #f6c94555}.ftile.out{opacity:.4}.ftile.hit{border:2px dashed #ff8a80}
-.fslot{flex:none;width:44px;height:60px;border-radius:7px}.fslot.e{border:2px dashed #ffffff40}
-.ftx{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:4px}.ftx .nm{font-weight:600;line-height:1.25;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;max-width:100%}.ftx small{color:var(--mute)}
-.pill{display:inline-block;border-radius:8px;padding:0 8px;font-size:var(--s1);line-height:20px;background:#0c2f23;white-space:nowrap}.pill.hot{background:var(--accent);color:#2a2200}.pill.wash{background:#a52a2a;color:#fff}
-.recent{padding:12px;margin-bottom:12px;min-height:96px}.recent .old{font-size:var(--s1);color:var(--mute)}.recent .last{font-size:var(--s2)}
-.hand.f{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:8px;padding:16px 0 8px}.hand.f .card{width:100%;max-width:64px;height:auto;aspect-ratio:5/7;justify-self:center}.hand.f .card b{font-size:var(--s4)}.hand.f.wait .card:not(.sel){opacity:.7}
-.fhint{min-height:40px;font-size:var(--s1);color:var(--mute);text-align:center;display:flex;align-items:center;justify-content:center;padding-bottom:8px}.fhint b{color:var(--accent)}
+.card.F{background:hsl(var(--h,210) 60% 40%);font-variant-numeric:tabular-nums}.card.md{width:44px;height:60px}.card.md b{font-size:var(--s3)}
+/* 富士流圓桌（手機優先；4 級字級、4/8 格線、零重疊幾何） */
+.fmeta{font-size:var(--s1);color:var(--mute);white-space:nowrap;font-variant-numeric:tabular-nums;background:var(--panel);padding:4px 8px;border-radius:8px;border:1px solid #2f7d5f}
+.fticker{display:flex;align-items:center;gap:8px;width:100%;min-height:36px;margin:4px 0 0;padding:6px 12px;border-radius:10px;background:var(--panel);border:1px solid #266b52;color:var(--ink);font-size:var(--s1);font-weight:400;text-align:left;line-height:1.35}
+.fticker span{flex:1;min-width:0;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}.fticker i{font-style:normal;color:var(--mute);flex:none}
+.fstage{flex:1;display:flex;align-items:center;justify-content:center;padding:4px 0;min-height:0}
+.ftable{position:relative;width:100%;max-width:440px;aspect-ratio:1/0.97;margin:0 auto;user-select:none;-webkit-user-select:none}
+.ffelt{position:absolute;inset:10%;border-radius:50%;background:radial-gradient(circle at 50% 45%,#227c5d 0%,#165740 64%,#104331 100%);border:3px solid #2c8666;box-shadow:inset 0 0 24px #061e1699,0 10px 24px #061c14aa,0 0 0 5px #0b2d21}
+.fsvg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.fhub{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:54px;height:54px;border-radius:50%;background:#0c3124ee;border:1.5px solid #2f7d5f;box-shadow:0 4px 12px #061c1499;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;z-index:1;pointer-events:none}
+.fhub b{font-size:var(--s2);line-height:1.05;font-variant-numeric:tabular-nums}.fhub small{font-size:var(--s1);line-height:1.1;color:var(--mute);transform:scale(.85)}
+.fhub-ptr{position:absolute;inset:-6px;transform:rotate(var(--ang,90deg));transition:transform .4s cubic-bezier(.22,1,.36,1)}
+.fhub-ptr::after{content:'';position:absolute;left:50%;top:50%;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:8px solid var(--accent);transform:translate(-50%,calc(-50% - 31px)) rotate(0deg);filter:drop-shadow(0 0 4px #f6c945aa)}
+.fcwrap{position:absolute;transform:translate(-50%,-50%);z-index:2;display:flex;align-items:center;justify-content:center}
+.fcwrap .card.F{width:52px;height:70px;border-width:2px;box-shadow:inset 0 1px 0 #ffffff55,0 6px 14px #061c14aa;transition:transform .2s ease,box-shadow .2s ease}
+.fcwrap .card.F b{font-size:var(--s4);text-shadow:0 1px 2px #0006}
+.ftable.mid .fcwrap .card.F{width:46px;height:62px}.ftable.mid .fcwrap .card.F b{font-size:var(--s3)}
+.ftable.dense .fcwrap .card.F{width:40px;height:54px}.ftable.dense .fcwrap .card.F b{font-size:var(--s3)}
+.fempty{width:52px;height:70px;border-radius:7px;border:1.5px dashed #cfe3d838;background:#08251b38;display:flex;align-items:center;justify-content:center;transition:border-color .2s,background .2s}
+.ftable.mid .fempty{width:46px;height:62px}.ftable.dense .fempty{width:40px;height:54px}
+.fempty.turn{border-color:var(--accent);background:#f6c94518;box-shadow:0 0 14px #f6c94533}
+.card.F.fpre{opacity:.65;border-style:dashed;border-color:var(--accent);box-shadow:0 0 12px #f6c94555}
+.card.F.fjust{box-shadow:inset 0 1px 0 #ffffff66,0 0 0 2px #ffffffaa,0 6px 16px #061c14bb}
+.card.F.fally{box-shadow:inset 0 1px 0 #ffffff55,0 0 0 2px #f6c945aa,0 6px 14px #061c14aa}
+.card.F.fally-pre{outline:3px solid var(--accent);box-shadow:0 0 18px 2px #f6c94588;transform:scale(1.06)}
+.card.F.fwash{outline:2.5px dashed #ff8a80;box-shadow:0 0 14px 2px #d6454588;filter:saturate(.75);animation:fwobble .45s ease-in-out infinite alternate}
+.card.F.fwin{outline:2.5px solid var(--accent);box-shadow:0 0 16px 3px #f6c94588}
+.card.F.fthrow{animation:fthrow .42s cubic-bezier(.18,1.25,.35,1) both}
+@keyframes fthrow{from{transform:translate(var(--fx,0px),var(--fy,0px)) scale(.65);opacity:.2}to{transform:none;opacity:1}}
+@keyframes fwobble{from{transform:rotate(-2.5deg) scale(.97)}to{transform:rotate(2.5deg) scale(.97)}}
+.fbadge{position:absolute;left:50%;bottom:-10px;transform:translateX(-50%);border-radius:8px;padding:0 6px;font-size:var(--s1);font-weight:600;line-height:18px;white-space:nowrap;box-shadow:0 2px 6px #061c1499;z-index:3;pointer-events:none;font-variant-numeric:tabular-nums}
+.fbadge.ally{background:#0c2f23;color:var(--accent);border:1px solid #f6c94588}.fbadge.hot{background:var(--accent);color:#2a2200}.fbadge.wash{background:#c63737;color:#fff}
+.fghost{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:7px;font-size:var(--s1);font-weight:600;pointer-events:none;animation:fgone 1.25s ease-out forwards}
+.fghost.wash{background:#c63737cc;color:#fff}.fghost.gone{background:#1b7a5ecc;color:var(--accent)}
+@keyframes fgone{0%{transform:scale(1.05);opacity:1}65%{opacity:.9}100%{transform:translateY(-14px) scale(.8);opacity:0}}
+.fseat{position:absolute;transform:translate(-50%,-50%);z-index:3;width:84px;padding:4px 6px;border-radius:12px;background:#103c2d;border:2px solid #266b52;box-shadow:0 3px 10px #061c1499;text-align:left;cursor:pointer;transition:border-color .2s,box-shadow .2s,transform .2s}
+.ftable.dense .fseat{width:70px;padding:3px 5px}
+.fseat.me{background:#154c39;border-color:#3a8d6f}
+.fseat.turn{border-color:var(--accent);box-shadow:0 0 16px 2px #f6c94566,0 3px 10px #061c1499;transform:translate(-50%,-50%) scale(1.05)}
+.fseat.hit{border:2px dashed #ff8a80}
+.fseat.out{opacity:.4}
+.fseat:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.fseat-top{display:flex;align-items:center;gap:4px;min-width:0}
+.fseat .av{width:20px;height:20px;font-size:var(--s1);flex:none}
+.fseat .fnm{flex:1;min-width:0;font-size:var(--s1);font-weight:600;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fseat-meta{display:flex;align-items:center;justify-content:space-between;gap:4px;margin-top:2px;font-size:var(--s1);line-height:1.15;color:var(--mute);white-space:nowrap;font-variant-numeric:tabular-nums}
+.fseat.turn .fseat-meta{color:var(--ink)}
+.fturn-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 6px var(--accent);flex:none}
+.hand.f{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:8px;padding:12px 0 4px}.hand.f .card{width:100%;max-width:64px;height:auto;aspect-ratio:5/7;justify-self:center;box-shadow:inset 0 1px 0 #ffffff44,0 2px 6px #061c1488}.hand.f .card b{font-size:var(--s4)}.hand.f.wait .card:not(.sel){opacity:.7}
+.fhint{min-height:32px;font-size:var(--s1);color:var(--mute);text-align:center;display:flex;align-items:center;justify-content:center;padding:4px 0 8px}.fhint b{color:var(--accent)}
+.tray .act button:not(:disabled){box-shadow:inset 0 1px 0 #ffffff66,0 4px 12px #061c1466}
+@media(max-width:600px){
+.ftable{max-width:390px}
+.fcwrap .card.F,.fempty{width:46px;height:62px}.fcwrap .card.F b{font-size:var(--s3)}
+.ftable.mid .fcwrap .card.F,.ftable.mid .fempty{width:42px;height:56px}
+.ftable.dense .fcwrap .card.F,.ftable.dense .fempty{width:38px;height:50px}
+.fseat{width:74px}.ftable.dense .fseat{width:64px}.ftable.dense .fseat .av{display:none}
+.fhub{width:48px;height:48px}.fhub-ptr::after{transform:translate(-50%,calc(-50% - 28px))}
+}
+@media(max-height:700px) and (max-width:600px){
+.ftable{max-width:356px}
+.hand.f{padding:8px 0 4px}.hand.f .card{max-width:54px}.hand.f .card b{font-size:var(--s3)}
+.fhint{min-height:24px;padding:2px 0 6px}
+}
+@media(max-height:500px){.ftable{max-width:310px}}
 </style>
 </head>
 <body>
@@ -553,7 +608,7 @@ function overlay(g, s) {
 }
 
 // 富士流：牌面只有數字，越大越紅
-const fcard = (c, o = {}) => `<${o.tag || 'button'} class="card F ${o.cls || ''}" style="--h:${Math.round(210 + (c.n - 2) * 140 / 18)}" aria-label="${c.n}" ${o.attrs || ''}><b>${c.n}</b></${o.tag || 'button'}>`;
+const fcard = (c, o = {}) => `<${o.tag || 'button'} class="card F ${o.cls || ''}" style="--h:${Math.round(210 + (c.n - 2) * 140 / 18)}${o.style ? `;${o.style}` : ''}" aria-label="${o.label || c.n}" ${o.attrs || ''}><b>${c.n}</b></${o.tag || 'button'}>`;
 function fuji() {
   const s = snap, g = s.game, me = s.me, myTurn = g.turn === me;
   const name = (id) => g.players.find((p) => p.id === id)?.name ?? '?', nm = (id) => (id === me ? '你' : esc(name(id)));
@@ -571,35 +626,112 @@ function fuji() {
   }
   seen.evNo = ev ? ev.no : null;
   const hand = [...g.hand].sort((a, b) => a.n - b.n), one = hand.find((c) => sel.has(c.id));
-  // 選牌預覽：只用桌上公開的牌，規則同 fuji.js act()（同盟合計嚴格大於才沖走）
-  const mates = one ? g.players.filter((p) => p.card?.n === one.n) : [], total = one ? one.n * (mates.length + 1) : 0;
-  const wash = new Set(one ? g.players.filter((p) => p.card && p.card.n !== one.n && p.sum < total).map((p) => p.id) : []);
-  const tiles = g.players.map((p) => {
-    const c = p.card, tag = wash.has(p.id) ? '<span class="pill wash">💦 會被沖走</span>'
-      : one && c?.n === one.n ? `<span class="pill hot">🤝 結盟 → ${total}</span>`
-      : c && p.sum > c.n ? `<span class="pill">🤝 同盟 ${p.sum}</span>`
-      : c && !p.n && p.in ? '<span class="pill hot">⚡ 差一步獲勝</span>' : '';
-    return `<div class="ftile ${g.turn === p.id ? 'turn' : ''} ${p.in ? '' : 'out'} ${wash.has(p.id) ? 'hit' : ''}" data-pid="${p.id}">
-      <div class="fslot ${c ? '' : 'e'}">${c ? fcard(c, { tag: 'div', cls: `md ${fresh && ev.by === p.id ? 'pop' : ''}` }) : ''}</div>
-      <div class="ftx"><span class="nm">${esc(p.name)}${p.id === me ? '（你）' : ''}</span><small>${p.left ? '已離開' : `${p.n} 張手牌${online[p.id] ? '' : ' 💤'}`}</small>${tag}</div></div>`;
+  // 選牌預覽：只用桌上公開的牌，規則同 fuji.js act()（同盟合計嚴格大於才沖走；輪到自己時自己面前的牌已流走，排除自己）
+  const mates = one ? g.players.filter((p) => p.id !== me && p.card?.n === one.n) : [], total = one ? one.n * (mates.length + 1) : 0;
+  const wash = new Set(one ? g.players.filter((p) => p.id !== me && p.card && p.card.n !== one.n && p.sum < total).map((p) => p.id) : []);
+
+  // 圓桌幾何：把自己固定在下方（6 點鐘方向），其餘依順位順時針排列；牌落在內圈（桌面中央）
+  const N = g.players.length, myIdx = Math.max(0, g.players.findIndex((p) => p.id === me));
+  const ring = Array.from({ length: N }, (_, k) => g.players[(myIdx + k) % N]);
+  const [Rx, Ry, rx, ry] = N <= 4 ? [39, 42.5, 18.5, 18.5] : N <= 6 ? [39.5, 43, 20, 20] : [40.5, 43.5, 21.5, 22];
+  const density = N >= 7 ? 'dense' : N >= 5 ? 'mid' : '';
+  const pos = ring.map((p, k) => {
+    const a = Math.PI / 2 + (2 * Math.PI * k) / N, ca = Math.cos(a), sa = Math.sin(a);
+    return { p, k, a, ca, sa, sx: 50 + Rx * ca, sy: 50 + Ry * sa, cx: 50 + rx * ca, cy: 50 + ry * sa };
+  });
+  const turnPos = pos.find((x) => x.p.id === g.turn);
+  const turnDeg = turnPos ? (turnPos.a * 180 / Math.PI) + 90 : 180;
+
+  // SVG 桌面視覺：順時針軌道箭頭、目前出牌者聚光扇形、同盟連線（含選牌預覽連線）
+  const arrows = pos.map(({ a }) => {
+    const mid = a + Math.PI / N, ax = 50 + 35.5 * Math.cos(mid), ay = 50 + 35.5 * Math.sin(mid), deg = (mid * 180 / Math.PI) + 90;
+    return `<path d="M-1.5 -1.1 L1.5 0 L-1.5 1.1" fill="none" stroke="#cfe3d855" stroke-width=".65" stroke-linecap="round" stroke-linejoin="round" transform="translate(${ax.toFixed(1)} ${ay.toFixed(1)}) rotate(${deg.toFixed(1)})"/>`;
   }).join('');
-  const lines = g.log.slice(-3);
-  const recent = `<div class="panel recent"><div class="mute" style="margin-bottom:8px">牌堆 ${g.drawCount} · 棄牌 ${g.discCount}</div>${lines.map((l, i) => `<div class="${i === lines.length - 1 ? 'last' : 'old'}">${esc(l)}</div>`).join('')}</div>`;
+  let spotlight = '';
+  if (turnPos && g.status === 'play') {
+    const sp = Math.min(0.34, (Math.PI / N) * 0.72), a1 = turnPos.a - sp, a2 = turnPos.a + sp;
+    const x1 = (50 + 39 * Math.cos(a1)).toFixed(1), y1 = (50 + 39 * Math.sin(a1)).toFixed(1);
+    const x2 = (50 + 39 * Math.cos(a2)).toFixed(1), y2 = (50 + 39 * Math.sin(a2)).toFixed(1);
+    spotlight = `<path d="M50 50 L${x1} ${y1} A39 39 0 0 1 ${x2} ${y2} Z" fill="url(#fspot)"/>`;
+  }
+  const byNum = new Map();
+  pos.forEach((x) => { if (x.p.card) { const k = x.p.card.n; byNum.set(k, [...(byNum.get(k) || []), x]); } });
+  let allyLines = '';
+  for (const grp of byNum.values()) if (grp.length > 1) {
+    for (let i = 0; i < grp.length; i++) for (let j = i + 1; j < grp.length; j++) {
+      allyLines += `<line x1="${grp[i].cx.toFixed(1)}" y1="${grp[i].cy.toFixed(1)}" x2="${grp[j].cx.toFixed(1)}" y2="${grp[j].cy.toFixed(1)}" stroke="#f6c94577" stroke-width=".9" stroke-linecap="round"/>`;
+    }
+  }
+  if (one && mates.length) {
+    const myP = pos[0];
+    for (const m of pos.filter((x) => x.p.card?.n === one.n && x.p.id !== me)) {
+      allyLines += `<line x1="${myP.cx.toFixed(1)}" y1="${myP.cy.toFixed(1)}" x2="${m.cx.toFixed(1)}" y2="${m.cy.toFixed(1)}" stroke="#f6c945" stroke-width="1.2" stroke-dasharray="2.4 1.8" stroke-linecap="round"/>`;
+    }
+  }
+  const svg = `<svg class="fsvg" viewBox="0 0 100 100" aria-hidden="true">
+    <defs><radialGradient id="fspot" cx="50%" cy="50%" r="50%"><stop offset="15%" stop-color="#f6c945" stop-opacity=".24"/><stop offset="100%" stop-color="#f6c945" stop-opacity=".02"/></radialGradient></defs>
+    ${spotlight}
+    <circle cx="50" cy="50" r="35.5" fill="none" stroke="#cfe3d822" stroke-width=".45" stroke-dasharray="1.8 1.8"/>
+    ${arrows}${allyLines}</svg>`;
+
+  const seats = pos.map(({ p, sx, sy }) => {
+    const isMe = p.id === me, isTurn = g.turn === p.id && g.status === 'play';
+    const meta = p.left ? '已離開' : `${isMe ? '你 · ' : ''}${p.n} 張${!p.n && p.card ? ' ⚡' : ''}${online[p.id] ? '' : ' 💤'}`;
+    const aria = `${p.name}${isMe ? '（你）' : ''}，${p.left ? '已離開' : `剩 ${p.n} 張`}${p.card ? `，場上 ${p.card.n}${p.sum > p.card.n ? `（同盟合計 ${p.sum}）` : ''}` : ''}${isTurn ? '，出牌中' : ''}`;
+    return `<div class="fseat ${isMe ? 'me' : ''} ${isTurn ? 'turn' : ''} ${p.in ? '' : 'out'} ${wash.has(p.id) ? 'hit' : ''}" data-pid="${p.id}" data-a="fseat" data-v="${p.id}" role="button" tabindex="0" aria-label="${esc(aria)}" style="left:${sx.toFixed(2)}%;top:${sy.toFixed(2)}%">
+      <div class="fseat-top">${av(p.name)}<span class="fnm">${esc(p.name)}</span></div>
+      <div class="fseat-meta"><span>${meta}</span>${isTurn ? '<i class="fturn-dot" aria-hidden="true"></i>' : ''}</div></div>`;
+  }).join('');
+
+  const cards = pos.map(({ p, ca, sa, cx, cy }) => {
+    const c = p.card, isMe = p.id === me, isTurn = g.turn === p.id && g.status === 'play';
+    let inner = '';
+    if (c) {
+      const isWash = wash.has(p.id), isAllyPre = !!(one && !isMe && c.n === one.n), isAlly = p.sum > c.n, isWin = !p.n && p.in;
+      const isThrow = fresh && ev.by === p.id, isJust = ev?.by === p.id;
+      const badge = isWash ? '<span class="fbadge wash">💦 沖走</span>'
+        : isAllyPre ? `<span class="fbadge hot">🤝 →${total}</span>`
+        : isWin ? '<span class="fbadge hot">⚡ 聽牌</span>'
+        : isAlly ? `<span class="fbadge ally">🤝 ${p.sum}</span>` : '';
+      const cls = `${isWash ? 'fwash' : isAllyPre ? 'fally-pre' : isWin ? 'fwin' : isAlly ? 'fally' : isJust ? 'fjust' : ''} ${isThrow ? 'fthrow' : ''}`;
+      const throwStyle = isThrow ? `--fx:${Math.round(ca * 52)}px;--fy:${Math.round(sa * 52)}px` : '';
+      const label = `${p.name} 打出的 ${c.n}${isAlly ? `，同盟合計 ${p.sum}` : ''}`;
+      inner = `${fcard(c, { tag: 'div', cls, style: throwStyle, label })}${badge}`;
+    } else if (isMe && one) {
+      inner = `${fcard(one, { tag: 'div', cls: 'fpre', label: `預覽打出 ${one.n}` })}${mates.length ? `<span class="fbadge hot">🤝 ${total}</span>` : ''}`;
+    } else {
+      const washed = fresh && ev.out.find((o) => o.id === p.id), flowed = fresh && ev.gone.find((x) => x.id === p.id);
+      const ghost = washed ? `<div class="fghost wash"><span>💦</span><span>${washed.n}</span></div>`
+        : flowed ? `<div class="fghost gone"><span>🌊</span><span>${flowed.n}</span></div>` : '';
+      inner = `<div class="fempty ${isTurn ? 'turn' : ''}">${ghost}</div>`;
+    }
+    return `<div class="fcwrap" style="left:${cx.toFixed(2)}%;top:${cy.toFixed(2)}%">${inner}</div>`;
+  }).join('');
+
+  const lastLog = g.log.at(-1) || '遊戲進行中';
+  const ticker = `<button class="fticker" data-a="sheet" aria-label="查看玩法與動態"><span>${esc(lastLog)}</span><i aria-hidden="true">›</i></button>`;
+  const table = `<div class="fstage"><div class="ftable ${density}" role="region" aria-label="富士流圓桌，依順時針輪流出牌">
+    <div class="ffelt"></div>${svg}
+    <div class="fhub" aria-label="牌堆剩餘 ${g.drawCount} 張">${g.status === 'play' ? `<div class="fhub-ptr" style="--ang:${turnDeg.toFixed(1)}deg" aria-hidden="true"></div>` : ''}<b>${g.drawCount}</b><small>牌堆</small></div>
+    ${cards}${seats}</div></div>`;
+
   const why = !myTurn ? `還沒輪到你，現在是 ${name(g.turn)}` : one ? '' : '先點一張要打出的牌';
-  const hint = !one ? (myTurn ? '點一張牌，會預覽誰被沖走' : `等 ${esc(name(g.turn))} 出牌…`)
+  const hint = !one ? (myTurn ? '點一張牌，在桌面中央預覽效果' : `等 ${esc(name(g.turn))} 出牌…`)
     : `${mates.length ? `與 ${mates.map((p) => esc(p.name)).join('、')} 結盟，合計 <b>${total}</b>。` : ''}${wash.size ? `沖走 <b>${[...wash].map((id) => esc(name(id))).join('、')}</b>` : '沒有人會被沖走'}`;
   const tray = g.status !== 'play' ? fujiOver(g, s) : `<div class="tray"><div class="row" style="justify-content:space-between;flex-wrap:nowrap"><b class="${myTurn ? 'crown' : ''}">${myTurn ? '輪到你了' : `輪到 ${esc(name(g.turn))}`}</b><b class="cd" aria-live="off"></b></div>
-    <div class="hand f ${myTurn ? '' : 'wait'}">${hand.map((c) => fcard(c, { cls: sel.has(c.id) ? 'sel' : '', attrs: `data-a="fcard" data-v="${c.id}" aria-pressed="${sel.has(c.id)}"` })).join('') || '<div class="mute" style="text-align:center;padding:24px 0">你的牌都打出去了，等最後一張順水流走</div>'}</div>
+    <div class="hand f ${myTurn ? '' : 'wait'}">${hand.map((c) => fcard(c, { cls: sel.has(c.id) ? 'sel' : '', attrs: `data-a="fcard" data-v="${c.id}" aria-pressed="${sel.has(c.id)}"` })).join('') || '<div class="mute" style="text-align:center;padding:16px 0">你的牌都打出去了，等最後一張順水流走</div>'}</div>
     <div class="fhint" aria-live="polite">${hint}</div>
     <div class="row act"><span class="w" data-why="${esc(why)}"><button data-a="fplay" ${why ? 'disabled' : ''}>${one ? `打出 ${one.n}` : '打出'}</button></span></div></div>`;
   const sheetUI = sheet && g.status === 'play' ? `<div class="overlay sheet"><div class="bd" data-a="sheet"></div><div class="modal" role="dialog" aria-label="玩法與動態">
     <div class="row" style="justify-content:space-between"><h2 style="margin:0">玩法與動態</h2><button class="ghost ic" data-a="sheet" aria-label="關閉">✕</button></div>
+    <p class="mute" style="margin:8px 0 0">順時針依序出牌 · 牌堆 ${g.drawCount} 張 · 棄牌 ${g.discCount} 張</p>
     ${fujiRules()}<h2 style="margin-top:16px">最近動態</h2><div class="log">${g.log.map(esc).join('<br>')}</div>
     <button class="ghost" data-a="leave" style="width:100%;margin-top:16px">離開房間</button></div></div>` : '';
   return `<div class="row" style="flex-wrap:nowrap"><b style="flex:1;min-width:0">🌊 富士流 · ${s.code}</b>
+    <span class="fmeta" aria-label="棄牌 ${g.discCount} 張">棄 ${g.discCount}</span>
     <span class="rxw"><button class="ghost ic" data-a="rxMenu" aria-label="送表情" aria-expanded="${rxOpen}">😀</button>${rxOpen ? `<div class="rxp">${EMOJI.map((e) => `<button data-a="react" data-v="${e}" aria-label="${e}">${e}</button>`).join('')}</div>` : ''}</span>
     <button class="ghost ic" data-a="sheet" aria-label="玩法、動態、離開">📋</button></div>
-  <div class="fgrid">${tiles}</div>${recent}${tray}${sheetUI}`;
+  ${ticker}${table}${tray}${sheetUI}`;
 }
 function fujiOver(g, s) {
   const me = s.me, host = me === s.host, win = g.winners.includes(me), nm = (id) => esc(g.players.find((p) => p.id === id).name);
@@ -671,6 +803,12 @@ const A = {
   draw: (v) => call('act', { action: { type: 'draw', from: v } }),
   fcard(v) { sel = new Set(sel.has(+v) ? [] : [+v]); render(); }, // 富士流一次只能選一張
   fplay: () => call('act', { action: { type: 'play', card: [...sel][0] } }).then((r) => r && sel.clear()),
+  fseat(v) {
+    const p = snap?.game?.players?.find((x) => x.id === v);
+    if (!p) return;
+    const tag = p.left ? '已離開' : `剩 ${p.n} 張${p.card ? ` · 場上 ${p.card.n}${p.sum > p.card.n ? `（同盟合計 ${p.sum}）` : ''}` : ' · 尚未出牌'}`;
+    toast(`${p.name}${p.id === snap.me ? '（你）' : ''}：${tag}`);
+  },
   card(v) {
     endFor = null;
     if (actSlot === null) sel.has(+v) ? sel.delete(+v) : sel.add(+v);
