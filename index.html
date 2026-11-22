@@ -267,7 +267,10 @@ body.manila-mode .tray{background:linear-gradient(180deg,#2e1d12,#20130b);border
 body.manila-mode .fmeta,body.manila-mode .fticker{background:#281910eb;border-color:#785a2e}
 body.manila-mode .rxp{background:#2b1b11;border-color:#8c6a36;box-shadow:0 8px 20px #0b0502cc}
 body.manila-mode .modal{background:linear-gradient(180deg,#301f13,#22150c);border:1.5px solid #8c6a36}
-body.manila-mode .res{background:#3a2618;border:1px solid #6b4e27}
+body.manila-mode .res{background:#3a2618;border:1px solid #6b4e27;color:#f8eed8}
+body.manila-mode .res.me{background:linear-gradient(180deg,#4d331d,#3a2414);border:2px solid #e8b954;color:#fff7e2;outline:0;box-shadow:0 0 14px #e8b95444}
+body.manila-mode .res.rk.me{background:linear-gradient(180deg,#f6e4bc,#e3c17a);border:2px solid #f8d77f;color:#241409;outline:0;box-shadow:0 0 18px #e8b95466,inset 0 1px 0 #fff8e6cc}
+body.manila-mode .res.rk.me .mute{color:#5c3a16}
 body.manila-mode input,body.manila-mode select{background:#1a1009;border-color:#785a2e}
 body.manila-mode button.ghost{border-color:#9e7d4a;color:#f3e4c3}
 .m-ico-img{width:24px;height:24px;border-radius:50%;object-fit:cover;border:1.5px solid #b58d47;flex:none;box-shadow:0 1px 3px #0006}
@@ -431,6 +434,23 @@ body.manila-mode button.ghost{border-color:#9e7d4a;color:#f3e4c3}
 .m-ready-bar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;justify-content:center}
 .m-rchip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:10px;font-size:var(--s1);background:#24150c;border:1px solid #6b4e27;color:var(--mute)}
 .m-rchip.ok{background:#19452c;border-color:#5ce09e;color:#e4fff0;font-weight:600}
+/* 📢 其他玩家動作大通知橫幅（非阻斷、高對比羊皮紙×胡桃木牌，清楚掌握對手每一步） */
+#mActBan{position:fixed;left:50%;top:max(56px,calc(env(safe-area-inset-top) + 52px));transform:translateX(-50%);z-index:7;width:calc(100% - 24px);max-width:440px;pointer-events:none;display:none}
+#mActBan.on{display:block;animation:mActIn .32s cubic-bezier(.18,1.25,.35,1) both}
+#mActBan.out{animation:mActOut .26s ease-in forwards}
+.m-act-card{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;background:linear-gradient(180deg,#342013f5,#21130bf5);border:2px solid #e8b954;box-shadow:0 14px 32px #000000cc,0 0 22px #e8b95455,inset 0 1px 0 #fff2cc44;color:#fbf3df;backdrop-filter:blur(4px)}
+.m-act-card.red{border-color:#e8635a;background:linear-gradient(180deg,#471815f5,#290d0cf5);box-shadow:0 14px 32px #000c,0 0 24px #d6454577}
+.m-act-card.green{border-color:#57d693;background:linear-gradient(180deg,#163d28f5,#0d2619f5);box-shadow:0 14px 32px #000c,0 0 22px #2eb87266}
+.m-act-card.blue{border-color:#68a9ed;background:linear-gradient(180deg,#163047f5,#0e2030f5);box-shadow:0 14px 32px #000c,0 0 22px #3b82d466}
+.m-act-card.mute{border-color:#8c734b;background:linear-gradient(180deg,#2c1e15f0,#1e140ef0);box-shadow:0 10px 24px #000b}
+.m-act-vis{position:relative;flex:none;display:flex;align-items:center;justify-content:center;min-width:40px}
+.m-act-vis .m-ico-img{width:40px;height:40px;border-width:2px}
+.m-act-vis .m-mp-badge{position:absolute;right:-6px;bottom:-4px}
+.m-act-txt{min-width:0;flex:1}
+.m-act-ttl{font-size:18px;font-weight:600;line-height:1.25;color:#fff7e2;letter-spacing:.2px}
+.m-act-sub{font-size:13px;color:#e4cfa8;margin-top:3px;line-height:1.3}
+@keyframes mActIn{from{opacity:0;transform:translate(-50%,-18px) scale(.94)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
+@keyframes mActOut{from{opacity:1;transform:translate(-50%,0) scale(1)}to{opacity:0;transform:translate(-50%,-12px) scale(.97)}}
 @keyframes mFadeIn{from{opacity:0}to{opacity:1}}
 @keyframes mFadeOut{from{opacity:1}to{opacity:0}}
 @keyframes mDiceArc{
@@ -469,6 +489,7 @@ body.manila-mode button.ghost{border-color:#9e7d4a;color:#f3e4c3}
 <div id="toast" role="status"></div>
 <div id="skipBan" role="status"></div>
 <div id="rx" aria-hidden="true"></div>
+<div id="mActBan" role="status" aria-live="polite"></div>
 <div id="mDiceStage" role="dialog" aria-label="擲骰結果動畫"></div>
 <script>
 const $ = (s) => document.querySelector(s);
@@ -570,7 +591,7 @@ const av = (n) => `<span class="av" style="--h:${Math.abs([...n].reduce((a, c) =
 let pick = (() => { try { const k = localStorage.getItem('p10pick'); return Object.hasOwn(GAMES, k) ? k : 'phase10'; } catch { return 'phase10'; } })(); // 首頁選的遊戲，下次進來沿用
 let dl = null, sess = store.get(), snap = null, es = null, sel = new Set(), slots = {}, los = {}, seen = null, sheet = false, endFor = null, actSlot = null, byColor = false, rxOpen = false, rxSeq = null, histFor = null, drag = null, noClick = false, xs = { target: null, v: null, give: null }; // xs = 交換牌的三個選擇（對象／數字或顏色／要換出的牌）。 // drag = 正在拖的百搭（拖曳中不重繪，不然 DOM 重建會把它弄丟）；noClick = 剛拖完，吃掉隨後的 click。 histFor = 正在看誰的撿棄牌歷史（玩家 id）。 rxOpen = 表情選單開著；rxSeq = 已播到的表情編號（null = 還沒收到第一筆快照）。每次 render 會重建 DOM，UI 狀態要存在這：sheet = 底部資訊面板開著；endFor = 正在選「接前/接後」的順子；actSlot = 放階段時作用中的那一組
 let ms = { bidAmt: 1, spot: null, masterGoods: ['jade', 'silk', 'nutmeg'], masterPos: { jade: 3, silk: 3, nutmeg: 3, ginseng: 0 }, navMoves: {}, plunderShip: null, stockSheet: false, infoSheet: false, animFrom: null, sailAnim: null, stageKey: null };
-const resetMs = () => { ms = { bidAmt: 1, spot: null, masterGoods: ['jade', 'silk', 'nutmeg'], masterPos: { jade: 3, silk: 3, nutmeg: 3, ginseng: 0 }, navMoves: {}, plunderShip: null, stockSheet: false, infoSheet: false, animFrom: null, sailAnim: null, stageKey: null }; closeManilaDice(); };
+const resetMs = () => { ms = { bidAmt: 1, spot: null, masterGoods: ['jade', 'silk', 'nutmeg'], masterPos: { jade: 3, silk: 3, nutmeg: 3, ginseng: 0 }, navMoves: {}, plunderShip: null, stockSheet: false, infoSheet: false, animFrom: null, sailAnim: null, stageKey: null }; closeManilaDice(); clearManilaActs(); };
 if (sess && urlRoom && sess.code !== urlRoom) sess = null; // 邀請連結指向另一間房 → 先顯示加入畫面
 // 在 localhost 開頁面時，邀請連結／QR 要換成手機連得到的區網 IP（undefined = 查詢中，null = 查不到）。部署後網址不是 localhost，這段不會跑。
 const isLocal = /^(localhost|127\.|\[?::1)/.test(location.hostname);
@@ -797,9 +818,9 @@ function room() {
   return `<h1>${GM.icon} ${GM.name}</h1>
   <div class="panel"><div class="row" style="justify-content:space-between;flex-wrap:nowrap"><div><div class="mute">房間代碼</div><div class="big">${s.code}</div></div><button data-a="copy" style="min-height:48px">${navigator.share ? '分享邀請' : '複製連結'}</button></div>
     ${fold('qr', '面對面？用 QR code 或連結加入', `<input readonly value="${esc(link)}" onfocus="this.select()" style="width:100%">${qrBox(link)}`)}</div>
-  <div class="panel"><div class="rhd"><h2>玩家 ${n}/${s.max}</h2>${host && n > 1 ? '<button class="ghost" data-a="shuffle">🔀 隨機排位子</button>' : ''}</div>
-    ${s.players.map((p) => `<div class="pl">${av(p.name)}<span class="nmx">${esc(p.name)}${p.id === s.me ? ' <span class="mute">（你）</span>' : ''}${p.id === s.host ? ' <span class="crown">👑</span>' : ''}</span><span class="dot ${p.online ? 'on' : ''}" role="img" aria-label="${p.online ? '在線' : '離線'}" style="margin:0"></span></div>`).join('')}
-    <p class="mute" style="margin:8px 0 0">${need ? `再邀請 ${need} 位朋友就能開始（${s.min}–${s.max} 人）` : host ? '人數夠了，可以開始！' : '人數夠了，等房主開始'}</p></div>
+  <div class="panel"><div class="rhd"><h2>玩家 ${n}/${s.max}</h2><div class="row" style="gap:6px">${host && mn && n < s.max ? '<button class="ghost" data-a="addBot">🤖 +電腦</button>' : ''}${host && n > 1 ? '<button class="ghost" data-a="shuffle">🔀 排位子</button>' : ''}</div></div>
+    ${s.players.map((p) => `<div class="pl">${p.bot ? '<span class="av" style="background:#5a3e20" aria-hidden="true">🤖</span>' : av(p.name)}<span class="nmx">${esc(p.name)}${p.id === s.me ? ' <span class="mute">（你）</span>' : ''}${p.id === s.host ? ' <span class="crown">👑</span>' : ''}</span>${host && mn && p.bot ? `<button class="ghost" data-a="removeBot" data-v="${p.id}" style="min-height:36px;padding:4px 10px;font-size:var(--s1)">移除</button>` : `<span class="dot ${p.online ? 'on' : ''}" role="img" aria-label="${p.online ? '在線' : '離線'}" style="margin:0"></span>`}</div>`).join('')}
+    <p class="mute" style="margin:8px 0 0">${need ? (host && mn ? `再邀請 ${need} 位朋友，或點「🤖 +電腦」補人就能開始（${s.min}–${s.max} 人）` : `再邀請 ${need} 位朋友就能開始（${s.min}–${s.max} 人）`) : host ? '人數夠了，可以開始！' : '人數夠了，等房主開始'}</p></div>
   ${rulesPanel}
   <div class="cta"><div class="row"><button class="ghost" data-a="leave" style="min-height:48px">離開</button>${host ? `<span class="w" data-why="${need ? `至少需要 ${s.min} 人` : ''}"><button data-a="start" ${need ? 'disabled' : ''}>開始遊戲</button></span>` : '<span class="mute" style="flex:1;text-align:center">等待房主開始…</span>'}</div></div>`;
 }
@@ -1327,6 +1348,41 @@ const mDieCube = (val, color, i) => {
   const faces = [1, 2, 3, 4, 5, 6].map((f) => `<div class="m-dface f${f}" style="--dc:${color}"><svg viewBox="0 0 28 28" aria-hidden="true">${M_DIE_PIPS[f].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2.4" fill="#fbf2dc"/>`).join('')}</svg></div>`).join('');
   return `<div class="m-dthrow" style="--tx0:${starts[3]}px"><div class="m-dcube" style="--rx0:${starts[0]}deg;--ry0:${starts[1]}deg;--rz0:${starts[2]}deg;--rx1:${tgt[0] + 720}deg;--ry1:${tgt[1] + 720}deg">${faces}</div></div>`;
 };
+// 📢 馬尼拉其他玩家動作大通知佇列（不中斷操作、不漏看電腦連貫動作）
+let mActQ = [], mActT1 = null, mActT2 = null, mActBusy = false;
+function clearManilaActs() {
+  mActQ = []; mActBusy = false;
+  clearTimeout(mActT1); clearTimeout(mActT2);
+  const el = $('#mActBan');
+  if (el) { el.classList.remove('on', 'out'); el.innerHTML = ''; }
+}
+function showNextManilaAct() {
+  const el = $('#mActBan');
+  if (!el || !mActQ.length) { mActBusy = false; return; }
+  mActBusy = true;
+  const { ev, actor } = mActQ.shift();
+  const tone = ev.tone || 'gold';
+  const vis = ev.good
+    ? `<div class="m-act-vis">${mGoodImg(ev.good)}${actor ? `<span class="m-mp-badge">${mMeeple(actor, true)}</span>` : ''}</div>`
+    : actor
+    ? `<div class="m-act-vis">${mMeeple(actor)}</div>`
+    : '';
+  el.innerHTML = `<div class="m-act-card ${tone}">${vis}<div class="m-act-txt"><div class="m-act-ttl">${esc(ev.title)}</div>${ev.sub ? `<div class="m-act-sub">${esc(ev.sub)}</div>` : ''}</div></div>`;
+  el.classList.remove('on', 'out'); void el.offsetWidth; el.classList.add('on');
+  if (tone === 'red') navigator.vibrate?.([40, 30, 40]);
+  const stay = mActQ.length ? 1250 : (tone === 'red' || ev.kind === 'masterWon' || ev.kind === 'sail' ? 2400 : 1950);
+  clearTimeout(mActT1); clearTimeout(mActT2);
+  mActT1 = setTimeout(() => {
+    if (mActQ.length) return showNextManilaAct();
+    el.classList.add('out');
+    mActT2 = setTimeout(() => { el.classList.remove('on', 'out'); mActBusy = false; if (mActQ.length) showNextManilaAct(); }, 260);
+  }, stay);
+}
+function enqueueManilaAct(ev, actor) {
+  mActQ.push({ ev, actor });
+  if (mActQ.length > 4) mActQ.splice(0, mActQ.length - 4);
+  if (!mActBusy) showNextManilaAct();
+}
 // 🎲 馬尼拉真 3D 三骰拋擲動畫（3 顆對應貨物色木骰同步拋出翻滾 → 落地定格 → 觸發三船滑行）
 let mDiceTimers = [];
 function closeManilaDice() {
@@ -1428,13 +1484,19 @@ function manila() {
   }
 
   seen ??= {};
-  const ev = g.ev, fresh = !!ev && seen.evNo !== undefined && ev.no !== seen.evNo;
-  if (fresh) {
-    if (ev.kind === 'plunder') { skipBanner('🏴‍☠️ 海盜出動掠奪船隻！', 2800); navigator.vibrate?.([60, 40, 60]); }
-    else if (ev.kind === 'masterWon') toast(`⚓ ${nm(ev.by)} 以 $${ev.price} 成為船老大`);
-    else if (ev.kind === 'roll') playManilaDice(ev);
+  const feed = g.evFeed || (g.ev ? [g.ev] : []);
+  const lastNo = feed.at(-1)?.no ?? null;
+  if (seen.evNo !== undefined) {
+    const freshEvs = feed.filter((x) => x.no > (seen.evNo ?? 0));
+    for (const fe of freshEvs) {
+      if (fe.kind === 'roll') playManilaDice(fe);
+      else if (fe.kind === 'plunder') { skipBanner('🏴‍☠️ 海盜出動掠奪船隻！', 2800); navigator.vibrate?.([60, 40, 60]); }
+      else if (fe.title && (fe.by !== me || fe.kind === 'masterWon' || fe.kind === 'pirateDecide')) {
+        enqueueManilaAct(fe, fe.by ? pById[fe.by] : null);
+      }
+    }
   }
-  seen.evNo = ev ? ev.no : null;
+  seen.evNo = lastNo;
 
   // 精簡黑市價格條（單排羊皮紙木牌，點任一格可展開完整黑市與玩家帳本）
   const mkt = `<div class="m-mkt" aria-label="黑市價格表">${M_GOODS.map((k) => {
@@ -1607,9 +1669,12 @@ function manila() {
 
   // --- 底部精簡拇指操作區 ---
   const mortCnt = g.myStocks.filter((x) => x.mortgaged).length;
+  const stockVal = g.myStocks.reduce((a, st) => a + g.market[st.good].price, 0);
+  const mortDebt = mortCnt * 15;
+  const estTotal = mine.cash + stockVal - mortDebt;
   const myBar = `<div class="m-bar">
     <span>${mCoin(15)} <b>$${mine.cash}</b> · ${mMeeple(mine, true)} <b>×${mine.workers}</b></span>
-    <button class="ghost m-bar-btn" data-a="mStockSheet">📜 我的股票 (${g.myStocks.length}${mortCnt ? ` · 🔒${mortCnt}` : ''})</button>
+    <button class="ghost m-bar-btn" data-a="mStockSheet">📜 股票 ${g.myStocks.length}張 · 現值 $${stockVal}${mortCnt ? ` · 🔒${mortCnt}` : ''}</button>
     <b class="cd" aria-live="off"></b>
   </div>`;
 
@@ -1730,10 +1795,14 @@ function manila() {
       <div class="mute" style="font-size:var(--s1);margin-top:4px">持股 ${p.stockCount} 張${p.mortgagedCount ? `（🔒 ${p.mortgagedCount} 張已抵押）` : ''}${p.bought.length ? ` · 公開購得：${p.bought.map((k) => M_INFO[k].name).join('、')}` : ''}</div></div>`).join('')}
   </div></div>` : '';
 
-  // 復古羊皮紙股票證書抽屜（隨時可抵押／贖回）
+  // 復古羊皮紙股票證書抽屜（隨時可抵押／贖回＋即時現值試算）
   const stockSheetUI = ms.stockSheet && g.status === 'play' ? `<div class="overlay sheet"><div class="bd" data-a="mStockSheet"></div><div class="modal" role="dialog" aria-label="我的股票證書與抵押贖回">
     <div class="row" style="justify-content:space-between"><h2 style="margin:0;color:var(--ink)">📜 1821 馬尼拉股票證書</h2><button class="ghost ic" data-a="mStockSheet" aria-label="關閉">✕</button></div>
-    <p class="mute" style="margin:6px 0 8px">現有現金 ${mCoin(14)} <b>$${mine.cash}</b> · 抵押立刻拿 <b>+$12</b>，贖回需 <b>−$15</b>（終局強制贖回）。</p>
+    <div class="res me" style="margin-top:10px">
+      <div class="row" style="justify-content:space-between"><span>股票現值合計（${g.myStocks.length} 張）</span><b style="color:var(--accent);font-size:var(--s3)">$${stockVal}</b></div>
+      <div class="row mute" style="justify-content:space-between;margin-top:4px;font-size:var(--s1)"><span>現金 $${mine.cash} ＋ 股票 $${stockVal}${mortDebt ? ` − 抵押贖回 $${mortDebt}` : ''}</span><span>預估總資產 <b style="color:#fff7e2">$${estTotal}</b></span></div>
+    </div>
+    <p class="mute" style="margin:8px 0 4px;font-size:var(--s1)">抵押立刻拿 <b>+$12</b>，贖回需 <b>−$15</b>（遊戲結束強制以 $15 贖回）。</p>
     ${g.myStocks.map((st) => {
       const info = M_INFO[st.good], curVal = g.market[st.good].price, canRedeem = mine.cash >= 15;
       return `<div class="m-cert ${st.mortgaged ? 'mort' : ''}" style="--gc:${info.color}">
@@ -1867,6 +1936,8 @@ const A = {
   },
   start: () => call('start'),
   shuffle: () => call('shuffle'),
+  addBot: () => call('addBot'),
+  removeBot: (v) => call('removeBot', { id: v }),
   async leave() {
     // 遊戲中途退出是真的退出：牌放回棄牌堆、不能再回來；剩 2 人時你一走房間就關閉，所以先確認
     if (snap?.game && snap.game.status !== 'over') {

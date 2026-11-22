@@ -15,6 +15,7 @@ const KINDS = { phase10: { eng: G, min: 2, max: 6 }, fuji: { eng: F, min: 3, max
 const K = (room) => KINDS[room.kind];
 const EMOJI = ['😮', '😡', '😂', '👏', '😭', '😎', '🙏', '😴']; // 白名單；index.html 有同一份，改的時候兩邊一起改
 const RULES = ['catchUp', 'first', 'rv', 'sh', 'xn', 'xc']; // 建房時可開的特殊規則（見 game.js），全部預設關 = 標準 Phase 10；index.html 有同一份鍵名，test.js 會比對
+const BOT_NAMES = ['老船長(電腦)', '海盜王(電腦)', '香料商(電腦)', '黑市通(電腦)'];
 const rooms = new Map();
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
 
@@ -22,7 +23,7 @@ function newRoom(kind, turn, extra) {
   let code;
   do { code = Array.from({ length: 4 }, () => CODE_CHARS[randomInt(CODE_CHARS.length)]).join(''); } while (rooms.has(code));
   const r = { code, kind, players: [], host: null, settings: { turn, ...extra }, // extra：phase10 才有 target、rules；富士流沒有額外設定
-     game: null, rx: [], clients: new Map(), touched: Date.now(), timer: null, dl: null };
+     game: null, rx: [], clients: new Map(), touched: Date.now(), timer: null, botTimer: null, dl: null };
   rooms.set(code, r);
   return r;
 }
@@ -37,13 +38,14 @@ function addPlayer(room, name) {
   return p;
 }
 
-const online = (room, id) => (room.clients.get(id)?.size ?? 0) > 0;
+const online = (room, id) => room.players.some((p) => p.id === id && p.bot) || (room.clients.get(id)?.size ?? 0) > 0;
+const isBot = (room, id) => room.players.some((p) => p.id === id && p.bot);
 
 function snapshot(room, pid) {
   return {
     code: room.code, kind: room.kind, min: K(room).min, max: K(room).max, me: pid, host: room.host, settings: room.settings,
     turnLeft: room.dl && Math.max(0, room.dl.at - Date.now()), // 剩餘毫秒（不傳絕對時間，免得被手機時鐘誤差影響）
-    players: room.players.map((p) => ({ id: p.id, name: p.name, online: online(room, p.id) })),
+    players: room.players.map((p) => ({ id: p.id, name: p.name, bot: !!p.bot, online: online(room, p.id) })),
     rx: room.rx, // 最近 5 筆表情；seq 遞增，前端只播自己沒看過的
     game: room.game ? K(room).eng.view(room.game, pid) : null,
   };
@@ -58,13 +60,50 @@ function broadcast(room) {
   }
 }
 
-// 回合倒數：每個回合（g.turnNo）開始時定下期限，其餘廣播只重掛 timer 不重設；
-// 時間到就代打（抽牌堆、棄最大張）。沒在玩或全員離線就凍結，有人回來時重新計時。
+// 回合倒數與電腦玩家排程：每個回合（g.turnNo）開始時定下期限，其餘廣播只重掛 timer 不重設；
+// 沒在玩或全員離線就凍結，有人回來時重新計時。
 function watch(room) {
   clearTimeout(room.timer);
+  clearTimeout(room.botTimer);
   const g = room.game;
-  if (!g || g.status !== 'play' || ![...room.clients.values()].some((s) => s.size)) { room.dl = null; return; }
+  const anyHumanOnline = [...room.clients.values()].some((s) => s.size);
+  if (!g || !anyHumanOnline) { room.dl = null; return; }
+
+  // 馬尼拉結算畫面：電腦玩家自動按下「開始下一航程」準備，但仍等所有真人玩家按開始
+  if (g.status === 'roundEnd' && room.kind === 'manila') {
+    room.dl = null;
+    const pendingBots = g.players.filter((p) => p.in && isBot(room, p.id) && !g.nextReady.includes(p.id));
+    if (pendingBots.length) {
+      const delay = room.settings.botDelay ?? 700;
+      room.botTimer = setTimeout(() => {
+        if (room.game !== g || g.status !== 'roundEnd') return;
+        for (const b of pendingBots) {
+          if (g.status !== 'roundEnd') break;
+          try { M.act(g, b.id, { type: 'next' }); } catch (e) { console.error(e); }
+        }
+        broadcast(room);
+      }, delay);
+      room.botTimer.unref();
+    }
+    return;
+  }
+
+  if (g.status !== 'play') { room.dl = null; return; }
   const no = g.turnNo, cur = g.players[g.turn].id;
+
+  // 輪到電腦玩家時自動執行 AI 決策（留出足夠閱讀其他玩家動作大通知與 3D 擲骰動畫的時間）
+  if (isBot(room, cur) && K(room).eng.botPlay) {
+    room.dl = null;
+    const baseDelay = room.settings.botDelay ?? (g.ev?.kind === 'roll' ? 2400 : 1350);
+    room.botTimer = setTimeout(() => {
+      if (room.game !== g || g.status !== 'play' || g.turnNo !== no) return;
+      try { K(room).eng.botPlay(g, cur); } catch (e) { console.error(e); try { K(room).eng.autoPlay(g, cur); } catch {} }
+      broadcast(room);
+    }, baseDelay);
+    room.botTimer.unref();
+    return;
+  }
+
   if (room.dl?.no !== no) room.dl = { no, at: Date.now() + room.settings.turn * 1000 };
   room.timer = setTimeout(() => {
     if (room.game !== g || g.status !== 'play' || g.turnNo !== no) return;
@@ -78,6 +117,7 @@ function watch(room) {
 // 關房間：先推一筆 { closed } 讓前端顯示原因並退出，再斷線、刪房。
 function close(room, why) {
   clearTimeout(room.timer);
+  clearTimeout(room.botTimer);
   rooms.delete(room.code); // 先刪房：res.end() 會觸發 req 'close' → broadcast，那時 rooms.has 必須已是 false
   for (const set of room.clients.values()) for (const res of set) { res.write(`data: ${JSON.stringify({ closed: why })}\n\n`); res.end(); }
 }
@@ -89,6 +129,26 @@ const actions = {
     if (room.kind === 'phase10' && Number.isInteger(b.target) && b.target >= 1 && b.target <= 10) room.settings.target = b.target;
     if (room.kind === 'cats' && Number.isInteger(b.rounds) && b.rounds >= 1 && b.rounds <= 10) room.settings.rounds = b.rounds;
     if (room.kind === 'manila' && typeof b.pirateKick === 'boolean') room.settings.pirateKick = b.pirateKick;
+  },
+  addBot(room, p) {
+    if (room.kind !== 'manila') G.err('目前只有馬尼拉支援電腦玩家');
+    if (room.host !== p.id) G.err('只有房主可以新增電腦玩家');
+    if (room.game) G.err('遊戲進行中不能新增電腦玩家');
+    if (room.players.length >= K(room).max) G.err(`房間已滿（最多 ${K(room).max} 人）`);
+    const used = new Set(room.players.map((x) => x.name));
+    let name = BOT_NAMES.find((n) => !used.has(n));
+    if (!name) { let k = 1; while (used.has(`電腦${k}`)) k++; name = `電腦${k}`; }
+    room.players.push({ id: randomUUID().slice(0, 8), token: null, name, bot: true });
+  },
+  removeBot(room, p, b) {
+    if (room.kind !== 'manila') G.err('目前只有馬尼拉支援電腦玩家');
+    if (room.host !== p.id) G.err('只有房主可以移除電腦玩家');
+    if (room.game) G.err('遊戲進行中不能移除電腦玩家');
+    const idx = b.id
+      ? room.players.findIndex((x) => x.bot && x.id === b.id)
+      : room.players.findLastIndex((x) => x.bot);
+    if (idx < 0) G.err('找不到可移除的電腦玩家');
+    room.players.splice(idx, 1);
   },
   shuffle(room, p) { // 隨機排座位：座位 = room.players 的順序，G.create 照這個順序發牌、輪流
     if (room.host !== p.id) G.err('只有房主可以排位子');
@@ -124,8 +184,12 @@ const actions = {
     room.players = room.players.filter((x) => x !== p);
     room.clients.get(p.id)?.forEach((res) => res.end());
     room.clients.delete(p.id);
-    if (room.host === p.id) room.host = room.players[0]?.id ?? null;
-    if (!room.players.length) rooms.delete(room.code);
+    if (!room.players.some((x) => !x.bot)) {
+      clearTimeout(room.timer);
+      clearTimeout(room.botTimer);
+      return rooms.delete(room.code);
+    }
+    if (room.host === p.id) room.host = room.players.find((x) => !x.bot)?.id ?? null;
   },
 };
 

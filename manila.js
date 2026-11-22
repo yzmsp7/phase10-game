@@ -50,15 +50,20 @@ const activeOrder = (g, startIdx) => {
   return out;
 };
 const buyPrice = (g, good) => Math.max(5, PRICE_TRACK[g.market[good]]);
-const pushEv = (g, ev) => { g.ev = { no: ++g.evNo, ...ev }; };
+const pushEv = (g, ev) => {
+  const item = { no: ++g.evNo, ...ev };
+  g.ev = item;
+  g.evFeed.push(item);
+  if (g.evFeed.length > 10) g.evFeed.shift();
+};
 
 function create(players, { pirateKick = false } = {}) {
   const deck = shuffle(GOODS.flatMap((good) => Array(SHARES_PER_GOOD).fill(good)));
   const supply = Object.fromEntries(GOODS.map((k) => [k, 0]));
-  const ps = players.map(({ id, name }, color) => {
+  const ps = players.map(({ id, name, bot }, color) => {
     const init = deck.splice(0, 2);
     return {
-      id, name, color, cash: START_CASH, workers: 0, in: true, left: false,
+      id, name, bot: !!bot, color, cash: START_CASH, workers: 0, in: true, left: false,
       stocks: init.map((good) => ({ good, mortgaged: false, public: false })),
       bought: [],
     };
@@ -76,6 +81,7 @@ function create(players, { pirateKick = false } = {}) {
     turnNo: 0,
     evNo: 0,
     ev: null,
+    evFeed: [],
     master: null,
     lastMaster: starter,
     masterBought: false,
@@ -179,7 +185,7 @@ function finishAuction(g, winner, price) {
   g.turn = idx;
   g.turnNo++;
   log(g, `${winner.name} 以 ${price} 元標下船老大！`);
-  pushEv(g, { kind: 'masterWon', by: winner.id, price });
+  pushEv(g, { kind: 'masterWon', by: winner.id, price, title: `⚓ ${winner.name} 當選船老大！`, sub: price > 0 ? `以 $${price} 得標，開始執行三大特權` : '全員 PASS，免費擔任船老大', tone: 'gold' });
 }
 
 // --- 派遣手下 ---
@@ -499,6 +505,7 @@ function act(g, pid, a) {
     p.stocks[idx].mortgaged = true;
     p.cash += MORTGAGE_GAIN;
     log(g, `${p.name} 抵押了 1 張股票（+${MORTGAGE_GAIN} 元）`);
+    pushEv(g, { kind: 'mortgage', by: p.id, title: `🔒 ${p.name} 抵押了 1 張股票`, sub: `換取現金 +$${MORTGAGE_GAIN}（贖回需 $${REDEEM_COST}）`, tone: 'gold' });
     return;
   }
   if (a.type === 'redeem') {
@@ -509,6 +516,7 @@ function act(g, pid, a) {
     p.stocks[idx].mortgaged = false;
     p.cash -= REDEEM_COST;
     log(g, `${p.name} 贖回了 1 張抵押股票（−${REDEEM_COST} 元）`);
+    pushEv(g, { kind: 'redeem', by: p.id, title: `📜 ${p.name} 贖回了抵押股票`, sub: `支付 −$${REDEEM_COST} 解除紅蠟抵押`, tone: 'gold' });
     return;
   }
 
@@ -524,12 +532,14 @@ function act(g, pid, a) {
       g.auction.high = amount;
       g.auction.leader = p.id;
       log(g, `${p.name} 喊價 ${amount} 元`);
+      pushEv(g, { kind: 'bid', by: p.id, amount, title: `💰 ${p.name} 競標喊價 $${amount}`, sub: '目前最高出價，爭奪船老大', tone: 'gold' });
       return checkAuctionEnd(g, g.turn);
     }
     if (a.type === 'pass') {
       if (g.auction.leader === p.id) err('你目前是最高出價者，不能 PASS');
       if (!g.auction.passed.includes(p.id)) g.auction.passed.push(p.id);
       log(g, `${p.name} 放棄競標`);
+      pushEv(g, { kind: 'pass', by: p.id, title: `${p.name} 放棄競標（PASS）`, sub: '退出本航程船老大競標', tone: 'mute' });
       return checkAuctionEnd(g, g.turn);
     }
     err('現在是競標階段，請出價或 PASS');
@@ -549,7 +559,7 @@ function act(g, pid, a) {
       p.bought.push(good);
       g.masterBought = true;
       log(g, `船老大 ${p.name} 以 ${price} 元買進 1 張${GOOD_INFO[good].name}股票`);
-      pushEv(g, { kind: 'buyStock', by: p.id, good, price });
+      pushEv(g, { kind: 'buyStock', by: p.id, good, price, title: `📜 ${p.name} 買進${GOOD_INFO[good].name}股票`, sub: `船老大特權 · 花費 $${price}（公開紀錄）`, tone: 'gold' });
       return;
     }
     if (a.type === 'setupShips') {
@@ -566,8 +576,9 @@ function act(g, pid, a) {
       }
       if (sum !== 9) err('三艘船的起始格數總和必須剛好是 9 格');
       g.ships = list.map(({ good, pos }) => ({ good, pos, startPos: pos, crew: [], plunderedBy: null, dest: null }));
-      log(g, `船老大 ${p.name} 啟航：${g.ships.map((s) => `${GOOD_INFO[s.good].name}(${s.pos}格)`).join('、')}`);
-      pushEv(g, { kind: 'sail', ships: g.ships.map((s) => ({ good: s.good, pos: s.pos })) });
+      const shipDesc = g.ships.map((s) => `${GOOD_INFO[s.good].name}(${s.pos}格)`).join(' · ');
+      log(g, `船老大 ${p.name} 啟航：${shipDesc}`);
+      pushEv(g, { kind: 'sail', by: p.id, ships: g.ships.map((s) => ({ good: s.good, pos: s.pos })), title: `⛵ 船老大 ${p.name} 安排啟航！`, sub: shipDesc, tone: 'gold' });
       return startPlaceWave(g);
     }
     err('請執行船老大特權（買股或安排三艘船出發）');
@@ -576,6 +587,7 @@ function act(g, pid, a) {
   if (g.stage === 'place') {
     if (a.type === 'passPlace') {
       log(g, `${p.name} 本次跳過派遣`);
+      pushEv(g, { kind: 'passPlace', by: p.id, title: `${p.name} 跳過本次派遣`, sub: '未派出手下', tone: 'mute' });
       g.placeQueue.shift();
       return advancePlaceQueue(g);
     }
@@ -595,6 +607,7 @@ function act(g, pid, a) {
       p.workers--;
       ship.crew.push(p.id);
       log(g, `${p.name} 花 ${cost} 元登上${GOOD_INFO[ship.good].name}船`);
+      pushEv(g, { kind: 'place', by: p.id, good: ship.good, title: `⛵ ${p.name} 登上${GOOD_INFO[ship.good].name}船`, sub: `花費 $${cost} · 進港平分 $${GOOD_INFO[ship.good].payout}`, tone: 'gold' });
     } else if (spot.startsWith('harbor:')) {
       const hi = Number(spot.slice(7));
       const slot = HARBOR_SLOTS[hi];
@@ -605,6 +618,7 @@ function act(g, pid, a) {
       p.workers--;
       g.board.harbor[hi] = p.id;
       log(g, `${p.name} 花 ${slot.cost} 元佔據港口 ${slot.label}`);
+      pushEv(g, { kind: 'place', by: p.id, title: `⚓ ${p.name} 佔據港口 ${slot.label}`, sub: `花費 $${slot.cost} · ≥${slot.need} 船進港得 $${slot.reward}`, tone: 'gold' });
     } else if (spot.startsWith('shipyard:')) {
       const yi = Number(spot.slice(9));
       const slot = SHIPYARD_SLOTS[yi];
@@ -615,12 +629,14 @@ function act(g, pid, a) {
       p.workers--;
       g.board.shipyard[yi] = p.id;
       log(g, `${p.name} 花 ${slot.cost} 元佔據修船廠 ${slot.label}`);
+      pushEv(g, { kind: 'place', by: p.id, title: `🔧 ${p.name} 佔據修船廠 ${slot.label}`, sub: `花費 $${slot.cost} · ≥${slot.need} 船進修船廠得 $${slot.reward}`, tone: 'gold' });
     } else if (spot === 'insurance') {
       if (g.board.insurance) err('保險辦事處已經有人了');
       p.workers--;
       p.cash += INSURANCE_GAIN;
       g.board.insurance = p.id;
       log(g, `${p.name} 接任保險辦事處，立刻獲得 ${INSURANCE_GAIN} 元！`);
+      pushEv(g, { kind: 'place', by: p.id, title: `🛡️ ${p.name} 接任保險辦事處！`, sub: `立刻領取 +$${INSURANCE_GAIN}（須代付修船廠賠償）`, tone: 'green' });
     } else if (spot === 'pirate') {
       const pi = g.board.pirates[0] ? (g.board.pirates[1] ? -1 : 1) : 0;
       if (pi < 0) err('海盜船已經滿員');
@@ -628,7 +644,9 @@ function act(g, pid, a) {
       p.cash -= PIRATE_COST;
       p.workers--;
       g.board.pirates[pi] = p.id;
-      log(g, `${p.name} 花 ${PIRATE_COST} 元成為海盜${pi === 0 ? '船長' : '船員'}`);
+      const role = pi === 0 ? '船長' : '船員';
+      log(g, `${p.name} 花 ${PIRATE_COST} 元成為海盜${role}`);
+      pushEv(g, { kind: 'place', by: p.id, title: `🏴‍☠️ ${p.name} 成為海盜${role}！`, sub: `花費 $${PIRATE_COST} · 船停 13 格即可劫船`, tone: 'red' });
     } else if (spot === 'nav_small') {
       if (g.board.navSmall) err('小領航員位置已經有人了');
       if (p.cash < NAV_SMALL_COST) err(`現金不足，小領航員需要 ${NAV_SMALL_COST} 元`);
@@ -636,6 +654,7 @@ function act(g, pid, a) {
       p.workers--;
       g.board.navSmall = p.id;
       log(g, `${p.name} 花 ${NAV_SMALL_COST} 元擔任小領航員（±1 格）`);
+      pushEv(g, { kind: 'place', by: p.id, title: `🧭 ${p.name} 擔任小領航員`, sub: `花費 $${NAV_SMALL_COST} · 第 3 輪前可調船 ±1 格`, tone: 'blue' });
     } else if (spot === 'nav_big') {
       if (g.board.navBig) err('大領航員位置已經有人了');
       if (p.cash < NAV_BIG_COST) err(`現金不足，大領航員需要 ${NAV_BIG_COST} 元`);
@@ -643,6 +662,7 @@ function act(g, pid, a) {
       p.workers--;
       g.board.navBig = p.id;
       log(g, `${p.name} 花 ${NAV_BIG_COST} 元擔任大領航員（±2 格）`);
+      pushEv(g, { kind: 'place', by: p.id, title: `🧭 ${p.name} 擔任大領航員`, sub: `花費 $${NAV_BIG_COST} · 第 3 輪前可調船 ±2 格`, tone: 'blue' });
     } else {
       err('未知的派遣位置');
     }
@@ -676,8 +696,9 @@ function act(g, pid, a) {
       ship.pos += delta;
       notes.push(`${GOOD_INFO[ship.good].name}${delta > 0 ? `+${delta}` : delta}→${ship.pos}格`);
     }
-    log(g, `${g.stage === 'nav_small' ? '小' : '大'}領航員 ${p.name}：${notes.length ? notes.join('、') : '按兵不動'}`);
-    pushEv(g, { kind: 'nav', by: p.id, small: g.stage === 'nav_small', notes });
+    const navLabel = g.stage === 'nav_small' ? '小領航員' : '大領航員';
+    log(g, `${navLabel} ${p.name}：${notes.length ? notes.join('、') : '按兵不動'}`);
+    pushEv(g, { kind: 'nav', by: p.id, small: g.stage === 'nav_small', notes, title: `🧭 ${p.name} 操控${navLabel}`, sub: notes.length ? notes.join(' · ') : '選擇按兵不動', tone: 'blue' });
 
     if (g.stage === 'nav_small') {
       const nb = g.board.navBig && playerOf(g, g.board.navBig)?.in ? g.board.navBig : null;
@@ -701,6 +722,7 @@ function act(g, pid, a) {
     const slot = g.pirateSlot;
     if (a.ship === null || a.ship === undefined) {
       log(g, `海盜 ${p.name} 選擇留在海盜船上，等待第 3 輪掠奪`);
+      pushEv(g, { kind: 'pirateBoard', by: p.id, title: `🏴‍☠️ 海盜 ${p.name} 留在海盜船`, sub: '放棄登船，等待第 3 輪掠奪', tone: 'red' });
       return advancePirateBoard(g);
     }
     const si = a.ship;
@@ -711,15 +733,18 @@ function act(g, pid, a) {
       ship.crew.push(p.id);
       g.board.pirates[slot] = null;
       log(g, `🏴‍☠️ 海盜 ${p.name} 免費登上${GOOD_INFO[ship.good].name}船！`);
+      pushEv(g, { kind: 'pirateBoard', by: p.id, good: ship.good, title: `🏴‍☠️ 海盜 ${p.name} 免費登上${GOOD_INFO[ship.good].name}船！`, sub: '船停 13 格趁機登船佔空位', tone: 'red' });
     } else {
       if (!g.rules.pirateKick) err('這艘船已經客滿，海盜無法登船');
       const ki = a.kickIdx;
       if (!Number.isInteger(ki) || ki < 0 || ki >= ship.crew.length) err('請指定要踢下船的水手');
       if (ship.crew[ki] === p.id) err('不能踢自己的手下');
       const kickedId = ship.crew[ki];
+      const kickedName = playerOf(g, kickedId).name;
       ship.crew[ki] = p.id;
       g.board.pirates[slot] = null;
-      log(g, `🏴‍☠️ 海盜 ${p.name} 踢下 ${playerOf(g, kickedId).name}，強行登上${GOOD_INFO[ship.good].name}船！`);
+      log(g, `🏴‍☠️ 海盜 ${p.name} 踢下 ${kickedName}，強行登上${GOOD_INFO[ship.good].name}船！`);
+      pushEv(g, { kind: 'pirateBoard', by: p.id, good: ship.good, title: `🏴‍☠️ 海盜 ${p.name} 踢下 ${kickedName}！`, sub: `強行登上${GOOD_INFO[ship.good].name}船搶佔位置`, tone: 'red' });
     }
     return advancePirateBoard(g);
   }
@@ -733,6 +758,7 @@ function act(g, pid, a) {
       const ship = g.ships[pl.ship];
       ship.dest = dest;
       log(g, `🏴‍☠️ 海盜船長 ${p.name} 將${GOOD_INFO[ship.good].name}船送進${dest === 'harbor' ? '港口' : '修船廠'}！`);
+      pushEv(g, { kind: 'pirateDecide', by: p.id, good: ship.good, dest, title: `🏴‍☠️ 海盜 ${p.name} 劫走${GOOD_INFO[ship.good].name}船！`, sub: `送進${dest === 'harbor' ? '⚓ 港口（拉抬股價）' : '🔧 修船廠（重創保險）'}`, tone: 'red' });
       g.plunder = null;
       return settleVoyage(g);
     }
@@ -745,6 +771,7 @@ function act(g, pid, a) {
     ship.dest = dest;
     g.board.pirates[pl.pirateSlot] = null;
     log(g, `🏴‍☠️ 海盜 ${p.name} 掠奪${GOOD_INFO[ship.good].name}船並送進${dest === 'harbor' ? '港口' : '修船廠'}！`);
+    pushEv(g, { kind: 'pirateDecide', by: p.id, good: ship.good, dest, title: `🏴‍☠️ 海盜 ${p.name} 掠奪${GOOD_INFO[ship.good].name}船！`, sub: `送進${dest === 'harbor' ? '⚓ 港口（拉抬股價）' : '🔧 修船廠（重創保險）'}`, tone: 'red' });
 
     const restShips = pl.ships.filter((x) => x !== si);
     const restPirates = pl.remainingPirates.filter((slot) => g.board.pirates[slot] && playerOf(g, g.board.pirates[slot])?.in);
@@ -854,6 +881,197 @@ function autoPlay(g, pid) {
   }
 }
 
+// --- 電腦玩家 AI 決策（競標、買股、配船、派遣、領航、海盜皆依局勢評估）---
+function botPlay(g, pid) {
+  if (g.status !== 'play') return;
+  const p = g.players[g.turn];
+  if (!p || p.id !== pid || !p.in) return;
+
+  // 現金充裕時贖回抵押股票；現金太少時必要才抵押
+  const tryRedeem = () => {
+    while (p.cash >= 26) {
+      const mi = p.stocks.findIndex((s) => s.mortgaged);
+      if (mi < 0) break;
+      act(g, pid, { type: 'redeem', idx: mi });
+    }
+  };
+  const mortgageOnce = () => {
+    const ui = p.stocks.findIndex((s) => !s.mortgaged);
+    if (ui < 0) return false;
+    act(g, pid, { type: 'mortgage', idx: ui });
+    return true;
+  };
+  const myShares = (good) => p.stocks.filter((s) => s.good === good).length;
+
+  tryRedeem();
+
+  if (g.stage === 'bid') {
+    const minBid = Math.max(1, g.auction.high + 1);
+    const hotBonus = GOODS.some((k) => g.market[k] >= 2 && (g.supply[k] > 0 || myShares(k) > 0)) ? 3 : 0;
+    const stockSynergy = Math.max(...GOODS.map((k) => myShares(k))) * 2;
+    const val = 5 + hotBonus + stockSynergy + randomInt(0, 5);
+    const cap = Math.min(val, p.cash - 6);
+    if (minBid <= cap) {
+      const jump = minBid + 1 <= cap && randomInt(3) === 0 ? 1 : 0;
+      return act(g, pid, { type: 'bid', amount: minBid + jump });
+    }
+    if (g.auction.leader === pid) return finishAuction(g, p, g.auction.high);
+    return act(g, pid, { type: 'pass' });
+  }
+
+  if (g.stage === 'master') {
+    // ① 特權買股：優先買黑市已漲或手上有同貨物的股票（保留足夠現金派遣）
+    if (!g.masterBought) {
+      const buyCands = GOODS
+        .filter((k) => g.supply[k] > 0 && p.cash - buyPrice(g, k) >= 8)
+        .map((k) => ({ k, score: g.market[k] * 4 + myShares(k) * 3 + (GOOD_INFO[k].payout / 12) + randomInt(0, 3) }))
+        .sort((a, b) => b.score - a.score);
+      if (buyCands.length && (buyCands[0].score >= 5 || randomInt(2) === 0)) {
+        act(g, pid, { type: 'buyStock', good: buyCands[0].k });
+      }
+    }
+    // ② 挑選 3 種貨物並分配 9 格起始位置
+    const ranked = GOODS
+      .map((k) => ({ k, score: myShares(k) * 4 + g.market[k] * 3 + GOOD_INFO[k].payout / 12 + randomInt(0, 3) }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 3)
+      .map((x) => x.k);
+    const p0 = 4 + randomInt(0, 2); // 4 或 5
+    const p1 = Math.min(5, Math.max(9 - p0 - 5, 3 + randomInt(0, 2)));
+    const p2 = 9 - p0 - p1;
+    return act(g, pid, {
+      type: 'setupShips',
+      ships: [{ good: ranked[0], pos: p0 }, { good: ranked[1], pos: p1 }, { good: ranked[2], pos: p2 }],
+    });
+  }
+
+  if (g.stage === 'place') {
+    if (p.workers <= 0) return act(g, pid, { type: 'passPlace' });
+    const rollsLeft = Math.max(1, 3 - g.roll);
+    const shipProb = (s) => {
+      if (s.pos >= HARBOR_POS) return 1;
+      const need = HARBOR_POS - s.pos;
+      const exp = rollsLeft * 3.5;
+      return Math.max(0.05, Math.min(0.95, 0.5 + (exp - need) * 0.14));
+    };
+    const probs = g.ships.map(shipProb);
+    const expIn = probs.reduce((a, b) => a + b, 0);
+    const expOut = 3 - expIn;
+
+    const cands = [];
+    const pushCand = (spot, cost, ev) => cands.push({ spot, cost, ev: ev + (randomInt(0, 30) - 10) / 10 });
+
+    // 船上水手位
+    g.ships.forEach((s, si) => {
+      const info = GOOD_INFO[s.good];
+      if (s.pos >= HARBOR_POS || s.crew.length >= info.slots.length) return;
+      const cost = info.slots[s.crew.length];
+      const estCrew = Math.min(info.slots.length, s.crew.length + 1 + (rollsLeft >= 2 ? 0.6 : 0));
+      const share = info.payout / estCrew;
+      pushCand(`ship:${si}`, cost, probs[si] * share - cost + myShares(s.good) * 0.4);
+    });
+    // 港口 A/B/C
+    HARBOR_SLOTS.forEach((h, i) => {
+      if (g.board.harbor[i]) return;
+      const prob = Math.max(0.08, Math.min(0.95, 0.55 + (expIn - h.need) * 0.35));
+      pushCand(`harbor:${i}`, h.cost, prob * h.reward - h.cost);
+    });
+    // 修船廠 A/B/C
+    SHIPYARD_SLOTS.forEach((y, i) => {
+      if (g.board.shipyard[i]) return;
+      const prob = Math.max(0.08, Math.min(0.95, 0.55 + (expOut - y.need) * 0.35));
+      pushCand(`shipyard:${i}`, y.cost, prob * y.reward - y.cost);
+    });
+    // 保險辦事處
+    if (!g.board.insurance) {
+      const takenYard = g.board.shipyard.reduce((a, owner, i) => a + (owner ? SHIPYARD_SLOTS[i].reward : 0), 0);
+      const estPay = Math.min(takenYard + (rollsLeft >= 2 ? 6 : 0), expOut * 7);
+      pushCand('insurance', 0, INSURANCE_GAIN - estPay);
+    }
+    // 海盜船
+    if (!g.board.pirates[0] || !g.board.pirates[1]) {
+      const near13 = g.ships.some((s) => s.pos >= 8 && s.pos <= 13);
+      const base = g.roll <= 1 ? 3.5 : near13 ? 4.5 : -2;
+      pushCand('pirate', PIRATE_COST, base);
+    }
+    // 領航員
+    const myCrewCount = g.ships.reduce((a, s) => a + s.crew.filter((x) => x === pid).length, 0);
+    const hasStake = myCrewCount > 0 || g.board.harbor.includes(pid) || g.board.shipyard.includes(pid) || g.board.insurance === pid;
+    if (!g.board.navSmall) pushCand('nav_small', NAV_SMALL_COST, hasStake ? 3.5 : 1.0);
+    if (!g.board.navBig) pushCand('nav_big', NAV_BIG_COST, hasStake ? 4.5 : 0.5);
+
+    cands.sort((a, b) => b.ev - a.ev);
+    let pick = cands.find((c) => c.cost <= p.cash && c.ev > -1.2);
+    if (!pick && cands.length && cands[0].ev > 3.5 && cands[0].cost <= p.cash + MORTGAGE_GAIN && mortgageOnce()) {
+      pick = cands[0];
+    }
+    if (pick) return act(g, pid, { type: 'place', spot: pick.spot });
+    return act(g, pid, { type: 'passPlace' });
+  }
+
+  if (g.stage === 'nav_small' || g.stage === 'nav_big') {
+    const budget = g.stage === 'nav_small' ? 1 : 2;
+    const isHarbor = g.board.harbor.includes(pid);
+    const isYard = g.board.shipyard.includes(pid);
+    const isIns = g.board.insurance === pid;
+    const wants = g.ships.map((s, si) => {
+      if (s.pos >= HARBOR_POS) return { si, score: 0, pos: s.pos };
+      let sc = s.crew.filter((x) => x === pid).length * 4 + myShares(s.good) * 2;
+      if (isHarbor || isIns) sc += 2;
+      if (isYard) sc -= 3;
+      return { si, score: sc, pos: s.pos };
+    });
+    const moves = [];
+    const posCopy = g.ships.map((s) => s.pos);
+    for (let step = 0; step < budget; step++) {
+      let best = null;
+      for (const w of wants) {
+        if (posCopy[w.si] >= HARBOR_POS || w.score === 0) continue;
+        const dir = w.score > 0 ? 1 : -1;
+        const nxt = posCopy[w.si] + dir;
+        if (nxt < 0 || nxt > MAX_POS) continue;
+        const mag = Math.abs(w.score);
+        if (!best || mag > best.mag) best = { si: w.si, delta: dir, mag };
+      }
+      if (!best) break;
+      posCopy[best.si] += best.delta;
+      moves.push({ ship: best.si, delta: best.delta });
+    }
+    return act(g, pid, { type: 'navigate', moves });
+  }
+
+  if (g.stage === 'roll') return act(g, pid, { type: 'roll' });
+
+  if (g.stage === 'pirate_board') {
+    // 第 2 次擲骰停 13 格：第 3 次擲骰必過 13 進港，優先免費登上利潤最高的船！
+    const cands = boardableShipsFor(g, pid)
+      .map((si) => ({ si, s: g.ships[si], payout: GOOD_INFO[g.ships[si].good].payout }))
+      .sort((a, b) => b.payout - a.payout);
+    if (cands.length) {
+      const { si, s } = cands[0];
+      const maxSlots = GOOD_INFO[s.good].slots.length;
+      if (s.crew.length < maxSlots) return act(g, pid, { type: 'pirateBoard', ship: si });
+      const kickIdx = s.crew.findIndex((owner) => owner !== pid);
+      if (kickIdx >= 0) return act(g, pid, { type: 'pirateBoard', ship: si, kickIdx });
+    }
+    return act(g, pid, { type: 'pirateBoard', ship: null });
+  }
+
+  if (g.stage === 'pirate_plunder') {
+    const pl = g.plunder;
+    const shipIdx = pl.mode === 'dest'
+      ? pl.ship
+      : [...pl.ships].sort((a, b) => GOOD_INFO[g.ships[b].good].payout - GOOD_INFO[g.ships[a].good].payout)[0];
+    const good = g.ships[shipIdx].good;
+    let harborScore = myShares(good) * 5 + (g.board.harbor.includes(pid) ? 4 : 0) + (g.board.insurance === pid ? 5 : 0);
+    let yardScore = (g.board.shipyard.includes(pid) ? 5 : 0) + (g.board.insurance && g.board.insurance !== pid ? 4 : 0);
+    const dest = harborScore >= yardScore ? 'harbor' : 'shipyard';
+    return act(g, pid, { type: 'pirateDecide', ship: shipIdx, dest });
+  }
+
+  return autoPlay(g, pid);
+}
+
 // --- 玩家視角 ---
 function view(g, pid) {
   const me = playerOf(g, pid);
@@ -886,7 +1104,7 @@ function view(g, pid) {
     lastRoll: g.lastRoll,
     nextReady: [...g.nextReady],
     players: g.players.map((p) => ({
-      id: p.id, name: p.name, color: p.color, cash: p.cash, workers: p.workers,
+      id: p.id, name: p.name, bot: !!p.bot, color: p.color, cash: p.cash, workers: p.workers,
       stockCount: p.stocks.length,
       mortgagedCount: p.stocks.filter((s) => s.mortgaged).length,
       bought: [...p.bought],
@@ -894,6 +1112,7 @@ function view(g, pid) {
     })),
     myStocks: me ? me.stocks.map((s, idx) => ({ idx, good: s.good, mortgaged: s.mortgaged, public: s.public })) : [],
     ev: g.ev,
+    evFeed: g.evFeed.slice(-8),
     summary: g.summary,
     winners: g.winners,
     log: g.log.slice(-20),
@@ -903,5 +1122,5 @@ function view(g, pid) {
 module.exports = {
   GOODS, GOOD_INFO, PRICE_TRACK, HARBOR_SLOTS, SHIPYARD_SLOTS,
   PIRATE_COST, NAV_SMALL_COST, NAV_BIG_COST, INSURANCE_GAIN, MORTGAGE_GAIN, REDEEM_COST,
-  create, act, leave, autoPlay, view, performRoll,
+  create, act, leave, autoPlay, botPlay, view, performRoll,
 };

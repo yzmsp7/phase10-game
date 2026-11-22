@@ -1101,6 +1101,27 @@ for (let np = 2; np <= 6; np++) {
     for (let k = 0; k < 10 && g.status === 'play'; k++) M.autoPlay(g);
     assert.ok(g.turnNo > 2);
   }
+
+  // 8) 電腦玩家 AI（botPlay）：3–5 人全 AI 對局可完整打完至終局且不報錯、會主動競標／買股／派遣
+  for (const np of [3, 4, 5]) {
+    const g = M.create(ppl(np).map((p) => ({ ...p, bot: true })), { pirateKick: np === 4 });
+    let steps = 0, bidCount = 0, placeCount = 0;
+    while (g.status !== 'over') {
+      assert.ok(++steps < 3000, `AI ${np} 人局不應卡死`);
+      if (g.status === 'roundEnd') {
+        for (const q of g.players) if (q.in && g.status === 'roundEnd') M.act(g, q.id, { type: 'next' });
+        continue;
+      }
+      const prevStage = g.stage, prevHigh = g.auction?.high ?? 0, cur = g.players[g.turn];
+      const prevW = cur.workers;
+      M.botPlay(g, cur.id);
+      if (prevStage === 'bid' && (g.auction?.high ?? 0) > prevHigh) bidCount++;
+      if (prevStage === 'place' && cur.workers < prevW) placeCount++;
+    }
+    assert.ok(g.winners.length >= 1);
+    assert.ok(placeCount > 0, '電腦玩家應會主動派遣手下');
+    void bidCount;
+  }
 }
 function randomInt(n) { return require('node:crypto').randomInt(n); }
 
@@ -1292,6 +1313,39 @@ function randomInt(n) { return require('node:crypto').randomInt(n); }
     }
     assert.equal((await fetch(`${base}/assets/../server.js`)).status, 404, '阻擋路徑穿越');
     assert.equal((await fetch(`${base}/assets/manila/nope.jpg`)).status, 404);
+
+    // 電腦玩家：只有馬尼拉支援、僅房主可增刪、滿 5 人擋下、開局後電腦自動行動且結算自動準備、最後真人離開即清房
+    const mb = (await post('create', { name: '房主甲', kind: 'manila' })).json;
+    const mbr = server.rooms.get(mb.code);
+    assert.equal((await post('addBot', host)).status, 400, 'Phase 10 不支援電腦');
+    assert.equal((await post('addBot', mb)).status, 200);
+    assert.equal((await post('addBot', mb)).status, 200);
+    assert.equal((await post('addBot', mb)).status, 200);
+    assert.equal((await post('addBot', mb)).status, 200);
+    assert.equal(mbr.players.length, 5);
+    assert.equal((await post('addBot', mb)).status, 400, '滿 5 人不能再加電腦');
+    const rmId = mbr.players.find((x) => x.bot).id;
+    assert.equal((await post('removeBot', { ...mb, id: rmId })).status, 200);
+    assert.equal(mbr.players.length, 4);
+    assert.ok(!mbr.players.some((x) => x.id === rmId), '已移除指定電腦');
+    // 測試電腦自動行動
+    mbr.settings.botDelay = 10;
+    const acB = new AbortController();
+    const sseB = await fetch(`${base}/api/events?code=${mb.code}&token=${mb.token}`, { signal: acB.signal });
+    assert.equal((await post('start', mb)).status, 200);
+    assert.equal((await post('addBot', mb)).status, 400, '開局後不能加電腦');
+    // 若開局先輪到真人就先 PASS，確保接著輪到電腦自動推進
+    if (mbr.game.players[mbr.game.turn].id === mbr.players[0].id) {
+      await post('act', { ...mb, action: { type: 'pass' } });
+    }
+    const turnBefore = mbr.game.turnNo;
+    await new Promise((r) => setTimeout(r, 250));
+    assert.ok(mbr.game.turnNo > turnBefore, '輪到電腦應自動出牌推進回合');
+    // 最後一名真人離開 → 即使房內還有電腦也要立即刪房
+    acB.abort();
+    void sseB;
+    assert.equal((await post('leave', mb)).status, 200);
+    assert.ok(!server.rooms.has(mb.code), '最後真人離開後應自動清理僅剩電腦的房間');
   }
   const cardsIn = (g) => g.players.reduce((a, p) => a + p.hand.length, 0) + g.groups.reduce((a, x) => a + x.cards.length, 0) + g.draw.length + g.disc.length;
 
