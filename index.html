@@ -598,6 +598,23 @@ body.magical-mode .slot{background:#161229}
 .ma-dslot.cur{border-color:#5fe094;background:#16402b;color:#e6fff2;box-shadow:0 0 10px #5fe09455}
 .ma-dslot.cur.me{border-color:var(--accent);background:#4a3712;color:#fff7d6;box-shadow:0 0 12px #ffd23f77}
 .ma-dturn{flex:0 0 auto;display:inline-flex;align-items:center;font-size:11px;color:var(--accent);opacity:.85;padding:0 2px}
+/* 🖐️ 手動甩出 3D 骰子物理舞台（支援手機滑動甩出 / 按住蓄力放開，60fps 彈跳撞牆） */
+.ma-arena{position:relative;width:100%;height:230px;border-radius:16px;background:radial-gradient(circle at 50% 45%,#28204d 0%,#141028 82%);border:2.5px dashed #ffd23f88;box-shadow:inset 0 0 28px #070510cc;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;margin:10px 0 8px}
+.ma-arena.dragging{cursor:grabbing;border-style:solid;border-color:var(--accent);box-shadow:inset 0 0 32px #ffd23f22,0 0 18px #ffd23f33}
+.ma-arena.flying{cursor:default;border-style:solid;border-color:#685ca6}
+.ma-aim-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2}
+.ma-tsh{position:absolute;left:50%;top:50%;width:52px;height:16px;margin:-8px 0 0 -26px;border-radius:50%;background:#000000aa;filter:blur(5px);pointer-events:none;z-index:1;will-change:transform,opacity}
+.ma-tdie{position:absolute;left:50%;top:50%;width:56px;height:56px;margin:-28px 0 0 -28px;perspective:420px;pointer-events:none;z-index:3;will-change:transform}
+.ma-tdie .m-dcube{animation:none!important;transition:none!important;transform-style:preserve-3d}
+.ma-tdie.idle{animation:maIdleBob 1.5s ease-in-out infinite}
+.ma-tdie.land::after{content:'';position:absolute;inset:-8px;border-radius:16px;border:2.5px solid var(--accent);animation:mRing .65s ease-out both;pointer-events:none}
+@keyframes maIdleBob{0%,100%{filter:drop-shadow(0 0 6px #ffd23f55)}50%{filter:drop-shadow(0 0 14px #ffd23faa)}}
+.ma-thint{position:absolute;left:12px;right:12px;top:12px;text-align:center;font-size:var(--s1);font-weight:600;color:#ffe68a;pointer-events:none;z-index:4;text-shadow:0 2px 6px #000}
+.ma-tlab{position:absolute;left:50%;bottom:-22px;transform:translateX(-50%);font-size:11px;font-weight:600;white-space:nowrap;color:#fff;background:#120e24dd;padding:1px 7px;border-radius:8px;border:1px solid #ffffff44}
+.ma-pwr{height:8px;width:100%;border-radius:999px;background:#120e24;border:1px solid #483f78;overflow:hidden;margin-bottom:8px}
+.ma-pwr-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,#3bb56b,#ffd23f,#eb5a3c);transition:width .06s linear}
+.ma-tfoot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px}
+.ma-tfoot button{min-height:40px}
 @media(max-width:600px){
 .ma-cell{min-height:56px}.ma-tok{width:28px;height:28px}.ma-tok.sm{width:24px;height:24px}
 }
@@ -769,10 +786,12 @@ let pick = (() => { try { const k = localStorage.getItem('p10pick'); return Obje
 let dl = null, sess = store.get(), snap = null, es = null, sel = new Set(), slots = {}, los = {}, seen = null, sheet = false, endFor = null, actSlot = null, byColor = false, rxOpen = false, rxSeq = null, histFor = null, drag = null, noClick = false, xs = { target: null, v: null, give: null }; // xs = 交換牌的三個選擇（對象／數字或顏色／要換出的牌）。 // drag = 正在拖的百搭（拖曳中不重繪，不然 DOM 重建會把它弄丟）；noClick = 剛拖完，吃掉隨後的 click。 histFor = 正在看誰的撿棄牌歷史（玩家 id）。 rxOpen = 表情選單開著；rxSeq = 已播到的表情編號（null = 還沒收到第一筆快照）。每次 render 會重建 DOM，UI 狀態要存在這：sheet = 底部資訊面板開著；endFor = 正在選「接前/接後」的順子；actSlot = 放階段時作用中的那一組
 let ms = { bidAmt: 1, spot: null, masterGoods: ['jade', 'silk', 'nutmeg'], masterPos: { jade: 3, silk: 3, nutmeg: 3, ginseng: 0 }, navMoves: {}, plunderShip: null, stockSheet: false, infoSheet: false, cashWarn: null, pendingBuy: null, holdOverlay: false, animFrom: null, sailAnim: null, stageKey: null };
 const resetMs = () => { ms = { bidAmt: 1, spot: null, masterGoods: ['jade', 'silk', 'nutmeg'], masterPos: { jade: 3, silk: 3, nutmeg: 3, ginseng: 0 }, navMoves: {}, plunderShip: null, stockSheet: false, infoSheet: false, cashWarn: null, pendingBuy: null, holdOverlay: false, animFrom: null, sailAnim: null, stageKey: null }; closeManilaDice(); clearManilaActs(); };
-let ma = { draftSel: null, pickSel: [], guess: null, inspect: null, dex: false, flipOpen: false, animPos: null, movingIds: null, trailCells: null, moveBanner: null, hopIds: null, holdOverlay: false, roState: 'idle' };
+let ma = { draftSel: null, pickSel: [], guess: null, inspect: null, dex: false, flipOpen: false, animPos: null, movingIds: null, trailCells: null, moveBanner: null, hopIds: null, holdOverlay: false, roState: 'ready' };
 let maMoveTimers = [];
 let maMoveAfter = null;
 let maRoTimer = null;
+let maRoDrag = false;
+let mThrow = null;
 const clearMaMoves = () => {
   maMoveTimers.forEach((id) => clearTimeout(id));
   maMoveTimers = [];
@@ -783,7 +802,12 @@ const clearMaMoves = () => {
   ma.moveBanner = null;
   ma.hopIds = null;
 };
-const resetMa = () => { clearMaMoves(); clearTimeout(maRoTimer); maRoTimer = null; ma = { draftSel: null, pickSel: [], guess: null, inspect: null, dex: false, flipOpen: false, animPos: null, movingIds: null, trailCells: null, moveBanner: null, hopIds: null, holdOverlay: false, roState: 'idle' }; closeManilaDice(); };
+const stopMaThrow = () => {
+  if (mThrow?.raf) cancelAnimationFrame(mThrow.raf);
+  if (mThrow?.autoClose) clearTimeout(mThrow.autoClose);
+  mThrow = null;
+};
+const resetMa = () => { stopMaThrow(); clearMaMoves(); clearTimeout(maRoTimer); maRoTimer = null; ma = { draftSel: null, pickSel: [], guess: null, inspect: null, dex: false, flipOpen: false, animPos: null, movingIds: null, trailCells: null, moveBanner: null, hopIds: null, holdOverlay: false, roState: 'ready' }; closeManilaDice(); };
 if (sess && urlRoom && sess.code !== urlRoom) sess = null; // 邀請連結指向另一間房 → 先顯示加入畫面
 // 在 localhost 開頁面時，邀請連結／QR 要換成手機連得到的區網 IP（undefined = 查詢中，null = 查不到）。部署後網址不是 localhost，這段不會跑。
 const isLocal = /^(localhost|127\.|\[?::1)/.test(location.hostname);
@@ -832,7 +856,7 @@ function connect() {
     const d = JSON.parse(e.data);
     if (d.closed) { exit(); return toast(d.closed); } // 房間被關（遊戲中只剩一人）→ 回首頁並說明原因
     snap = d; dl = d.turnLeft == null ? null : Date.now() + d.turnLeft; // 伺服器傳剩餘毫秒，用本機時鐘算期限
-    if (!document.activeElement?.matches?.('select') && !drag) render(); else tick();
+    if (!document.activeElement?.matches?.('select') && !drag && !maRoDrag) render(); else tick();
     playRx(d.rx); // 要在 render 之後：玩家卡是剛重建的，位置才對
   };
   es.onerror = () => { if (es.readyState === EventSource.CLOSED) { toast('連線中斷或房間已過期'); exit(); } };
@@ -1591,6 +1615,7 @@ function enqueueManilaAct(ev, actor) {
 let mDiceTimers = [];
 let mDiceAfter = null;
 function closeManilaDice() {
+  stopMaThrow();
   mDiceTimers.forEach((id) => { clearTimeout(id); clearInterval(id); });
   mDiceTimers = [];
   mDiceAfter = null;
@@ -1603,6 +1628,8 @@ function closeManilaDice() {
   ma.holdOverlay = false;
 }
 function finishManilaDice() {
+  if (mThrow && mThrow.phase !== 'landed') return;
+  stopMaThrow();
   mDiceTimers.forEach((id) => { clearTimeout(id); clearInterval(id); });
   mDiceTimers = [];
   const box = $('#mDiceStage');
@@ -1793,6 +1820,398 @@ function playMaMoves(initPos, steps, opts = {}) {
 
   // 先讓起點畫面穩定進 DOM，下一幀立刻開跑第一步
   maMoveTimers.push(setTimeout(runNext, 40));
+}
+
+// 🖐️ 瘋狂運動會手動 3D 物理拋骰引擎（手指滑動甩出 / 按住蓄力放開 → 真實撞牆反彈 → 平滑停在伺服器公正點數）
+const MA_FACE_ANG = { 1: [0, 0], 2: [0, -90], 3: [-90, 0], 4: [90, 0], 5: [0, 90], 6: [0, 180] };
+const maDieFaces = (color) => [1, 2, 3, 4, 5, 6].map((f) => `<div class="m-dface f${f}" style="--dc:${color}"><svg viewBox="0 0 28 28" aria-hidden="true">${M_DIE_PIPS[f].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2.4" fill="#fbf2dc"/>`).join('')}</svg></div>`).join('');
+const nearAngle = (cur, targetMod) => {
+  const base = Math.round((cur - targetMod) / 360) * 360 + targetMod;
+  return base;
+};
+
+function openMaThrow(cfg) {
+  const reduced = matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+  if (reduced) return call('act', { action: cfg.action });
+  const box = $('#mDiceStage');
+  if (!box) return call('act', { action: cfg.action });
+  closeManilaDice();
+
+  const isDuel = cfg.kind === 'duel';
+  const g = snap?.kind === 'magical' ? snap.game : null;
+  const pById = Object.fromEntries((g?.players || []).map((p) => [p.id, p]));
+  const owner = pById[snap?.me];
+  const pcol = MA_PCOLORS[(owner?.color ?? 0) % MA_PCOLORS.length];
+  const rInfo = MA_MAP[cfg.racerBase] || { name: '選手', color: pcol };
+  const foeInfo = isDuel ? (MA_MAP[cfg.foeBase] || { name: '對手', color: '#3b82c4' }) : null;
+  const col1 = rInfo.color || pcol;
+  const col2 = foeInfo?.color || '#3b82c4';
+
+  const heroHTML = isDuel
+    ? `<div class="row" style="justify-content:center;gap:10px;flex-wrap:nowrap">
+        <div class="ma-dhero" style="--pc:${col1}"><img src="${maImg(cfg.racerBase)}" alt=""><div class="ma-dhero-tx"><b>${esc(rInfo.name)}</b><small>你的骰子</small></div></div>
+        <b class="ma-dvs" style="font-size:var(--s2)">VS</b>
+        <div class="ma-dhero" style="--pc:${col2}"><img src="${maImg(cfg.foeBase)}" alt=""><div class="ma-dhero-tx"><b>${esc(foeInfo.name)}</b><small>對手</small></div></div></div>`
+    : `<div class="ma-dhero" style="--pc:${pcol};margin:0 auto;width:fit-content"><img src="${maImg(cfg.racerBase)}" alt=""><div class="ma-dhero-tx"><b>${esc(rInfo.name)}</b><small>${esc(owner?.name || '')}${cfg.guess ? ` · 預測 ${cfg.guess} 點` : ''}</small></div></div>`;
+
+  box.innerHTML = `<div class="m-dtray ma-dtray" style="max-width:440px">
+    <div class="m-dtray-hd" style="margin-bottom:10px">${esc(cfg.title)}</div>
+    ${heroHTML}
+    <div class="ma-arena" id="maArena">
+      <div class="ma-thint" id="maThrowHint">👆 按住骰子往上甩出（或按住蓄力放開）</div>
+      <svg class="ma-aim-svg" id="maAimSvg" viewBox="0 0 300 230" preserveAspectRatio="none"></svg>
+      <div class="ma-tsh" id="maSh0"></div>
+      <div class="ma-tdie idle" id="maDie0"><div class="m-dcube" id="maCube0">${maDieFaces(col1)}</div>${isDuel ? `<span class="ma-tlab">${esc(rInfo.name)}</span>` : ''}</div>
+      ${isDuel ? `<div class="ma-tsh" id="maSh1"></div><div class="ma-tdie" id="maDie1"><div class="m-dcube" id="maCube1">${maDieFaces(col2)}</div><span class="ma-tlab">${esc(foeInfo.name)}</span></div>` : ''}
+    </div>
+    <div class="ma-pwr"><div class="ma-pwr-fill" id="maPwrFill"></div></div>
+    <div class="m-dres" id="maThrowRes" style="min-height:32px"></div>
+    <div class="ma-tfoot" id="maThrowFoot">
+      <button class="ghost" id="maThrowCancel" style="flex:1">取消</button>
+      <button id="maThrowQuick" style="flex:1">🎲 直接輕丟</button>
+    </div>
+  </div>`;
+  box.classList.add('on');
+
+  const arena = $('#maArena'), hintEl = $('#maThrowHint'), aimSvg = $('#maAimSvg'), pwrEl = $('#maPwrFill');
+  const die0 = { el: $('#maDie0'), cube: $('#maCube0'), sh: $('#maSh0'), x: isDuel ? -46 : 0, y: 58, z: 0, vx: 0, vy: 0, vz: 0, rx: -22, ry: 28, rz: 0, vrx: 0, vry: 0, vrz: 0, target: null, lock: null };
+  const die1 = isDuel ? { el: $('#maDie1'), cube: $('#maCube1'), sh: $('#maSh1'), x: 66, y: -48, z: 0, vx: 0, vy: 0, vz: 0, rx: 18, ry: -32, rz: 0, vrx: 0, vry: 0, vrz: 0, target: null, lock: null } : null;
+  const dice = die1 ? [die0, die1] : [die0];
+
+  const syncDom = () => {
+    for (const d of dice) {
+      const sc = 1 + d.z / 260;
+      d.el.style.transform = `translate3d(${d.x.toFixed(1)}px,${(d.y - d.z * 0.55).toFixed(1)}px,0) scale(${sc.toFixed(3)})`;
+      d.cube.style.transform = `rotateX(${d.rx.toFixed(1)}deg) rotateY(${d.ry.toFixed(1)}deg) rotateZ(${d.rz.toFixed(1)}deg)`;
+      const shSc = Math.max(0.45, 1 - d.z / 340);
+      d.sh.style.transform = `translate3d(${d.x.toFixed(1)}px,${(d.y + 24).toFixed(1)}px,0) scale(${shSc.toFixed(3)})`;
+      d.sh.style.opacity = Math.max(0.25, 0.85 - d.z / 320).toFixed(2);
+    }
+  };
+  syncDom();
+
+  const state = mThrow = {
+    phase: 'aim', kind: cfg.kind, action: cfg.action, dice, raf: null, autoClose: null,
+    ev: null, meta: null, settled: false, t0: 0,
+  };
+
+  let dragging = false, ptrId = null, dragStart = 0, lastX = 0, lastY = 0, pts = [], chargeRaf = null;
+  const maxX = () => Math.max(85, arena.clientWidth / 2 - 36);
+  const maxY = () => Math.max(68, arena.clientHeight / 2 - 36);
+
+  const drawAim = (vx, vy, pwr) => {
+    pwrEl.style.width = `${Math.round(pwr * 100)}%`;
+    const aw = arena.clientWidth || 300, ah = arena.clientHeight || 230;
+    const ox = aw / 2 + die0.x, oy = ah / 2 + die0.y;
+    const len = 32 + pwr * 68;
+    const mag = Math.hypot(vx, vy) || 1;
+    const ux = vx / mag, uy = vy / mag;
+    const tx = ox + ux * len, ty = oy + uy * len;
+    const sx = (v) => (v / aw * 300).toFixed(1), sy = (v) => (v / ah * 230).toFixed(1);
+    const ang = Math.atan2(uy, ux);
+    const a1x = tx - Math.cos(ang - 0.5) * 14, a1y = ty - Math.sin(ang - 0.5) * 14;
+    const a2x = tx - Math.cos(ang + 0.5) * 14, a2y = ty - Math.sin(ang + 0.5) * 14;
+    aimSvg.innerHTML = `<line x1="${sx(ox)}" y1="${sy(oy)}" x2="${sx(tx)}" y2="${sy(ty)}" stroke="#ffd23f" stroke-width="4" stroke-linecap="round" stroke-dasharray="7 5"/>
+      <polygon points="${sx(tx)},${sy(ty)} ${sx(a1x)},${sy(a1y)} ${sx(a2x)},${sy(a2y)}" fill="#ffd23f"/>`;
+  };
+
+  const launch = (vx, vy, pwr) => {
+    if (state.phase !== 'aim') return;
+    state.phase = 'flying';
+    if (chargeRaf) cancelAnimationFrame(chargeRaf);
+    arena.classList.remove('dragging');
+    arena.classList.add('flying');
+    die0.el.classList.remove('idle');
+    aimSvg.innerHTML = '';
+    pwrEl.style.width = `${Math.round(pwr * 100)}%`;
+    hintEl.textContent = '🎲 骰子翻滾中…';
+    $('#maThrowFoot').innerHTML = '<div class="mute" style="width:100%;font-size:var(--s1)">等待骰子落地定格…</div>';
+    navigator.vibrate?.(18);
+
+    const sp = Math.hypot(vx, vy);
+    die0.vx = vx; die0.vy = vy; die0.vz = 420 + pwr * 280;
+    die0.vrx = -(vy * 1.45) + (Math.random() - 0.5) * 260;
+    die0.vry = (vx * 1.45) + (Math.random() - 0.5) * 260;
+    die0.vrz = (Math.random() - 0.5) * (320 + sp * 0.4);
+    if (die1) {
+      die1.vx = -260 - Math.random() * 240;
+      die1.vy = 260 + Math.random() * 260;
+      die1.vz = 480 + Math.random() * 180;
+      die1.vrx = 680 + Math.random() * 260;
+      die1.vry = -720 - Math.random() * 240;
+      die1.vrz = (Math.random() - 0.5) * 420;
+    }
+
+    // 放手瞬間立刻送出伺服器公平擲骰請求，骰子空中翻滾同時接收真實點數！
+    call('act', { action: cfg.action }).then((ok) => {
+      if (!ok && mThrow === state) closeManilaDice();
+    });
+
+    state.t0 = performance.now();
+    let prev = state.t0;
+    const step = (now) => {
+      if (mThrow !== state) return;
+      const dt = Math.min(0.033, (now - prev) / 1000);
+      prev = now;
+      const elapsed = (now - state.t0) / 1000;
+      const mx = maxX(), my = maxY();
+      let allLockedDone = true;
+
+      for (const d of dice) {
+        // 平面移動 + 撞牆彈性反彈
+        d.x += d.vx * dt;
+        d.y += d.vy * dt;
+        if (d.x > mx) { d.x = mx; d.vx = -Math.abs(d.vx) * 0.68; d.vry = -d.vry * 0.7; navigator.vibrate?.(10); }
+        else if (d.x < -mx) { d.x = -mx; d.vx = Math.abs(d.vx) * 0.68; d.vry = -d.vry * 0.7; navigator.vibrate?.(10); }
+        if (d.y > my) { d.y = my; d.vy = -Math.abs(d.vy) * 0.68; d.vrx = -d.vrx * 0.7; navigator.vibrate?.(10); }
+        else if (d.y < -my) { d.y = -my; d.vy = Math.abs(d.vy) * 0.68; d.vrx = -d.vrx * 0.7; navigator.vibrate?.(10); }
+
+        // 3D 高度重力彈跳
+        d.vz -= 1850 * dt;
+        d.z += d.vz * dt;
+        if (d.z < 0) {
+          d.z = 0;
+          if (Math.abs(d.vz) > 95) { d.vz = -d.vz * 0.5; navigator.vibrate?.(8); }
+          else d.vz = 0;
+        }
+
+        // 地面摩擦減速
+        const damp = Math.pow(d.z > 2 ? 0.55 : 0.12, dt);
+        d.vx *= damp; d.vy *= damp;
+
+        // 拿到伺服器點數且已翻滾 >= 0.42 秒 → 平滑導引至正確點數面
+        if (d.target != null && elapsed >= 0.42 && !d.lock) {
+          const [tx, ty] = MA_FACE_ANG[d.target] || [0, 0];
+          const dirX = d.vrx >= 0 ? 1 : -1, dirY = d.vry >= 0 ? 1 : -1;
+          d.lock = {
+            tStart: elapsed, dur: 0.56,
+            sx: d.rx, sy: d.ry, sz: d.rz,
+            ex: nearAngle(d.rx + dirX * 180, tx),
+            ey: nearAngle(d.ry + dirY * 180, ty),
+            ez: Math.round(d.rz / 360) * 360,
+          };
+        }
+
+        if (d.lock) {
+          const u = Math.min(1, (elapsed - d.lock.tStart) / d.lock.dur);
+          const ease = 1 - Math.pow(1 - u, 3);
+          d.rx = d.lock.sx + (d.lock.ex - d.lock.sx) * ease;
+          d.ry = d.lock.sy + (d.lock.ey - d.lock.sy) * ease;
+          d.rz = d.lock.sz + (d.lock.ez - d.lock.sz) * ease;
+          if (u < 1) allLockedDone = false;
+        } else {
+          d.rx += d.vrx * dt;
+          d.ry += d.vry * dt;
+          d.rz += d.vrz * dt;
+          allLockedDone = false;
+        }
+      }
+
+      // 雙骰防重疊輕微推開
+      if (die1) {
+        const dx = die1.x - die0.x, dy = die1.y - die0.y, dist = Math.hypot(dx, dy);
+        if (dist > 0.1 && dist < 66) {
+          const push = (66 - dist) * 0.5;
+          die0.x -= (dx / dist) * push; die0.y -= (dy / dist) * push;
+          die1.x += (dx / dist) * push; die1.y += (dy / dist) * push;
+        }
+      }
+
+      syncDom();
+
+      if (allLockedDone && state.ev && elapsed >= 0.98) {
+        state.phase = 'landed';
+        for (const d of dice) { d.z = 0; d.el.classList.add('land'); }
+        syncDom();
+        navigator.vibrate?.([15, 30, 25]);
+        hintEl.textContent = '✨ 落地定格！';
+        const resEl = $('#maThrowRes');
+        const ev = state.ev;
+        if (ev.kind === 'roll') {
+          const curR = snap?.game?.racers?.find((r) => r.id === ev.racerId);
+          const toPos = curR ? (curR.finished ? 30 : curR.pos) : null;
+          let pill = `<span class="ma-dpill">🎲 骰出 ${ev.d} 點！</span>`;
+          if (ev.guess != null) {
+            pill = ev.guess === ev.d ? `<span class="ma-dpill win">🧠 猜中 ${ev.d} 點！再多一回合！</span>` : `<span class="ma-dpill">🎲 骰出 ${ev.d} 點（預測 ${ev.guess}）</span>`;
+          } else if (curR?.finished) {
+            pill = `<span class="ma-dpill win">🎲 ${ev.d} 點 → 🏁 衝過終點！</span>`;
+          } else if (ev.from != null && toPos != null && toPos !== ev.from && !state.meta?.pendingChoice) {
+            pill = `<span class="ma-dpill ${toPos < ev.from ? 'bad' : 'win'}">🎲 ${ev.d} 點 · 第 ${ev.from} → ${toPos} 格</span>`;
+          }
+          resEl.innerHTML = pill;
+        } else if (ev.kind === 'duel') {
+          const w1 = ev.winSide === 1 || ev.d1 >= ev.d2;
+          resEl.innerHTML = `<span class="ma-dpill win">⚔️ ${ev.d1} vs ${ev.d2} · ${w1 ? esc(rInfo.name) : esc(foeInfo.name)} 勝出 +2 格！</span>`;
+        }
+        resEl.classList.add('show');
+        $('#maThrowFoot').innerHTML = '<div class="mute" style="width:100%;font-size:var(--s1)">點擊任意處立即繼續</div>';
+        state.autoClose = setTimeout(() => {
+          box.classList.add('out');
+          mDiceTimers.push(setTimeout(finishManilaDice, 240));
+        }, state.meta?.pendingChoice ? 780 : 1020);
+        return;
+      }
+
+      if (elapsed > 4.5) { closeManilaDice(); return; }
+      state.raf = requestAnimationFrame(step);
+    };
+    state.raf = requestAnimationFrame(step);
+  };
+
+  arena.addEventListener('pointerdown', (e) => {
+    if (state.phase !== 'aim') return;
+    e.preventDefault();
+    dragging = true;
+    ptrId = e.pointerId;
+    arena.setPointerCapture(ptrId);
+    arena.classList.add('dragging');
+    die0.el.classList.remove('idle');
+    hintEl.textContent = '🔥 甩出去放開手！';
+    dragStart = performance.now();
+    lastX = e.clientX; lastY = e.clientY;
+    pts = [{ x: e.clientX, y: e.clientY, t: dragStart }];
+    // 按住時若沒滑動，蓄力條平滑上升、骰子微微顫動
+    const chargeLoop = () => {
+      if (!dragging || state.phase !== 'aim') return;
+      const hold = Math.min(1, (performance.now() - dragStart) / 950);
+      const moved = pts.length > 1 ? Math.hypot(pts.at(-1).x - pts[0].x, pts.at(-1).y - pts[0].y) : 0;
+      if (moved < 18) {
+        die0.rx += (Math.random() - 0.5) * 6;
+        die0.ry += (Math.random() - 0.5) * 6;
+        syncDom();
+        drawAim(0, -1, 0.3 + hold * 0.68);
+      }
+      chargeRaf = requestAnimationFrame(chargeLoop);
+    };
+    chargeRaf = requestAnimationFrame(chargeLoop);
+  });
+
+  arena.addEventListener('pointermove', (e) => {
+    if (!dragging || e.pointerId !== ptrId || state.phase !== 'aim') return;
+    const dx = e.clientX - lastX, dy = e.clientY - lastY;
+    lastX = e.clientX; lastY = e.clientY;
+    const mx = maxX(), my = maxY();
+    die0.x = Math.max(-mx, Math.min(mx, die0.x + dx));
+    die0.y = Math.max(-my, Math.min(my, die0.y + dy));
+    die0.rx -= dy * 1.15;
+    die0.ry += dx * 1.15;
+    syncDom();
+    const now = performance.now();
+    pts.push({ x: e.clientX, y: e.clientY, t: now });
+    while (pts.length > 2 && now - pts[0].t > 95) pts.shift();
+    const p0 = pts[0], p1 = pts.at(-1), dt = Math.max(0.016, (p1.t - p0.t) / 1000);
+    const vx = (p1.x - p0.x) / dt, vy = (p1.y - p0.y) / dt;
+    const sp = Math.hypot(vx, vy);
+    if (sp > 40) drawAim(vx, vy, Math.min(1, sp / 1100));
+  });
+
+  const endDrag = (e) => {
+    if (!dragging || e.pointerId !== ptrId || state.phase !== 'aim') return;
+    dragging = false;
+    const now = performance.now();
+    pts.push({ x: e.clientX, y: e.clientY, t: now });
+    while (pts.length > 2 && now - pts[0].t > 95) pts.shift();
+    const p0 = pts[0], p1 = pts.at(-1), dt = Math.max(0.016, (p1.t - p0.t) / 1000);
+    let vx = (p1.x - p0.x) / dt, vy = (p1.y - p0.y) / dt;
+    const sp = Math.hypot(vx, vy);
+    const hold = Math.min(1, (now - dragStart) / 950);
+    let pwr;
+    if (sp > 140) {
+      const clamped = Math.min(1180, Math.max(480, sp * 0.92));
+      vx = (vx / sp) * clamped;
+      vy = (vy / sp) * clamped;
+      pwr = Math.min(1, clamped / 1150);
+    } else {
+      pwr = 0.38 + hold * 0.6;
+      vx = (Math.random() - 0.5) * 260;
+      vy = -(540 + pwr * 480);
+    }
+    launch(vx, vy, pwr);
+  };
+  arena.addEventListener('pointerup', endDrag);
+  arena.addEventListener('pointercancel', endDrag);
+
+  $('#maThrowCancel').addEventListener('click', (e) => { e.stopPropagation(); closeManilaDice(); });
+  $('#maThrowQuick').addEventListener('click', (e) => {
+    e.stopPropagation();
+    launch((Math.random() - 0.5) * 260, -760, 0.65);
+  });
+}
+
+function feedMaThrowResult(ev, opts = {}) {
+  if (!mThrow) return false;
+  mThrow.ev = ev;
+  mThrow.meta = opts;
+  if (opts.keepAnimPos) ma.animPos = { ...opts.keepAnimPos };
+  if (opts.holdOverlay) ma.holdOverlay = true;
+  mDiceAfter = opts.onFinish || null;
+  if (ev.kind === 'roll') {
+    mThrow.dice[0].target = ev.d;
+  } else if (ev.kind === 'duel') {
+    mThrow.dice[0].target = ev.d1;
+    if (mThrow.dice[1]) mThrow.dice[1].target = ev.d2;
+  }
+  return true;
+}
+
+function triggerRoSpin() {
+  if (ma.roState !== 'ready') return;
+  ma.roState = 'spin';
+  navigator.vibrate?.(18);
+  render();
+  clearTimeout(maRoTimer);
+  maRoTimer = setTimeout(() => {
+    ma.roState = 'landed';
+    document.querySelectorAll('#maRoStage [data-di]').forEach((el) => el.classList.add('land'));
+    document.querySelectorAll('#maRoStage [data-dr]').forEach((el) => el.classList.add('show'));
+    if (snap?.kind === 'magical' && snap.game?.stage === 'rollOff') render();
+  }, 1180);
+}
+
+function bindRoArena() {
+  const arena = $('#maRoArena');
+  if (!arena || arena.dataset.bound) return;
+  arena.dataset.bound = '1';
+  const die = $('#maRoDie'), cube = $('#maRoCube'), sh = $('#maRoSh'), pwrEl = $('#maRoPwr'), aim = $('#maRoAim');
+  let down = false, pid = null, x = 0, y = 40, rx = -22, ry = 28, lx = 0, ly = 0, t0 = 0;
+  const sync = () => {
+    die.style.transform = `translate3d(${x.toFixed(1)}px,${y.toFixed(1)}px,0)`;
+    cube.style.transform = `rotateX(${rx.toFixed(1)}deg) rotateY(${ry.toFixed(1)}deg)`;
+    sh.style.transform = `translate3d(${x.toFixed(1)}px,${(y + 24).toFixed(1)}px,0)`;
+  };
+  arena.addEventListener('pointerdown', (e) => {
+    if (ma.roState !== 'ready') return;
+    e.preventDefault();
+    down = true; maRoDrag = true; pid = e.pointerId; lx = e.clientX; ly = e.clientY; t0 = performance.now();
+    arena.setPointerCapture(pid);
+    arena.classList.add('dragging');
+    die.classList.remove('idle');
+    pwrEl.style.width = '40%';
+  });
+  arena.addEventListener('pointermove', (e) => {
+    if (!down || e.pointerId !== pid) return;
+    const dx = e.clientX - lx, dy = e.clientY - ly;
+    lx = e.clientX; ly = e.clientY;
+    const mx = Math.max(80, arena.clientWidth / 2 - 36), my = Math.max(55, arena.clientHeight / 2 - 34);
+    x = Math.max(-mx, Math.min(mx, x + dx));
+    y = Math.max(-my, Math.min(my, y + dy));
+    rx -= dy * 1.15; ry += dx * 1.15;
+    sync();
+    const pwr = Math.min(1, 0.35 + Math.hypot(dx, dy) / 36);
+    pwrEl.style.width = `${Math.round(pwr * 100)}%`;
+    const aw = arena.clientWidth || 300, ah = arena.clientHeight || 200;
+    const ox = (aw / 2 + x) / aw * 300, oy = (ah / 2 + y) / ah * 200;
+    aim.innerHTML = `<line x1="${ox.toFixed(1)}" y1="${oy.toFixed(1)}" x2="${(ox + dx * 2.5).toFixed(1)}" y2="${(oy + dy * 2.5 - 30).toFixed(1)}" stroke="#ffd23f" stroke-width="4" stroke-linecap="round" stroke-dasharray="6 5"/>`;
+  });
+  const rel = (e) => {
+    if (!down || e.pointerId !== pid) return;
+    down = false; maRoDrag = false;
+    arena.classList.remove('dragging');
+    void t0;
+    triggerRoSpin();
+  };
+  arena.addEventListener('pointerup', rel);
+  arena.addEventListener('pointercancel', rel);
 }
 
 // 🎲 瘋狂運動會真 3D 擲骰動畫（支援主要移動單骰／重骰、決鬥家雙骰對決、全員先手比骰）
@@ -2516,7 +2935,7 @@ function magical() {
       const pendingChoice = !!(g.prompt && ['reroll', 'alchemist', 'rocket'].includes(g.prompt.kind));
 
       if (diceEv) {
-        playMaDice(diceEv, {
+        const diceOpts = {
           holdOverlay: g.status !== 'play',
           pendingChoice,
           keepAnimPos: hasMoves ? initPos : null,
@@ -2531,7 +2950,12 @@ function magical() {
               if (ma.holdOverlay) { ma.holdOverlay = false; if (snap?.kind === 'magical') render(); }
             }
           },
-        });
+        };
+        if (mThrow && mThrow.phase === 'flying' && mThrow.kind === diceEv.kind) {
+          feedMaThrowResult(diceEv, diceOpts);
+        } else {
+          playMaDice(diceEv, diceOpts);
+        }
       } else if (hasMoves) {
         clearMaMoves();
         ma.animPos = { ...initPos };
@@ -2545,7 +2969,7 @@ function magical() {
     }
   }
   seen.evNo = lastNo;
-  if (g.stage !== 'rollOff') { clearTimeout(maRoTimer); maRoTimer = null; ma.roState = 'idle'; }
+  if (g.stage !== 'rollOff') { clearTimeout(maRoTimer); maRoTimer = null; ma.roState = 'ready'; }
 
   // 頂部玩家積分條
   const fullDraftOrder = g.stage === 'draft' && g.draft ? (g.draft.fullOrder || g.draft.order || []) : [];
@@ -2571,41 +2995,55 @@ function magical() {
   if (g.stage === 'rollOff' && g.rollOff) {
     const ro = g.rollOff;
     const reduced = matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
-    const doSpin = !reduced && ma.roState === 'idle';
-    if (doSpin) {
-      ma.roState = 'spin';
-      clearTimeout(maRoTimer);
-      maRoTimer = setTimeout(() => {
-        ma.roState = 'landed';
-        document.querySelectorAll('#maRoStage [data-di]').forEach((el) => el.classList.add('land'));
-        document.querySelectorAll('#maRoStage [data-dr]').forEach((el) => el.classList.add('show'));
-      }, 1180);
-    } else if (reduced && ma.roState === 'idle') {
-      ma.roState = 'landed';
-    }
-    const landed = ma.roState === 'landed' || reduced;
+    if (reduced && ma.roState === 'ready') ma.roState = 'landed';
     const readySet = new Set(ro.ready || []);
     const activePs = g.players.filter((p) => p.in);
     const myReady = readySet.has(me);
-    const readyBar = `<div class="m-ready-bar" style="margin-top:16px">${activePs.map((p) => `<span class="m-rchip ${readySet.has(p.id) ? 'ok' : ''}">${esc(p.name)} ${readySet.has(p.id) ? '✓ 已確認' : '…'}</span>`).join('')}</div>`;
-    mainHTML = `<div id="maRoStage" class="m-dtray ma-dtray" style="max-width:none;margin:12px 0">
-      <div class="m-dtray-hd" style="margin-bottom:6px">🎲 選秀比骰決定先手！</div>
-      <div class="mute" style="font-size:var(--s1);margin-bottom:18px">點數最高且不重複者優先選秀（相同點數抵銷）</div>
-      <div class="ma-dro">${ro.rolls.map((x, i) => {
-        const p = pById[x.id], col = MA_PCOLORS[(p?.color ?? i) % MA_PCOLORS.length], win = x.id === ro.winner;
-        return `<div class="m-dcol">
-          <div class="m-dwrap ${doSpin ? 'throw' : landed ? 'land' : ''}" data-di="${i}" style="--dl:${(i * 0.08).toFixed(2)}s">${mDieCube(x.d, col, i)}</div>
-          <b style="font-size:var(--s1);max-width:96px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p?.name || '?')}${x.id === me ? '(你)' : ''}</b>
-          <div class="m-dres ${landed ? 'show' : ''}" data-dr="${i}"><span class="ma-dpill ${win ? 'win' : ''}">${win ? `👑 ${x.d} 先選！` : `${x.d} 點`}</span></div>
-        </div>`;
-      }).join('')}</div>
-      ${readyBar}
-      <div class="m-dtray-ft">全體玩家按確認後開始蛇行選秀</div></div>`;
-    trayHTML = `<div class="tray"><div class="row" style="justify-content:space-between;flex-wrap:nowrap;margin-bottom:8px">
-      <b class="${!myReady ? 'crown' : ''}">${myReady ? `✅ 已確認！等待其他玩家（${readySet.size}/${activePs.length}）` : `👑 ${esc(nm(ro.winner))} 贏得先選權！請按確認開始選秀`}</b></div>
-      <div class="row act">${myReady
-        ? `<button class="ghost" disabled>✅ 已確認，等待其他人（${readySet.size}/${activePs.length}）</button>`
-        : `<button data-a="maRollOffOk">✅ 確認，開始選秀！（${readySet.size}/${activePs.length} 已確認）</button>`}</div></div>`;
+    if (myReady && ma.roState === 'ready') ma.roState = 'landed';
+    const waitingThrow = ma.roState === 'ready';
+    const doSpin = ma.roState === 'spin';
+    const landed = ma.roState === 'landed' || reduced;
+    const myRoll = ro.rolls.find((x) => x.id === me);
+    const myCol = MA_PCOLORS[((pById[me]?.color ?? 0)) % MA_PCOLORS.length];
+    const readyBar = `<div class="m-ready-bar" style="margin-top:14px">${activePs.map((p) => `<span class="m-rchip ${readySet.has(p.id) ? 'ok' : ''}">${esc(p.name)} ${readySet.has(p.id) ? '✓ 已確認' : '…'}</span>`).join('')}</div>`;
+    if (waitingThrow) {
+      mainHTML = `<div id="maRoStage" class="m-dtray ma-dtray" style="max-width:none;margin:12px 0">
+        <div class="m-dtray-hd" style="margin-bottom:6px">🎲 選秀比骰決定先手！</div>
+        <div class="mute" style="font-size:var(--s1);margin-bottom:10px">手動甩出你的先手骰！點數最高且不重複者優先選秀</div>
+        <div class="ma-arena" id="maRoArena" style="height:200px">
+          <div class="ma-thint">👆 按住骰子往上甩出（或點一下直接丟）</div>
+          <svg class="ma-aim-svg" id="maRoAim" viewBox="0 0 300 200" preserveAspectRatio="none"></svg>
+          <div class="ma-tsh" id="maRoSh" style="transform:translate3d(0px,64px,0)"></div>
+          <div class="ma-tdie idle" id="maRoDie" style="transform:translate3d(0px,40px,0)"><div class="m-dcube" id="maRoCube" style="transform:rotateX(-22deg) rotateY(28deg)">${maDieFaces(myCol)}</div></div>
+        </div>
+        <div class="ma-pwr"><div class="ma-pwr-fill" id="maRoPwr"></div></div>
+        ${readyBar}
+      </div>`;
+      trayHTML = `<div class="tray"><div class="row" style="justify-content:space-between;flex-wrap:nowrap;margin-bottom:8px">
+        <b class="crown">🖐️ 在上方骰盤滑動甩出你的先手骰！</b></div>
+        <div class="row act"><button data-a="maRoThrow">🎲 擲出我的先手骰！</button></div></div>`;
+      // 下一幀綁定 inline 比骰甩動手勢
+      setTimeout(() => bindRoArena(myRoll?.d ?? 1), 0);
+    } else {
+      mainHTML = `<div id="maRoStage" class="m-dtray ma-dtray" style="max-width:none;margin:12px 0">
+        <div class="m-dtray-hd" style="margin-bottom:6px">🎲 選秀比骰結果！</div>
+        <div class="mute" style="font-size:var(--s1);margin-bottom:18px">點數最高且不重複者優先選秀（相同點數抵銷）</div>
+        <div class="ma-dro">${ro.rolls.map((x, i) => {
+          const p = pById[x.id], col = MA_PCOLORS[(p?.color ?? i) % MA_PCOLORS.length], win = x.id === ro.winner;
+          return `<div class="m-dcol">
+            <div class="m-dwrap ${doSpin ? 'throw' : landed ? 'land' : ''}" data-di="${i}" style="--dl:${(i * 0.08).toFixed(2)}s">${mDieCube(x.d, col, i)}</div>
+            <b style="font-size:var(--s1);max-width:96px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p?.name || '?')}${x.id === me ? '(你)' : ''}</b>
+            <div class="m-dres ${landed ? 'show' : ''}" data-dr="${i}"><span class="ma-dpill ${win ? 'win' : ''}">${win ? `👑 ${x.d} 先選！` : `${x.d} 點`}</span></div>
+          </div>`;
+        }).join('')}</div>
+        ${readyBar}
+        <div class="m-dtray-ft">全體玩家按確認後開始蛇行選秀</div></div>`;
+      trayHTML = `<div class="tray"><div class="row" style="justify-content:space-between;flex-wrap:nowrap;margin-bottom:8px">
+        <b class="${!myReady ? 'crown' : ''}">${myReady ? `✅ 已確認！等待其他玩家（${readySet.size}/${activePs.length}）` : landed ? `👑 ${esc(nm(ro.winner))} 贏得先選權！請按確認開始選秀` : '🎲 全員骰子落地中…'}</b></div>
+        <div class="row act">${myReady
+          ? `<button class="ghost" disabled>✅ 已確認，等待其他人（${readySet.size}/${activePs.length}）</button>`
+          : `<button data-a="maRollOffOk">✅ 確認，開始選秀！（${readySet.size}/${activePs.length} 已確認）</button>`}</div></div>`;
+    }
   } else if (g.stage === 'draft') {
     const d = g.draft, isMyPick = d.picker === me;
     const full = d.fullOrder || d.order || [];
@@ -3083,6 +3521,7 @@ const A = {
   },
   // 瘋狂運動會動作
   maRollOffOk: () => call('act', { action: { type: 'rollOffOk' } }),
+  maRoThrow() { triggerRoSpin(); },
   maDraftSel(v) { ma.draftSel = ma.draftSel === v ? null : v; render(); },
   maDraftGo() { const r = ma.draftSel; return call('act', { action: { type: 'draftPick', racer: r } }).then((ok) => { if (ok) ma.draftSel = null; }); },
   maPickCard(v) {
@@ -3103,17 +3542,41 @@ const A = {
   maHypno: (v) => call('act', { action: { type: 'hypnotist', targetId: v === 'skip' ? null : v } }),
   maThirdWheel: (v) => call('act', { action: { type: 'thirdWheel', space: v === 'skip' ? null : +v } }),
   maGuess(v) { ma.guess = ma.guess === +v ? null : +v; render(); },
-  maRoll() { const g = ma.guess; ma.guess = null; return call('act', { action: g != null ? { type: 'roll', guess: g } : { type: 'roll' } }); },
+  maRoll() {
+    const g = snap?.game, pr = g?.prompt, r = g?.racers?.find((x) => x.id === pr?.racerId);
+    const guess = ma.guess; ma.guess = null;
+    openMaThrow({
+      kind: 'roll', title: '🎲 手動擲骰移動！',
+      racerBase: r?.base || 'legs', guess,
+      action: guess != null ? { type: 'roll', guess } : { type: 'roll' },
+    });
+  },
   maLegs: () => call('act', { action: { type: 'legs' } }),
   maFlipToggle() { ma.flipOpen = !ma.flipOpen; render(); },
   maFlip: (v) => call('act', { action: { type: 'flipFlop', targetId: v } }),
   maKeepRoll: () => call('act', { action: { type: 'keepRoll' } }),
-  maRerollMag: () => call('act', { action: { type: 'rerollMag' } }),
-  maRerollDM: () => call('act', { action: { type: 'rerollDM' } }),
+  maRerollMag() {
+    const g = snap?.game, r = g?.racers?.find((x) => x.id === g?.prompt?.racerId);
+    openMaThrow({ kind: 'roll', title: '🎩 魔術師手動重骰！', racerBase: r?.base || 'magician', action: { type: 'rerollMag' } });
+  },
+  maRerollDM() {
+    const g = snap?.game, r = g?.racers?.find((x) => x.id === g?.prompt?.racerId);
+    openMaThrow({ kind: 'roll', title: '🎰 骰子商人手動重骰！', racerBase: r?.base || 'dicemonger', action: { type: 'rerollDM' } });
+  },
   maAlch: (v) => call('act', { action: { type: 'alchemist', use: v === '1' } }),
   maRocket: (v) => call('act', { action: { type: 'rocket', use: v === '1' } }),
   maSucker: (v) => call('act', { action: { type: 'suckerfish', use: v === '1' } }),
-  maDuel: (v) => call('act', { action: { type: 'duelist', use: v === '1' } }),
+  maDuel(v) {
+    if (v !== '1') return call('act', { action: { type: 'duelist', use: false } });
+    const g = snap?.game, pr = g?.prompt;
+    const r = g?.racers?.find((x) => x.id === pr?.racerId);
+    const foe = g?.racers?.find((x) => x.id === pr?.foeId);
+    openMaThrow({
+      kind: 'duel', title: '⚔️ 手動甩出決鬥骰！',
+      racerBase: r?.base || 'duelist', foeBase: foe?.base || 'banana',
+      action: { type: 'duelist', use: true },
+    });
+  },
   maCopycat: (v) => call('act', { action: { type: 'copycatPick', targetId: v } }),
   maInspect(v) { ma.inspect = v || null; render(); },
   maDex() { ma.dex = !ma.dex; sheet = false; render(); },
