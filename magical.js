@@ -130,7 +130,12 @@ function emit(g, ev) {
   const item = { no: g.evNo, ...ev };
   g.ev = item;
   g.evFeed.push(item);
-  if (g.evFeed.length > 24) g.evFeed.shift();
+  if (g.evFeed.length > 36) g.evFeed.shift();
+  // 估算前端動畫播放毫秒數，供電腦玩家自動留出觀賞時間
+  if (ev.kind === 'roll') g.lastAnimMs = (g.lastAnimMs || 0) + 2100;
+  else if (ev.kind === 'duel') g.lastAnimMs = (g.lastAnimMs || 0) + 2500;
+  else if (ev.kind === 'move') g.lastAnimMs = (g.lastAnimMs || 0) + Math.abs((ev.to ?? 0) - (ev.from ?? 0)) * 270 + 250;
+  else if (ev.kind === 'warp' || ev.kind === 'swap' || ev.kind === 'partyMove') g.lastAnimMs = (g.lastAnimMs || 0) + 520;
 }
 
 function racerLabel(g, r) {
@@ -637,6 +642,9 @@ function continueTurn(g) {
               moved.push({ r: o, from, to });
             }
           }
+          if (moved.length) {
+            emit(g, { kind: 'partyMove', by: r.ownerId, racer: r.base, reason: '派對靠攏', moves: moved.map((m) => ({ racerId: m.r.id, from: m.from, to: m.to })) });
+          }
           for (const m of moved) {
             queueAfterStep(g, m.r, m.from, m.to, { isMain: false, silentMove: true });
           }
@@ -1088,6 +1096,7 @@ function processNextQueued(g) {
           for (const o of others) {
             o.pos = pos - 1;
             log(g, `👶 ${racerLabel(g, hb)} 體型太巨大！${racerLabel(g, o)} 被擠到身後第 ${o.pos} 格！`);
+            emit(g, { kind: 'warp', by: o.ownerId, racerId: o.id, racer: o.base, from: pos, to: o.pos, reason: '巨嬰擠開' });
             emit(g, { kind: 'power', by: hb.ownerId, racer: hb.base, title: `${racerLabel(g, hb)} 擠開對手！`, sub: `${racerLabel(g, o)} 被推至第 ${o.pos} 格`, tone: 'red' });
             triggerScoocher(g, hb, 'huge_baby');
             queueAfterStep(g, o, pos, o.pos, { isWarp: true });
@@ -1311,6 +1320,7 @@ function finishRace(g) {
 // --- 動作處理入口 ---
 function act(g, pid, a) {
   if (!a || typeof a !== 'object') err('無效的動作');
+  g.lastAnimMs = 0;
   if (g.status === 'raceEnd') {
     if (a.type !== 'next') err('請先按準備進入下一場比賽');
     const p = playerOf(g, pid);
@@ -1462,7 +1472,7 @@ function act(g, pid, a) {
       r.pos = pB;
       tgt.pos = pA;
       log(g, `🩴 ${racerLabel(g, r)} 與 ${racerLabel(g, tgt)} 夾腳拖互換位置（${pA} ↔ ${pB}）！`);
-      emit(g, { kind: 'swap', by: pid, racer: r.base, title: `${racerLabel(g, r)} 換位傳送！`, sub: `與 ${racerLabel(g, tgt)} 互換位置（${pA}↔${pB}）`, tone: 'blue' });
+      emit(g, { kind: 'swap', by: pid, racer: r.base, racerA: r.id, fromA: pA, toA: pB, racerB: tgt.id, fromB: pB, toB: pA, reason: '夾腳拖換位', title: `${racerLabel(g, r)} 換位傳送！`, sub: `與 ${racerLabel(g, tgt)} 互換位置（${pA}↔${pB}）`, tone: 'blue' });
       triggerScoocher(g, r, 'flip_flop');
       syncCopycats(g);
       queueAfterStep(g, r, pA, pB, { isWarp: true });
@@ -1813,7 +1823,7 @@ function view(g, pid) {
     })),
     nextReady: g.nextReady,
     ev: g.ev,
-    evFeed: g.evFeed.slice(-8),
+    evFeed: g.evFeed.slice(-20),
     log: g.log.slice(-30),
     summary: g.summary,
     winners: g.winners,
