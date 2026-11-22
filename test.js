@@ -827,6 +827,281 @@ for (let np = 2; np <= 6; np++) {
     assert.ok(s.players.every((p) => p.roundDeltas.length === rd && p.hand.length === 0));
   }
 }
+
+// --- 馬尼拉（Manila）規則引擎 ---
+{
+  const M = require('./manila');
+  const ppl = (k) => [...Array(k)].map((_, i) => ({ id: 'p' + i, name: 'P' + i }));
+
+  // 1) 開局狀態：現金 30、每人 2 張秘密股、剩餘公開股合計 20、3人=4手下 / 4-5人=3手下
+  for (const np of [3, 4, 5]) {
+    const g = M.create(ppl(np));
+    assert.equal(g.players.length, np);
+    assert.ok(g.players.every((p) => p.cash === 30 && p.stocks.length === 2 && p.workers === (np === 3 ? 4 : 3)));
+    const supTotal = Object.values(g.supply).reduce((a, b) => a + b, 0);
+    assert.equal(supTotal + np * 2, 20, '四種股票合計 20 張');
+    const v0 = M.view(g, 'p0');
+    assert.equal(v0.myStocks.length, 2);
+    assert.ok(v0.players.every((p) => !('stocks' in p) && p.stockCount === 2), '看不到別人的秘密股票');
+  }
+
+  // 2) 股票隨時抵押（+12）與贖回（-15）
+  {
+    const g = M.create(ppl(4));
+    const other = g.players.find((p) => p.id !== g.players[g.turn].id);
+    const t0 = g.turnNo;
+    M.act(g, other.id, { type: 'mortgage', idx: 0 });
+    assert.equal(other.cash, 42);
+    assert.equal(other.stocks[0].mortgaged, true);
+    assert.equal(g.turnNo, t0, '抵押不影響目前輪次與倒數');
+    throws(() => M.act(g, other.id, { type: 'mortgage', idx: 0 }), /已經抵押/);
+    M.act(g, other.id, { type: 'redeem', idx: 0 });
+    assert.equal(other.cash, 27);
+    assert.equal(other.stocks[0].mortgaged, false);
+    other.cash = 10;
+    M.act(g, other.id, { type: 'mortgage', idx: 0 }); // cash = 22
+    other.cash = 10;
+    throws(() => M.act(g, other.id, { type: 'redeem', idx: 0 }), /現金不足/);
+  }
+
+  // 3) 競標船老大：全員 PASS 免費由首位擔任；正常喊價最高者付錢得標
+  {
+    const g = M.create(ppl(3));
+    const starter = g.auction.starter;
+    for (let k = 0; k < 3; k++) M.act(g, g.players[g.turn].id, { type: 'pass' });
+    assert.equal(g.stage, 'master');
+    assert.equal(g.master, starter);
+    assert.equal(g.players.find((p) => p.id === starter).cash, 30, '全員 PASS 免費當船老大');
+  }
+  {
+    const g = M.create(ppl(3));
+    const pA = g.players[g.turn].id;
+    throws(() => M.act(g, pA, { type: 'bid', amount: 0 }), /至少 1/);
+    M.act(g, pA, { type: 'bid', amount: 4 });
+    const pB = g.players[g.turn].id;
+    throws(() => M.act(g, pB, { type: 'bid', amount: 4 }), /至少 5/);
+    M.act(g, pB, { type: 'bid', amount: 7 });
+    const pC = g.players[g.turn].id;
+    M.act(g, pC, { type: 'pass' });
+    M.act(g, pA, { type: 'pass' });
+    assert.equal(g.stage, 'master');
+    assert.equal(g.master, pB);
+    assert.equal(g.players.find((p) => p.id === pB).cash, 23);
+
+    // 船老大買股票（黑市 0 也要付 5 元，且公開紀錄）
+    const buyGood = M.GOODS.find((k) => g.supply[k] > 0);
+    M.act(g, pB, { type: 'buyStock', good: buyGood });
+    assert.equal(g.players.find((p) => p.id === pB).cash, 18);
+    assert.deepEqual(g.players.find((p) => p.id === pB).bought, [buyGood]);
+    throws(() => M.act(g, pB, { type: 'buyStock', good: buyGood }), /只能買 1 張/);
+
+    // 船老大安排 3 艘船：總和須為 9，每船 0–5
+    throws(() => M.act(g, pB, { type: 'setupShips', ships: [{ good: 'jade', pos: 6 }, { good: 'silk', pos: 2 }, { good: 'nutmeg', pos: 1 }] }), /0–5/);
+    throws(() => M.act(g, pB, { type: 'setupShips', ships: [{ good: 'jade', pos: 4 }, { good: 'silk', pos: 4 }, { good: 'nutmeg', pos: 2 }] }), /9 格/);
+    M.act(g, pB, { type: 'setupShips', ships: [{ good: 'jade', pos: 5 }, { good: 'silk', pos: 3 }, { good: 'nutmeg', pos: 1 }] });
+    assert.equal(g.stage, 'place');
+    // 3 人局第 1 輪輪流放兩圈（共 6 次派遣）
+    assert.equal(g.placeQueue.length, 6);
+  }
+
+  // 4) 領航員順序（小先於大、不可過 13 或低於 0）、海盜第 2 輪登船（標準 vs 踢人變體）
+  {
+    const runPirateBoard = (pirateKick) => {
+      const g = M.create(ppl(4), { pirateKick });
+      g.turn = 0; g.auction.starter = 'p0';
+      for (let i = 0; i < 4; i++) M.act(g, g.players[g.turn].id, { type: 'pass' }); // p0 免費當船老大
+      M.act(g, 'p0', { type: 'setupShips', ships: [{ good: 'ginseng', pos: 5 }, { good: 'silk', pos: 3 }, { good: 'jade', pos: 1 }] });
+      // Wave 1: 塞滿人蔘船（3 格：p0, p1, p2）+ p3 當海盜船長
+      M.act(g, 'p0', { type: 'place', spot: 'ship:0' }); // $1
+      M.act(g, 'p1', { type: 'place', spot: 'ship:0' }); // $2
+      M.act(g, 'p2', { type: 'place', spot: 'ship:0' }); // $3
+      M.act(g, 'p3', { type: 'place', spot: 'pirate' }); // $5
+      assert.equal(g.stage, 'roll');
+      M.performRoll(g, [4, 1, 1]); // 人蔘 5+4=9
+      // Wave 2: 買小領航員與大領航員，順便佔修船廠與保險
+      M.act(g, 'p0', { type: 'place', spot: 'nav_big' });   // $5
+      M.act(g, 'p1', { type: 'place', spot: 'nav_small' }); // $2
+      M.act(g, 'p2', { type: 'place', spot: 'shipyard:0' }); // $4
+      M.act(g, 'p3', { type: 'place', spot: 'insurance' });  // +$10
+      assert.equal(g.stage, 'roll');
+      M.performRoll(g, [4, 2, 2]); // 第 2 次擲骰：人蔘 9+4=13（且船滿！）
+      return g;
+    };
+
+    // 標準規則：人蔘船滿了，海盜不能登船 → 直接進 Wave 3
+    const std = runPirateBoard(false);
+    assert.equal(std.stage, 'place');
+    assert.equal(std.board.pirates[0], 'p3');
+
+    // 變體規則：人蔘船停 13 且客滿 → 海盜 p3 可踢下 p1 強行登船
+    const v = runPirateBoard(true);
+    assert.equal(v.stage, 'pirate_board');
+    assert.equal(v.players[v.turn].id, 'p3');
+    M.act(v, 'p3', { type: 'pirateBoard', ship: 0, kickIdx: 1 });
+    assert.deepEqual(v.ships[0].crew, ['p0', 'p3', 'p2']);
+    assert.equal(v.board.pirates[0], null);
+    assert.equal(v.stage, 'place');
+
+    // Wave 3 全部跳過 → 小領航員（p1）先於大領航員（p0）行動！
+    for (let i = 0; i < 4; i++) M.act(v, v.players[v.turn].id, { type: 'passPlace' });
+    assert.equal(v.stage, 'nav_small');
+    assert.equal(v.players[v.turn].id, 'p1');
+    throws(() => M.act(v, 'p1', { type: 'navigate', moves: [{ ship: 0, delta: 1 }] }), /0–13/);
+    M.act(v, 'p1', { type: 'navigate', moves: [{ ship: 0, delta: -1 }] }); // 人蔘 13→12
+    assert.equal(v.stage, 'nav_big');
+    assert.equal(v.players[v.turn].id, 'p0');
+    M.act(v, 'p0', { type: 'navigate', moves: [{ ship: 0, delta: 1 }, { ship: 1, delta: 1 }] }); // 人蔘 12→13（領航到 13 不觸發海盜）, 絲綢 6→7
+    assert.equal(v.stage, 'roll');
+    assert.equal(v.ships[0].pos, 13);
+    assert.equal(v.ships[1].pos, 7);
+  }
+
+  // 5) 第 3 次擲骰海盜掠奪（1 船 2 海盜平分 & 2 船各獨吞）＋ 保險公司現金不足自動抵押與銀行補差額 ＋ 終局 30 元結算
+  {
+    const g = M.create(ppl(4));
+    g.turn = 0; g.auction.starter = 'p0';
+    for (let i = 0; i < 4; i++) M.act(g, g.players[g.turn].id, { type: 'pass' });
+    M.act(g, 'p0', { type: 'setupShips', ships: [{ good: 'jade', pos: 5 }, { good: 'silk', pos: 3 }, { good: 'nutmeg', pos: 1 }] });
+    // Wave 1: p0 上玉石、p1/p2 當海盜、p3 當保險
+    M.act(g, 'p0', { type: 'place', spot: 'ship:0' });
+    M.act(g, 'p1', { type: 'place', spot: 'pirate' }); // 船長
+    M.act(g, 'p2', { type: 'place', spot: 'pirate' }); // 船員
+    M.act(g, 'p3', { type: 'place', spot: 'insurance' }); // +10 → cash 40
+    M.performRoll(g, [3, 1, 1]); // 玉石 8, 絲綢 4, 豆蔻 2
+    // Wave 2: 佔滿修船廠 A/B/C（共賠 6+8+15=29）
+    M.act(g, 'p0', { type: 'place', spot: 'shipyard:0' });
+    M.act(g, 'p1', { type: 'place', spot: 'shipyard:1' });
+    M.act(g, 'p2', { type: 'place', spot: 'shipyard:2' });
+    M.act(g, 'p3', { type: 'passPlace' });
+    M.performRoll(g, [2, 1, 1]); // 玉石 10, 絲綢 5, 豆蔻 3
+    for (let i = 0; i < 4; i++) M.act(g, g.players[g.turn].id, { type: 'passPlace' });
+    // 故意把保險 p3 現金調低到 2，且只有 2 張股（全抵押 +24 → 總共 26 < 29，銀行補 3）
+    g.players[3].cash = 2;
+    const p1Before = g.players[1].cash, p2Before = g.players[2].cash;
+    M.performRoll(g, [3, 1, 1]); // 第 3 次擲骰：玉石 10+3=13！
+    assert.equal(g.stage, 'pirate_plunder');
+    assert.equal(g.players[g.turn].id, 'p1', '海盜船長決定船隻去向');
+    M.act(g, 'p1', { type: 'pirateDecide', ship: 0, dest: 'shipyard' }); // 送進修船廠 → 3 船全進修船廠！
+    assert.equal(g.status, 'roundEnd');
+    assert.equal(g.market.jade, 0, '被海盜送進修船廠，玉石不漲價');
+    assert.equal(g.players[1].cash, p1Before + 18 + 8, '海盜船長分玉石一半 18 + 修船廠 B 8');
+    assert.equal(g.players[2].cash, p2Before + 18 + 15, '海盜船員分玉石一半 18 + 修船廠 C 15');
+    assert.equal(g.players[3].cash, 0, '保險公司全數抵押後現金歸 0');
+    assert.equal(g.summary.insurance.autoMortgaged, 2);
+    assert.equal(g.summary.insurance.bankCovered, 3);
+    // 結算須全部在場玩家按「開始下一航程」才進第 2 航程
+    M.act(g, 'p0', { type: 'next' });
+    M.act(g, 'p0', { type: 'next' }); // 重複按不重複計數
+    assert.equal(g.status, 'roundEnd');
+    assert.deepEqual(g.nextReady, ['p0']);
+    M.act(g, 'p1', { type: 'next' });
+    M.act(g, 'p2', { type: 'next' });
+    assert.equal(g.status, 'roundEnd', '還有 1 人未按開始，不能進下一航程');
+    M.act(g, 'p3', { type: 'next' });
+    assert.equal(g.status, 'play');
+    assert.equal(g.round, 2, '全員按開始後進入第 2 航程');
+    assert.deepEqual(g.nextReady, []);
+  }
+
+  // 5b) 結算畫面若最後一位未按開始的人中途離開 → 立即進入下一航程不卡死
+  {
+    const g = M.create(ppl(3));
+    g.turn = 0; g.auction.starter = 'p0';
+    for (let i = 0; i < 3; i++) M.act(g, g.players[g.turn].id, { type: 'pass' });
+    M.act(g, 'p0', { type: 'setupShips', ships: [{ good: 'jade', pos: 3 }, { good: 'silk', pos: 3 }, { good: 'nutmeg', pos: 3 }] });
+    for (let r = 0; r < 3; r++) {
+      while (g.stage === 'place') M.act(g, g.players[g.turn].id, { type: 'passPlace' });
+      M.performRoll(g, [1, 1, 1]);
+    }
+    assert.equal(g.status, 'roundEnd');
+    M.act(g, 'p0', { type: 'next' });
+    M.act(g, 'p1', { type: 'next' });
+    assert.equal(g.status, 'roundEnd');
+    assert.equal(M.leave(g, 'p2'), 2);
+    assert.equal(g.status, 'play', '最後未準備者離開 → 剩餘全員皆已準備，自動進下一航程');
+    assert.equal(g.round, 2);
+  }
+
+  // 6) 終局結算：黑市到 30 觸發結束，抵押股票強制扣 15 元
+  {
+    const g = M.create(ppl(3));
+    g.market.jade = 3; // 20 → 差 1 步到 30
+    g.players[0].stocks = [{ good: 'jade', mortgaged: true, public: false }]; // 30 - 15 = +15
+    g.players[0].cash = 20; // total = 35
+    g.players[1].stocks = [{ good: 'jade', mortgaged: false, public: false }, { good: 'jade', mortgaged: false, public: false }]; // 60
+    g.players[1].cash = 10; // total = 70
+    g.players[2].stocks = [];
+    g.players[2].cash = 50; // total = 50
+    g.turn = 0; g.auction.starter = 'p0';
+    for (let i = 0; i < 3; i++) M.act(g, g.players[g.turn].id, { type: 'pass' });
+    M.act(g, 'p0', { type: 'setupShips', ships: [{ good: 'jade', pos: 5 }, { good: 'silk', pos: 3 }, { good: 'nutmeg', pos: 1 }] });
+    for (let r = 0; r < 3; r++) {
+      while (g.stage === 'place') M.act(g, g.players[g.turn].id, { type: 'passPlace' });
+      M.performRoll(g, [5, 1, 1]);
+    }
+    assert.equal(g.status, 'over');
+    assert.deepEqual(g.winners, ['p1']);
+    const r0 = g.summary.finalRows.find((r) => r.id === 'p0');
+    assert.equal(r0.total, 35, '現金 20 + 玉石 30 - 贖回 15 = 35');
+  }
+
+  // 7) 3–5 人完整隨機對局模擬（含標準與海盜踢人變體、autoPlay、中途退出）
+  for (const np of [3, 4, 5]) for (const pirateKick of [false, true]) {
+    const g = M.create(ppl(np), { pirateKick });
+    let steps = 0;
+    while (g.status !== 'over') {
+      assert.ok(++steps < 2500, `馬尼拉 ${np} 人局不應卡死`);
+      if (g.status === 'roundEnd') {
+        for (const q of g.players) if (q.in && g.status === 'roundEnd') M.act(g, q.id, { type: 'next' });
+        continue;
+      }
+      const p = g.players[g.turn];
+      if (g.stage === 'bid') {
+        if (g.auction.high < 3 && p.cash > g.auction.high && randomInt(2)) M.act(g, p.id, { type: 'bid', amount: g.auction.high + 1 });
+        else M.act(g, p.id, { type: 'pass' });
+      } else if (g.stage === 'master') {
+        const avGood = M.GOODS.find((k) => g.supply[k] > 0 && p.cash >= Math.max(5, M.PRICE_TRACK[g.market[k]]));
+        if (avGood && !g.masterBought && randomInt(2)) M.act(g, p.id, { type: 'buyStock', good: avGood });
+        const pick3 = M.GOODS.slice(0, 3);
+        M.act(g, p.id, { type: 'setupShips', ships: [{ good: pick3[0], pos: 5 }, { good: pick3[1], pos: 3 }, { good: pick3[2], pos: 1 }] });
+      } else if (g.stage === 'place') {
+        const opts = [];
+        g.ships.forEach((s, si) => { if (s.pos < 14 && s.crew.length < M.GOOD_INFO[s.good].slots.length && p.cash >= M.GOOD_INFO[s.good].slots[s.crew.length]) opts.push(`ship:${si}`); });
+        M.HARBOR_SLOTS.forEach((h, i) => { if (!g.board.harbor[i] && p.cash >= h.cost) opts.push(`harbor:${i}`); });
+        M.SHIPYARD_SLOTS.forEach((y, i) => { if (!g.board.shipyard[i] && p.cash >= y.cost) opts.push(`shipyard:${i}`); });
+        if (!g.board.insurance) opts.push('insurance');
+        if ((!g.board.pirates[0] || !g.board.pirates[1]) && p.cash >= 5) opts.push('pirate');
+        if (!g.board.navSmall && p.cash >= 2) opts.push('nav_small');
+        if (!g.board.navBig && p.cash >= 5) opts.push('nav_big');
+        if (opts.length && randomInt(4)) M.act(g, p.id, { type: 'place', spot: opts[randomInt(opts.length)] });
+        else M.act(g, p.id, { type: 'passPlace' });
+      } else if (g.stage === 'nav_small' || g.stage === 'nav_big') {
+        const cand = g.ships.findIndex((s) => s.pos > 0 && s.pos < 13);
+        if (cand >= 0 && randomInt(2)) M.act(g, p.id, { type: 'navigate', moves: [{ ship: cand, delta: randomInt(2) ? 1 : -1 }] });
+        else M.act(g, p.id, { type: 'navigate', moves: [] });
+      } else if (g.stage === 'roll') {
+        M.act(g, p.id, { type: 'roll' });
+      } else if (g.stage === 'pirate_board') {
+        M.autoPlay(g, p.id);
+      } else if (g.stage === 'pirate_plunder') {
+        const pl = g.plunder;
+        M.act(g, p.id, { type: 'pirateDecide', ship: pl.mode === 'pick' ? pl.ships[0] : pl.ship, dest: randomInt(2) ? 'harbor' : 'shipyard' });
+      }
+    }
+    assert.ok(g.winners.length >= 1);
+    assert.ok(M.GOODS.some((k) => g.market[k] === 4), '結束時必有貨物達黑市 30');
+  }
+
+  // 中途退出不卡死
+  {
+    const g = M.create(ppl(4));
+    const curId = g.players[g.turn].id;
+    assert.equal(M.leave(g, curId), 3);
+    assert.notEqual(g.players[g.turn].id, curId);
+    for (let k = 0; k < 10 && g.status === 'play'; k++) M.autoPlay(g);
+    assert.ok(g.turnNo > 2);
+  }
+}
 function randomInt(n) { return require('node:crypto').randomInt(n); }
 
 // --- HTTP 冒煙測試 ---
@@ -958,7 +1233,7 @@ function randomInt(n) { return require('node:crypto').randomInt(n); }
     assert.ok(fr.game.turnNo >= 2, '出牌後換人');
     assert.equal((await post('start', f)).status, 400, '已開始');
     const wl = (f2) => [...read(f2).matchAll(/^(?:const KINDS = \{| *const GAMES = \{)(.*)$/gm)].map((m) => [...m[1].matchAll(/\b(\w+): \{/g)].map((x) => x[1]).filter((k) => k !== 'eng').join());
-    assert.equal(wl('server.js')[0], 'phase10,fuji,cats'); assert.equal(wl('index.html')[0], 'phase10,fuji,cats', '伺服器與前端的遊戲鍵名要一致');
+    assert.equal(wl('server.js')[0], 'phase10,fuji,cats,manila'); assert.equal(wl('index.html')[0], 'phase10,fuji,cats,manila', '伺服器與前端的遊戲鍵名要一致');
   }
   { // 貓貓食堂：人數 3–6、輪數預設 3 且可自訂（1–10）、房主可在等待室修改輪數、同時蓋牌同步與隱藏
     for (const bad of [0, 11, 2.5, '3']) assert.equal((await post('create', { name: 'c', kind: 'cats', rounds: bad })).status, 400, `輪數 ${bad} 不合法`);
@@ -989,6 +1264,34 @@ function randomInt(n) { return require('node:crypto').randomInt(n); }
     assert.equal(cr.game.trick, 2, '全員蓋牌後翻牌進第 2 手');
     assert.ok(cr.game.last && cr.game.last.picks.length === 6);
     void c2;
+  }
+  { // 馬尼拉：人數 3–5、海盜踢人變體預設關且可切換、起始秘密股票不外洩
+    const mDef = (await post('create', { name: 'M0', kind: 'manila' })).json;
+    const mr = server.rooms.get(mDef.code);
+    assert.equal(mDef.kind, 'manila');
+    assert.equal(mr.settings.pirateKick, false, '預設標準規則（不踢人）');
+    assert.equal((await post('settings', { ...mDef, pirateKick: true })).status, 200);
+    assert.equal(mr.settings.pirateKick, true, '房主可在房內開啟海盜踢人變體');
+    const mv0 = await sseOnce(mDef);
+    assert.deepEqual([mv0.kind, mv0.min, mv0.max, mv0.settings.pirateKick], ['manila', 3, 5, true]);
+    const m1 = (await post('join', { code: mDef.code, name: 'M1' })).json;
+    assert.equal((await post('start', mDef)).status, 400, '馬尼拉 2 人不能開');
+    for (let i = 2; i < 5; i++) await post('join', { code: mDef.code, name: 'M' + i });
+    assert.equal((await post('join', { code: mDef.code, name: '第六人' })).status, 400, '馬尼拉滿 5 人');
+    assert.equal((await post('start', mDef)).status, 200);
+    const mv1 = await sseOnce(m1);
+    assert.equal(mv1.game.stage, 'bid');
+    assert.equal(mv1.game.myStocks.length, 2);
+    assert.ok(mv1.game.players.every((p) => !('stocks' in p) && p.stockCount === 2), '秘密股票不洩漏給其他玩家');
+    assert.equal(mv1.game.rules.pirateKick, true);
+    // 靜態美術素材路由與路徑穿越防護
+    for (const f of ['board_bg.jpg', 'good_jade.jpg', 'good_silk.jpg', 'good_nutmeg.jpg', 'good_ginseng.jpg']) {
+      const r = await fetch(`${base}/assets/manila/${f}`);
+      assert.equal(r.status, 200, `${f} 應可讀取`);
+      assert.equal(r.headers.get('content-type'), 'image/jpeg');
+    }
+    assert.equal((await fetch(`${base}/assets/../server.js`)).status, 404, '阻擋路徑穿越');
+    assert.equal((await fetch(`${base}/assets/manila/nope.jpg`)).status, 404);
   }
   const cardsIn = (g) => g.players.reduce((a, p) => a + p.hand.length, 0) + g.groups.reduce((a, x) => a + x.cards.length, 0) + g.draw.length + g.disc.length;
 
@@ -1046,12 +1349,13 @@ function randomInt(n) { return require('node:crypto').randomInt(n); }
   assert.equal(room3.settings.turn, 30);
   room3.settings.turn = 0.3; // 測試用：直接改成 0.3 秒，不然要等 10 秒以上
   const ac3 = new AbortController();
-  await fetch(`${base}/api/events?code=${h3.code}&token=${h3.token}`, { signal: ac3.signal }); // 要有人連線倒數才會跑
+  const sse3 = await fetch(`${base}/api/events?code=${h3.code}&token=${h3.token}`, { signal: ac3.signal }); // 要有人連線倒數才會跑（保留參照避免 Node 24 GC 回收關閉連線）
   await post('start', h3);
   const no0 = room3.game.turnNo;
   await new Promise((res) => setTimeout(res, 800));
   assert.ok(room3.game.turnNo > no0, '超時自動代打、換人');
   ac3.abort();
+  void sse3;
   server.close();
   console.log('✅ 全部測試通過');
   process.exit(0);

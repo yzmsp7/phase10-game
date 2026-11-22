@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Phase 10・富士流・貓貓食堂</title>
+<title>Phase 10・富士流・貓貓食堂・馬尼拉</title>
 <style>
 /* 字級只有 4 級、字重只有 400/600；間距走 4/8 格線。--mute 在 --panel2 上 4.84:1（原 #a8c7b8 只有 3.57） */
 :root{--s1:12px;--s2:16px;--s3:20px;--s4:28px;--bg:#0f3d2e;--panel:#165740;--panel2:#1d6a4f;--ink:#f6f3ea;--mute:#cfe3d8;--accent:#f6c945;--R:#d64545;--B:#3b73d4;--G:#2e9e5b;--Y:#e0b020}
@@ -116,7 +116,7 @@ input[readonly]{width:100%}
 .card.X b{font-size:var(--s3)}.card.X i{font-size:11px;line-height:1.1;text-align:center;max-width:100%}
 .trophy{display:inline-block;animation:pop .7s cubic-bezier(.2,1.4,.4,1)}
 /* 首頁選遊戲、房間、富士流牌桌（手機優先；字級只用 --s1..4，間距 4/8 格線） */
-.gsel{display:flex;gap:8px}.gsel button{flex:1;min-height:96px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:12px 8px;line-height:1.2}.gsel .gi{font-size:var(--s4);line-height:1}.gsel small{font-weight:400}
+.gsel{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}@media(min-width:640px){.gsel{grid-template-columns:repeat(4,1fr)}}.gsel button{min-height:92px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:12px 8px;line-height:1.2}.gsel .gi{font-size:var(--s4);line-height:1}.gsel small{font-weight:400}
 .how{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}.how div{background:#0c2f23;border-radius:12px;padding:12px 8px;text-align:center;font-size:var(--s1);line-height:1.3}.how span{display:block;font-size:var(--s4);line-height:1.2;margin-bottom:4px}
 .fold{background:transparent;color:var(--mute);font-weight:400;width:100%;min-height:44px;padding:8px 0;display:flex;align-items:center;gap:8px;text-align:left}.fold::before{content:'▸'}.fold[aria-expanded=true]::before{content:'▾'}.foldb{padding-bottom:8px}
 .av{flex:none;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:600;color:#fff;background:hsl(var(--h) 45% 38%)}
@@ -261,6 +261,207 @@ body.cats-mode .slot{background:#24150d}
 .hand.c .ccard{height:52px}.hand.c .ccard span{display:none}
 }
 @media(max-height:500px){.ctable{max-width:304px}}
+/* 馬尼拉：1821 羊皮紙古航海圖典藏桌遊主題（胡桃木桌 × 復古羊皮紙 × 黃銅紅蠟；手機優先 8px 格線） */
+body.manila-mode{--bg:#1c110a;--panel:#2b1b11;--panel2:#392517;--ink:#f8eed8;--mute:#d8c19b;--accent:#e8b954;background:repeating-linear-gradient(90deg,#21140c 0,#21140c 26px,#1c110a 26px,#1c110a 54px,#24160d 54px,#24160d 82px);background-attachment:fixed}
+body.manila-mode .tray{background:linear-gradient(180deg,#2e1d12,#20130b);border-top:2px solid #8c6a36;box-shadow:0 -10px 24px #0c0602dd;padding-top:10px}
+body.manila-mode .fmeta,body.manila-mode .fticker{background:#281910eb;border-color:#785a2e}
+body.manila-mode .rxp{background:#2b1b11;border-color:#8c6a36;box-shadow:0 8px 20px #0b0502cc}
+body.manila-mode .modal{background:linear-gradient(180deg,#301f13,#22150c);border:1.5px solid #8c6a36}
+body.manila-mode .res{background:#3a2618;border:1px solid #6b4e27}
+body.manila-mode input,body.manila-mode select{background:#1a1009;border-color:#785a2e}
+body.manila-mode button.ghost{border-color:#9e7d4a;color:#f3e4c3}
+.m-ico-img{width:24px;height:24px;border-radius:50%;object-fit:cover;border:1.5px solid #b58d47;flex:none;box-shadow:0 1px 3px #0006}
+.m-ico-img.md{width:34px;height:34px;border-width:2px}.m-ico-img.lg{width:50px;height:50px;border-radius:8px;border-width:2px}
+.m-mp-svg{display:inline-block;vertical-align:middle;flex:none;filter:drop-shadow(0 2px 2px #0008)}
+.m-coin-svg{display:inline-block;vertical-align:-2px;flex:none}
+.m-die-svg{display:inline-block;vertical-align:middle;filter:drop-shadow(0 2px 3px #0009)}
+/* 精簡頂部黑市條（單排不擁擠，點擊看詳情） */
+.m-mkt{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
+.m-good{background:linear-gradient(180deg,#f2e1bd 0%,#dfc289 100%);color:#2a1a0e;border:1.5px solid #8b6732;border-top:3px solid var(--gc);border-radius:10px;padding:6px 6px 5px;text-align:left;box-shadow:inset 0 1px 0 #fff7e2aa,0 2px 6px #0a050288;cursor:pointer;display:flex;flex-direction:column;gap:4px}
+.m-good.hot{border-color:#b82e2e;box-shadow:0 0 0 1.5px #e8b954,0 0 12px #e8b95466}
+.m-good-row{display:flex;align-items:center;gap:5px;min-width:0}
+.m-good-val{min-width:0;line-height:1.1}
+.m-good-p{display:block;font-size:var(--s2);font-weight:600;font-variant-numeric:tabular-nums;color:#6e2412}
+.m-good-sub{display:block;font-size:10px;color:#5c4020;font-weight:600;white-space:nowrap}
+.m-pips{display:flex;gap:2px}
+.m-pip{flex:1;height:4px;border-radius:2px;background:#bca06d}
+.m-pip.on{background:var(--gc)}.m-pip.end.on{background:#b82e2e}
+/* 單排橫向可滑動玩家條（手機不換行不擠壓圖板） */
+.m-players{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;padding:2px 0 4px;margin:8px 0;scrollbar-width:none}
+.m-players::-webkit-scrollbar{display:none}
+.m-pl{flex:0 0 auto;min-width:128px;scroll-snap-align:start;background:linear-gradient(180deg,#382417,#28180f);border-radius:10px;padding:7px 10px;border:1.5px solid #6b4e27;font-variant-numeric:tabular-nums;box-shadow:0 3px 8px #0a050288;cursor:pointer;text-align:left;color:var(--ink)}
+@media(min-width:640px){.m-players{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));overflow:visible}.m-pl{min-width:0}}
+.m-pl.me{border-color:#b88f4c}
+.m-pl.turn{border-color:#f0c45c;box-shadow:0 0 12px #e8b95466,inset 0 0 0 1px #f0c45c55}
+.m-pl.out{opacity:.42}
+.m-pl-top{display:flex;align-items:center;gap:5px;min-width:0}
+.m-pl-nm{flex:1;min-width:0;font-size:var(--s1);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.m-pl-row{display:flex;justify-content:space-between;align-items:center;gap:6px;margin-top:4px;font-size:var(--s1);color:var(--mute)}
+.m-pl-row b{color:#f8eed8}
+.m-tag{display:inline-flex;align-items:center;gap:2px;padding:1px 5px;border-radius:6px;font-size:10px;font-weight:600;background:#1d120a;border:1px solid var(--gc,#8c6a36);color:#f8eed8;white-space:nowrap}
+/* 1821 羊皮紙馬尼拉灣實體圖板（寬敞留白 + 8/12px 節奏） */
+.m-map-wrap{position:relative;border-radius:16px;padding:6px;background:linear-gradient(145deg,#5a3d1e,#2b1a0d);box-shadow:0 12px 28px #080401cc,inset 0 1px 0 #c9a15a66;margin-bottom:12px}
+.m-map{position:relative;border-radius:12px;overflow:hidden;background:#1b384a url('/assets/manila/board_bg.jpg') center top/cover no-repeat;border:2px solid #9e7738;box-shadow:inset 0 0 36px #180d0588;padding:12px 10px;display:flex;flex-direction:column;gap:12px}
+.m-map::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,#1a100822 0%,#0b1a241f 45%,#0b1a2455 100%);pointer-events:none}
+.m-map>*{position:relative;z-index:1}
+/* 中央三條直向航道（清爽節點：關鍵里程碑圓牌 + 細緻黃銅刻度點，零重疊） */
+.m-bay-box{position:relative;padding:8px 6px 10px;border-radius:12px;background:#0c22305c;border:1px solid #d4af6355;backdrop-filter:blur(1px)}
+.m-bay-head{display:flex;justify-content:space-between;align-items:center;padding:0 6px 6px;font-size:var(--s1);color:#f5e5c4;text-shadow:0 1px 3px #000}
+.m-bay{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;height:316px;padding:8px 4px}
+.m-lane{position:relative;height:100%;border-radius:10px;background:linear-gradient(180deg,#1a485e66 0%,#102e4255 62%,#1b3e4f77 100%);border:1px solid #c9a15a44}
+.m-lane-line{position:absolute;left:50%;top:18px;bottom:18px;width:2px;transform:translateX(-50%);background:repeating-linear-gradient(180deg,#d8b46a88 0,#d8b46a88 4px,transparent 4px,transparent 9px)}
+.m-launch-zone{position:absolute;left:2px;right:2px;bottom:2px;height:38%;border-radius:0 0 8px 8px;background:#e8b95418;border-top:1px dashed #e8b95477;pointer-events:none}
+.m-dot{position:absolute;left:50%;transform:translate(-50%,50%);width:7px;height:7px;border-radius:50%;background:#132b3c;border:1.5px solid #b58d47aa;z-index:1;pointer-events:none}
+.m-dot.passed{background:#d8b46a;border-color:#fff6d6}
+.m-node{position:absolute;left:50%;transform:translate(-50%,50%);min-width:24px;height:20px;padding:0 5px;border-radius:10px;background:#132b3cee;border:1.5px solid #b58d47;color:#f3dfb4;font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums;box-shadow:0 1px 4px #0009;z-index:2;pointer-events:none}
+.m-node.n5{border-color:#e8b954;color:#ffe6a3}
+.m-node.n13{min-width:34px;height:22px;background:#6b171a;border:1.5px solid #ff9c90;color:#ffe2dc;box-shadow:0 0 10px #c9322c99}
+.m-node.n14{min-width:36px;height:22px;background:#195236;border:1.5px solid #7fe8b0;color:#e0ffef;box-shadow:0 0 10px #32b87288}
+.m-node.passed{background:#24506e;border-color:#e8c474}
+/* 實體木船（沿航道平滑滑行） */
+.m-boat{position:absolute;left:50%;transform:translate(-50%,50%);z-index:4;display:flex;flex-direction:column;align-items:center;cursor:default}
+.m-boat.sailing{animation:mBoatSail .85s cubic-bezier(.22,1,.36,1) both}
+@keyframes mBoatSail{0%{bottom:var(--from-b);transform:translate(-50%,50%) rotate(-3deg)}50%{transform:translate(-50%,50%) rotate(3deg) scale(1.04)}100%{bottom:var(--to-b);transform:translate(-50%,50%) rotate(0)}}
+.m-boat.can{cursor:pointer}
+.m-boat.can:hover .m-boat-svg,.m-boat.sel .m-boat-svg{filter:drop-shadow(0 0 10px #f4c459) drop-shadow(0 6px 10px #000a)}
+.m-boat-svg{width:58px;height:88px;filter:drop-shadow(0 6px 8px #000b);transition:filter .2s}
+.m-boat-cargo{position:absolute;top:15px;left:50%;transform:translateX(-50%);width:28px;height:28px;border-radius:50%;object-fit:cover;border:2px solid #e6c06e;box-shadow:0 2px 5px #0009;pointer-events:none}
+.m-boat-crew{position:absolute;top:46px;left:50%;transform:translateX(-50%);display:flex;flex-wrap:wrap;justify-content:center;gap:1px;width:40px;pointer-events:none}
+.m-boat-die{position:absolute;top:-6px;right:-16px;z-index:5;pointer-events:none}
+.m-boat-pos{position:absolute;bottom:-11px;left:50%;transform:translateX(-50%);background:#1f120af0;color:#f5dfae;border:1px solid #b58d47;border-radius:8px;padding:0 6px;font-size:10px;font-weight:600;white-space:nowrap;box-shadow:0 2px 4px #0008;pointer-events:none}
+.m-boat.danger .m-boat-pos{background:#7d1818;border-color:#ff9e94;color:#fff}
+.m-boat.arrived .m-boat-pos{background:#185738;border-color:#7fe8b0;color:#e4fff0}
+.m-bay-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:16px;text-align:center}
+.m-bay-empty span{background:#26170eee;color:#f3e1bc;border:1.5px solid #9e7738;border-radius:12px;padding:12px 16px;font-size:var(--s1);box-shadow:0 6px 16px #000a;line-height:1.45}
+/* 全寬水平船隻登船條（每船一列、零截字、大點擊目標） */
+.m-ship-rows{display:flex;flex-direction:column;gap:8px}
+.m-srow{background:linear-gradient(180deg,#f4e4c2f2,#e2c68ff0);color:#2a190d;border:1.5px solid #7d5b28;border-left:5px solid var(--gc);border-radius:10px;padding:8px 10px;box-shadow:0 3px 10px #0a050299;display:flex;flex-direction:column;gap:8px}
+.m-srow.danger{border-color:#b82e2e;box-shadow:0 0 12px #d6454566}
+.m-srow.arrived{border-color:#2c8a56}
+.m-srow-h{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.m-srow-id{display:flex;align-items:center;gap:8px;min-width:0}
+.m-srow-id b{font-size:var(--s2);color:#26150a}
+.m-srow-id small{display:block;font-size:var(--s1);color:#5c3f1e;font-weight:600}
+.m-srow-st{font-size:var(--s1);font-weight:600;padding:3px 8px;border-radius:8px;background:#2b1a0e18;color:#3d2510;white-space:nowrap}
+.m-srow.danger .m-srow-st{background:#8f1f1f;color:#fff}
+.m-srow.arrived .m-srow-st{background:#1c6b42;color:#e6fff2}
+.m-crew-row{display:grid;grid-template-columns:repeat(var(--cols,3),1fr);gap:6px}
+.m-slot{min-height:42px;padding:4px 6px;border-radius:8px;background:#e4cc9a;border:1.5px solid #94723c;color:#4a3116;font-size:var(--s1);font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:4px;font-variant-numeric:tabular-nums;cursor:default;min-width:0}
+.m-slot.open{cursor:pointer;background:#fff8e3;border:2px dashed #b56c12;color:#7d3f00;box-shadow:0 0 0 2px #f0c45c55}
+.m-slot.sel{background:#e8b954;color:#261600;border:2px solid #fff;box-shadow:0 0 12px #f0c45ccc}
+.m-slot.locked{opacity:.46}
+.m-slot.occ{background:#d4b782;border-color:#7d5d2d;color:#2b1a0e}
+.m-slot .snm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:var(--s1)}
+/* 全寬沿岸與特殊職位木牌（不擠兩欄，卡片大而清楚） */
+.m-zones-stack{display:flex;flex-direction:column;gap:10px}
+.m-plaque{background:linear-gradient(180deg,#f3e2bef2,#e2c792f0);color:#2a190d;border:1.5px solid #7d5b28;border-radius:12px;padding:10px;box-shadow:0 4px 12px #0d0703aa,inset 0 0 0 1px #fff6df99}
+.m-plaque.dark{background:linear-gradient(180deg,#2e1715f0,#20100ff0);color:#f8ebd4;border-color:#9e3c36;box-shadow:0 4px 12px #090302bb,inset 0 0 0 1px #e26d5c33}
+.m-plaque.navy{background:linear-gradient(180deg,#163042f0,#102333f0);color:#f3e6cc;border-color:#8f6d37;box-shadow:0 4px 12px #090302aa}
+.m-plaque-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid #8a693544}
+.m-plaque.dark .m-plaque-h,.m-plaque.navy .m-plaque-h{border-bottom-color:#c9a15a33}
+.m-plaque-h b{font-size:var(--s2);letter-spacing:.3px}.m-plaque-h small{font-size:var(--s1);opacity:.82}
+.m-grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.m-grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.m-zcard{min-height:60px;width:100%;padding:8px 6px;border-radius:9px;background:#efe0bd;border:1.5px solid #8f6d37;color:#2b1a0e;font-size:var(--s1);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-align:center;font-variant-numeric:tabular-nums;cursor:default}
+.m-zcard.row{flex-direction:row;justify-content:space-between;text-align:left;padding:10px 12px;min-height:50px}
+.m-plaque.dark .m-zcard{background:#3a1d1a;border-color:#8a3d38;color:#f8ebd4}
+.m-plaque.navy .m-zcard{background:#1b384d;border-color:#7a5e32;color:#f5e9cf}
+.m-zcard small{font-size:11px;opacity:.82;line-height:1.2}
+.m-zcard .m-price{font-size:var(--s2);font-weight:600;color:#7a3e06}
+.m-plaque.dark .m-zcard .m-price,.m-plaque.navy .m-zcard .m-price{color:var(--accent)}
+.m-zcard.open{cursor:pointer;background:#fff7e0;border:2px dashed #b56c12;box-shadow:0 0 0 2px #f0c45c55,0 2px 6px #0004}
+.m-plaque.dark .m-zcard.open{background:#52231e;border-color:#f0c45c;color:#fff}
+.m-plaque.navy .m-zcard.open{background:#234a66;border-color:#f0c45c;color:#fff}
+.m-zcard.sel{background:#e8b954!important;color:#261600!important;border:2px solid #fff!important;box-shadow:0 0 14px #f0c45ccc}
+.m-zcard.sel small,.m-zcard.sel .m-price{color:#3d2400!important;opacity:1}
+.m-zcard.locked{opacity:.5}
+.m-zcard.occ{background:#dfc694;border-color:#856535;color:#2b1a0e}
+.m-plaque.dark .m-zcard.occ{background:#291412;border-color:#69302c}
+.m-plaque.navy .m-zcard.occ{background:#132838;border-color:#544225}
+.m-zcard.ins-box{background:linear-gradient(180deg,#dff1e0,#c8e4cb);border-color:#3a7a4d;color:#12381d}
+.m-zcard.ins-open{cursor:pointer;background:#ebfaec;border:2px dashed #1f8a4c;box-shadow:0 0 12px #3fd18055}
+.m-zcard.ins-open.sel{background:#38b56c!important;color:#052412!important;border-color:#fff!important}
+/* 船老大特權工作台（行內呈現，不擠占固定底部托盤） */
+.m-desk{background:linear-gradient(180deg,#332114,#25170e);border:2px solid #c99a45;border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 8px 20px #0a0502aa}
+.m-desk h2{color:var(--accent);font-size:var(--s2);margin:0 0 10px}
+/* 底部操作區與復古股票證書 */
+.m-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-bottom:8px;margin-bottom:8px;border-bottom:1px solid #6b4e27;font-size:var(--s1);font-variant-numeric:tabular-nums}
+.m-bar-btn{min-height:36px;padding:4px 10px;font-size:var(--s1);border-radius:8px}
+.m-step{display:flex;align-items:center;gap:6px}
+.m-step button{min-width:44px;min-height:44px;padding:0 10px}
+.m-step b{min-width:40px;text-align:center;font-size:var(--s3);font-variant-numeric:tabular-nums}
+.m-chips{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.m-chip{min-height:48px;padding:6px 10px;border-radius:10px;background:#1e130b;border:1.5px solid #75562c;color:#f8eed8;display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:var(--s1)}
+.m-chip.on{border-color:var(--gc);background:#342214;box-shadow:0 0 0 1.5px var(--gc)}
+.m-alloc{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;background:#1d120a;border-radius:10px;margin-top:8px;border:1px solid #6b4e27;border-left:4px solid var(--gc)}
+.m-cert{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px;background:linear-gradient(180deg,#f4e4c2,#e0c38c);color:#2b1a0e;border:2px solid #8a6630;border-left:5px solid var(--gc);border-radius:10px;margin-top:10px;box-shadow:inset 0 0 0 2px #fff6df88,0 4px 10px #0a050288;position:relative}
+.m-cert.mort{background:linear-gradient(180deg,#dfd1b6,#c7b494);border-style:dashed;border-left-style:solid}
+.m-cert small{color:#5c3f1e}
+.m-wax{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:12px;background:#8f1f1f;color:#ffece8;font-size:11px;font-weight:600;border:1px solid #c9584d;box-shadow:0 2px 4px #0006;margin-top:4px}
+/* 🎲 真 3D 六面立體木骰擲骰動畫舞台（獨立在 #app 外，3 顆彩色木骰同步拋出翻滾落地） */
+#mDiceStage{position:fixed;inset:0;z-index:8;display:none;align-items:center;justify-content:center;padding:16px;background:#0a0502c4;backdrop-filter:blur(3px);cursor:pointer}
+#mDiceStage.on{display:flex;animation:mFadeIn .22s ease-out both}
+#mDiceStage.out{animation:mFadeOut .3s ease-in forwards}
+.m-dtray{width:100%;max-width:420px;background:radial-gradient(circle at 50% 35%,#3d2616 0%,#22130a 82%);border:3px solid #c99a45;border-radius:20px;padding:20px 16px 16px;box-shadow:0 20px 48px #000d,inset 0 0 28px #0c0602bb,inset 0 0 0 2px #f6d58b33;text-align:center;color:#f8eed8}
+.m-dtray-hd{font-size:var(--s3);font-weight:600;color:var(--accent);margin-bottom:18px;letter-spacing:.5px}
+.m-drow{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;align-items:start}
+.m-dcol{display:flex;flex-direction:column;align-items:center;gap:10px}
+.m-dwrap{position:relative;width:76px;height:76px;display:flex;align-items:center;justify-content:center;perspective:360px}
+.m-dwrap::before{content:'';position:absolute;bottom:2px;left:50%;width:50px;height:14px;border-radius:50%;background:#00000088;filter:blur(4px);transform:translateX(-50%);pointer-events:none}
+.m-dwrap.throw::before{animation:mDieShadow 1.05s cubic-bezier(.22,.82,.34,1) var(--dl,0s) both}
+.m-dthrow{width:56px;height:56px;transform-style:preserve-3d;position:relative}
+.m-dwrap.throw .m-dthrow{animation:mDiceArc 1.05s cubic-bezier(.2,.8,.32,1) var(--dl,0s) both}
+.m-dcube{width:56px;height:56px;position:relative;transform-style:preserve-3d;transform:rotateX(var(--rx1,0deg)) rotateY(var(--ry1,0deg)) rotateZ(0deg)}
+.m-dwrap.throw .m-dcube{animation:mDiceSpin 1.05s cubic-bezier(.16,.84,.28,1) var(--dl,0s) both}
+.m-dface{position:absolute;inset:0;border-radius:10px;background:var(--dc,#8c5a2b);border:2px solid #241207;box-shadow:inset 0 0 0 2px #ffffff38,inset 0 0 10px #00000044;display:grid;place-items:center;backface-visibility:hidden}
+.m-dface svg{width:52px;height:52px;display:block}
+.m-dface.f1{transform:rotateY(0deg) translateZ(28px)}
+.m-dface.f2{transform:rotateY(90deg) translateZ(28px)}
+.m-dface.f3{transform:rotateX(90deg) translateZ(28px)}
+.m-dface.f4{transform:rotateX(-90deg) translateZ(28px)}
+.m-dface.f5{transform:rotateY(-90deg) translateZ(28px)}
+.m-dface.f6{transform:rotateY(180deg) translateZ(28px)}
+.m-dwrap.land::after{content:'';position:absolute;inset:-4px;border-radius:16px;border:2px solid var(--accent);opacity:0;animation:mRing .6s ease-out both}
+.m-dres{min-height:38px;display:flex;flex-direction:column;align-items:center;gap:3px;opacity:0;transform:translateY(6px);transition:opacity .28s ease,transform .28s ease}
+.m-dres.show{opacity:1;transform:none}
+.m-dpill{display:inline-block;padding:2px 8px;border-radius:8px;font-size:var(--s1);font-weight:600;background:#1a0f08;border:1px solid #8c6a36;color:#f5dfae;font-variant-numeric:tabular-nums;white-space:nowrap}
+.m-dpill.port{background:#185e3a;border-color:#7fe8b0;color:#e6fff2}
+.m-dpill.p13{background:#8c1d1d;border-color:#ff9e94;color:#fff}
+.m-dtray-ft{margin-top:14px;font-size:var(--s1);color:var(--mute)}
+.m-ready-bar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;justify-content:center}
+.m-rchip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:10px;font-size:var(--s1);background:#24150c;border:1px solid #6b4e27;color:var(--mute)}
+.m-rchip.ok{background:#19452c;border-color:#5ce09e;color:#e4fff0;font-weight:600}
+@keyframes mFadeIn{from{opacity:0}to{opacity:1}}
+@keyframes mFadeOut{from{opacity:1}to{opacity:0}}
+@keyframes mDiceArc{
+  0%{transform:translate3d(var(--tx0,30px),110px,0) scale(.55);opacity:0}
+  16%{opacity:1}
+  44%{transform:translate3d(calc(var(--tx0,30px) * -.25),-34px,0) scale(1.14)}
+  68%{transform:translate3d(calc(var(--tx0,30px) * .12),6px,0) scale(.94)}
+  84%{transform:translate3d(0,-10px,0) scale(1.04)}
+  100%{transform:translate3d(0,0,0) scale(1)}
+}
+@keyframes mDiceSpin{
+  0%{transform:rotateX(var(--rx0,0deg)) rotateY(var(--ry0,0deg)) rotateZ(var(--rz0,-180deg))}
+  100%{transform:rotateX(var(--rx1,720deg)) rotateY(var(--ry1,720deg)) rotateZ(0deg)}
+}
+@keyframes mDieShadow{
+  0%{transform:translateX(-50%) scale(.4);opacity:0}
+  44%{transform:translateX(-50%) scale(.75);opacity:.45}
+  68%{transform:translateX(-50%) scale(1.1);opacity:.9}
+  84%{transform:translateX(-50%) scale(.88);opacity:.65}
+  100%{transform:translateX(-50%) scale(1);opacity:.85}
+}
+@keyframes mRing{0%{transform:scale(.75);opacity:.9}100%{transform:scale(1.25);opacity:0}}
+@media(min-width:700px){
+.m-bay{height:384px;gap:12px}.m-boat-svg{width:68px;height:102px}.m-boat-cargo{top:18px;width:32px;height:32px}.m-boat-crew{top:53px;width:46px}
+.m-zones-stack{display:grid;grid-template-columns:1fr 1fr;gap:10px}.m-zones-stack .wide{grid-column:1 / -1}
+}
+@media(max-width:600px){
+.m-mkt{gap:5px}.m-good{padding:5px 4px}.m-ico-img{width:22px;height:22px}
+.m-map{padding:10px 8px;gap:10px}.m-bay{height:300px;gap:5px}
+.m-boat-svg{width:52px;height:78px}.m-boat-cargo{top:13px;width:24px;height:24px}.m-boat-crew{top:41px;width:36px}
+}
 </style>
 </head>
 <body>
@@ -268,6 +469,7 @@ body.cats-mode .slot{background:#24150d}
 <div id="toast" role="status"></div>
 <div id="skipBan" role="status"></div>
 <div id="rx" aria-hidden="true"></div>
+<div id="mDiceStage" role="dialog" aria-label="擲骰結果動畫"></div>
 <script>
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -290,7 +492,26 @@ const store = {
   set(v) { try { v ? localStorage.setItem('p10', JSON.stringify(v)) : localStorage.removeItem('p10'); } catch {} },
 };
 // 遊戲種類（鍵名跟 server.js 的 KINDS 同一份）。邀請連結帶 &game=，收到的人直接進該遊戲的加入畫面；舊連結沒帶 = Phase 10
-const GAMES = { phase10: { name: 'Phase 10', icon: '🃏', people: '2–6', sub: '湊齊 10 個階段' }, fuji: { name: '富士流', icon: '🌊', people: '3–8', sub: '順水流走，先出完' }, cats: { name: '貓貓食堂', icon: '🐱', people: '3–6', sub: '猜首領去哪吃，別吃得比老大好！' } };
+const GAMES = { phase10: { name: 'Phase 10', icon: '🃏', people: '2–6', sub: '湊齊 10 個階段' }, fuji: { name: '富士流', icon: '🌊', people: '3–8', sub: '順水流走，先出完' }, cats: { name: '貓貓食堂', icon: '🐱', people: '3–6', sub: '猜首領去哪吃，別吃得比老大好！' }, manila: { name: '馬尼拉', icon: '⚓', people: '3–5', sub: '走私、競標、股票與海盜的博弈' } };
+const M_GOODS = ['jade', 'silk', 'nutmeg', 'ginseng'];
+const M_INFO = {
+  jade: { name: '玉石', icon: '💎', img: '/assets/manila/good_jade.jpg', color: '#27915c', slots: [3, 4, 5, 5], payout: 36 },
+  silk: { name: '絲綢', icon: '🧣', img: '/assets/manila/good_silk.jpg', color: '#2d68b8', slots: [3, 4, 5], payout: 30 },
+  nutmeg: { name: '豆蔻', icon: '🌰', img: '/assets/manila/good_nutmeg.jpg', color: '#9c5c2e', slots: [2, 3, 4], payout: 24 },
+  ginseng: { name: '人蔘', icon: '🌿', img: '/assets/manila/good_ginseng.jpg', color: '#c48d1e', slots: [1, 2, 3], payout: 18 },
+};
+const M_PRICES = [0, 5, 10, 20, 30];
+const M_PCOLORS = ['#c93b3b', '#2b7cc9', '#dca320', '#27995d', '#8c52cc'];
+const M_HARBOR = [{ label: 'A', cost: 4, reward: 6, need: 1 }, { label: 'B', cost: 3, reward: 8, need: 2 }, { label: 'C', cost: 2, reward: 15, need: 3 }];
+const M_SHIPYARD = [{ label: 'A', cost: 4, reward: 6, need: 1 }, { label: 'B', cost: 3, reward: 8, need: 2 }, { label: 'C', cost: 2, reward: 15, need: 3 }];
+const MANILA_RULES = [
+  '每人起始 30 元與 2 張秘密股票（剩餘股票公開擺放）；3 人局每人 4 個手下，4–5 人局每人 3 個手下。',
+  '競標船老大：順時針喊價（至少 1 元，PASS 後不能再出價）；最高價者當選，享有三大特權：①依黑市價（最低 5 元）買 1 張股票 ②選 3 種貨物裝船 ③分配 9 格出發點（每船 0–5 格）。',
+  '派遣與擲骰：共 3 輪「派遣手下 → 擲骰移動」（3 人局第 1 輪輪流放兩圈）。可派往三艘船、港口 A/B/C、修船廠 A/B/C、海盜船（5 元）、小/大領航員（2/5 元）或保險辦事處（立刻領 10 元，但須賠付修船廠）。',
+  '海盜與領航員：第 2 次擲骰後船停在 13 格，海盜可免費登船空位（開變體可踢人）；第 3 次擲骰前小領航員（±1）先、大領航員（±2）後調整船位（停 13 格不觸發海盜）；第 3 次擲骰停 13 格會被海盜掠奪並由海盜決定進港或修船廠！',
+  '結算與股票：超過 13 格進港口平分貨物利潤並讓該貨物黑市漲 1 格；沒過 13 格進修船廠。隨時可抵押股票拿 12 元、花 15 元贖回。當任一貨物黑市達 30 元時遊戲結束，強制以 15 元贖回抵押股票後，現金＋股票總值最高者勝！',
+];
+const manilaRules = () => `<ul style="margin:8px 0;padding-left:20px">${MANILA_RULES.map((t) => `<li style="margin-top:8px">${t}</li>`).join('')}</ul>`;
 const FUJI_RULES = [
   '每次輪到自己就打出一張牌，放在面前。',
   '輪回自己時，面前的牌如果還在，就順水流走：棄掉，不用抽牌。',
@@ -348,6 +569,8 @@ const fold = (key, title, body) => `<button class="fold" data-a="fold" data-v="$
 const av = (n) => `<span class="av" style="--h:${Math.abs([...n].reduce((a, c) => (a * 31 + c.codePointAt(0)) | 0, 7)) % 360}" aria-hidden="true">${esc([...n][0] ?? '?')}</span>`; // 名字首字 + 依名字決定的底色
 let pick = (() => { try { const k = localStorage.getItem('p10pick'); return Object.hasOwn(GAMES, k) ? k : 'phase10'; } catch { return 'phase10'; } })(); // 首頁選的遊戲，下次進來沿用
 let dl = null, sess = store.get(), snap = null, es = null, sel = new Set(), slots = {}, los = {}, seen = null, sheet = false, endFor = null, actSlot = null, byColor = false, rxOpen = false, rxSeq = null, histFor = null, drag = null, noClick = false, xs = { target: null, v: null, give: null }; // xs = 交換牌的三個選擇（對象／數字或顏色／要換出的牌）。 // drag = 正在拖的百搭（拖曳中不重繪，不然 DOM 重建會把它弄丟）；noClick = 剛拖完，吃掉隨後的 click。 histFor = 正在看誰的撿棄牌歷史（玩家 id）。 rxOpen = 表情選單開著；rxSeq = 已播到的表情編號（null = 還沒收到第一筆快照）。每次 render 會重建 DOM，UI 狀態要存在這：sheet = 底部資訊面板開著；endFor = 正在選「接前/接後」的順子；actSlot = 放階段時作用中的那一組
+let ms = { bidAmt: 1, spot: null, masterGoods: ['jade', 'silk', 'nutmeg'], masterPos: { jade: 3, silk: 3, nutmeg: 3, ginseng: 0 }, navMoves: {}, plunderShip: null, stockSheet: false, infoSheet: false, animFrom: null, sailAnim: null, stageKey: null };
+const resetMs = () => { ms = { bidAmt: 1, spot: null, masterGoods: ['jade', 'silk', 'nutmeg'], masterPos: { jade: 3, silk: 3, nutmeg: 3, ginseng: 0 }, navMoves: {}, plunderShip: null, stockSheet: false, infoSheet: false, animFrom: null, sailAnim: null, stageKey: null }; closeManilaDice(); };
 if (sess && urlRoom && sess.code !== urlRoom) sess = null; // 邀請連結指向另一間房 → 先顯示加入畫面
 // 在 localhost 開頁面時，邀請連結／QR 要換成手機連得到的區網 IP（undefined = 查詢中，null = 查不到）。部署後網址不是 localhost，這段不會跑。
 const isLocal = /^(localhost|127\.|\[?::1)/.test(location.hostname);
@@ -404,7 +627,7 @@ function connect() {
 // 手機切去別的 App 再回來，iOS 的 EventSource 常常是死的 → 回前景一律重連
 document.addEventListener('visibilitychange', () => { if (!document.hidden && sess) connect(); });
 function exit() {
-  es?.close(); sess = snap = null; xs = { target: null, v: null, give: null }; sel.clear(); slots = {}; los = {}; rxOpen = false; histFor = null; sheet = false; folds.clear(); store.set(null);
+  es?.close(); sess = snap = null; xs = { target: null, v: null, give: null }; resetMs(); sel.clear(); slots = {}; los = {}; rxOpen = false; histFor = null; sheet = false; folds.clear(); store.set(null);
   history.replaceState(null, '', '/'); render();
 }
 function enter(r) {
@@ -513,17 +736,22 @@ function qrBox(link) {
 }
 
 function lobby() {
-  const kind = urlRoom ? urlGame : pick, GM = GAMES[kind], fj = kind === 'fuji', ct = kind === 'cats'; // 收到邀請連結 = 直接是那個遊戲，不顯示選單
+  const kind = urlRoom ? urlGame : pick, GM = GAMES[kind], fj = kind === 'fuji', ct = kind === 'cats', mn = kind === 'manila'; // 收到邀請連結 = 直接是那個遊戲，不顯示選單
   const rules = RULES.map(([k, t, d]) => `<label class="rule"><input type="checkbox" data-r="${k}"><i aria-hidden="true">✓</i><span><b>${t}</b><small>${d}</small></span></label>`).join('');
   const picker = `<div class="panel"><h2>想玩哪一個？</h2><div class="gsel">${Object.entries(GAMES).map(([k, x]) => `<button class="${k === kind ? '' : 'ghost'}" data-a="pick" data-v="${k}" aria-pressed="${k === kind}"><span class="gi">${x.icon}</span><b>${x.name}</b><small>${x.people} 人</small></button>`).join('')}</div><p class="mute" style="margin:12px 0 0">${GM.sub}</p></div>`;
   const turnFld = '<div class="fld"><label for="turn">每回合秒數</label><input id="turn" type="number" inputmode="numeric" min="10" max="600" value="60"></div>';
   const roundsFld = `<div class="fld"><label for="rounds">遊戲輪數</label><select id="rounds">${[...Array(10)].map((_, i) => `<option value="${i + 1}" ${i === 2 ? 'selected' : ''}>${i + 1} 輪${i === 2 ? '（標準）' : ''}</option>`).join('')}</select></div>`;
+  const pirateRule = `<label class="rule" style="margin-top:12px"><input id="pirateKick" type="checkbox"><i aria-hidden="true">✓</i><span><b>🏴‍☠️ 海盜踢人變體規則</b><small>第 2 次擲骰船停在 13 格且客滿時，海盜可踢下一位其他玩家的手下強行登船（預設關閉＝僅能佔空位）</small></span></label>`;
   const create = fj
     ? `<div class="panel"><h2>開新房間</h2><div class="row">${turnFld}</div><p class="mute" style="margin:8px 0 0">時間到會自動代打（出最小的牌）。</p>
       <div class="how"><div><span>🃏</span>每次出一張牌</div><div><span>💦</span>大的沖走小的</div><div><span>🌊</span>沒被沖走就流走</div></div>${fold('howto', '完整玩法', fujiRules())}</div>`
     : ct
     ? `<div class="panel"><h2>開新房間</h2><div class="row">${roundsFld}${turnFld}</div><p class="mute" style="margin:8px 0 0">每人一套 1–12 覓食地點卡；時間到會自動出最小的牌。</p>
       <div class="how"><div><span>👑</span>輪流當首領</div><div><span>🐾</span>別比首領大</div><div><span>⚡</span>撞號扣首領</div></div>${fold('howto', '完整玩法', catsRules())}</div>`
+    : mn
+    ? `<div class="panel"><h2>開新房間</h2><div class="row">${turnFld}</div><p class="mute" style="margin:8px 0 0">3–5 人遊玩（最佳 4 人）；3 人局每人 4 個手下，4–5 人局每人 3 個手下。</p>
+      ${pirateRule}
+      <div class="how"><div><span>⚓</span>競標當船老大</div><div><span>⛵</span>派遣手下投資</div><div><span>📈</span>黑市漲至 $30 結算</div></div>${fold('howto', '完整玩法', manilaRules())}</div>`
     : `<div class="panel"><h2>開新房間</h2>
       <div class="row"><div class="fld"><label for="target">目標階段</label><select id="target">${[...Array(10)].map((_, i) => `<option value="${i + 1}" ${i === 9 ? 'selected' : ''}>第 ${i + 1} 階段</option>`).join('')}</select></div>${turnFld}</div>
       <p class="mute" style="margin:8px 0 0">時間到會自動代打（抽牌堆、棄最大張）。</p>
@@ -544,7 +772,7 @@ function lobby() {
 }
 
 function room() {
-  const s = snap, host = s.me === s.host, n = s.players.length, st = s.settings, fj = s.kind === 'fuji', ct = s.kind === 'cats', GM = GAMES[s.kind];
+  const s = snap, host = s.me === s.host, n = s.players.length, st = s.settings, fj = s.kind === 'fuji', ct = s.kind === 'cats', mn = s.kind === 'manila', GM = GAMES[s.kind];
   const link = inviteLink(s.code, s.kind), need = Math.max(0, s.min - n);
   const set = host
     ? `<div class="row"><select data-c="target">${[...Array(10)].map((_, i) => `<option value="${i + 1}" ${st.target === i + 1 ? 'selected' : ''}>目標：第 ${i + 1} 階段</option>`).join('')}</select></div>`
@@ -552,10 +780,15 @@ function room() {
   const catSet = host
     ? `<div class="row"><select data-c="rounds">${[...Array(10)].map((_, i) => `<option value="${i + 1}" ${st.rounds === i + 1 ? 'selected' : ''}>遊戲輪數：${i + 1} 輪${i === 2 ? '（標準）' : ''}</option>`).join('')}</select></div>`
     : `<div>共進行 <b>${st.rounds} 輪</b>，最高分者成為喵喵之王</div>`;
+  const manilaSet = host
+    ? `<label class="rule"><input type="checkbox" data-c="pirateKick" ${st.pirateKick ? 'checked' : ''}><i aria-hidden="true">✓</i><span><b>🏴‍☠️ 海盜踢人變體規則</b><small>第 2 次擲骰船停在 13 格且客滿時，海盜可踢下一位其他玩家的手下強行登船</small></span></label>`
+    : `<div>海盜登船規則：<b>${st.pirateKick ? '變體（客滿可踢人）' : '標準（僅佔空位）'}</b></div>`;
   const rulesPanel = fj
     ? `<div class="panel"><h2>規則</h2><p style="margin:0">每回合 ${st.turn} 秒，超時自動代打（出最小的牌）。3–6 人每人發 6 張，7–8 人發 5 張。</p>${fold('rules', '完整玩法', fujiRules())}</div>`
     : ct
     ? `<div class="panel"><h2>規則</h2>${catSet}<p style="margin:8px 0 0">每手 ${st.turn} 秒，超時自動出最小的牌。每輪結算：第一名 +2、第二名 +1、最低分 −1。</p>${fold('rules', '完整玩法', catsRules())}</div>`
+    : mn
+    ? `<div class="panel"><h2>規則</h2>${manilaSet}<p style="margin:8px 0 0">每回合 ${st.turn} 秒，超時自動跳過或擲骰。起始 30 元與 2 張秘密股票，任一貨物黑市達 30 元即結束結算。</p>${fold('rules', '完整玩法', manilaRules())}</div>`
     : `<div class="panel"><h2>規則</h2>${set}
     <p>每回合 ${st.turn} 秒，超時自動代打。</p>
     ${RULES.some(([k]) => st.rules[k]) ? `<ul style="margin:8px 0;padding-left:20px">${RULES.filter(([k]) => st.rules[k]).map(([, t, d]) => `<li style="margin-top:8px"><b>${t}</b><br><small class="mute">${d}</small></li>`).join('')}</ul>${['rv', 'sh', 'xn', 'xc'].some((k) => st.rules[k]) ? `<p class="mute" style="margin:8px 0">${SP_NOTE}</p>` : ''}` : '<p class="mute">標準規則</p>'}
@@ -1070,13 +1303,529 @@ function catsOverlay(g, s, seatIdx) {
     <div class="row act foot">${foot}</div></div></div>`;
 }
 
+// --- 馬尼拉（Manila）：A+C 羊皮紙古航海圖典藏版 ---
+const mGoodImg = (k, cls = '') => `<img class="m-ico-img ${cls}" src="${M_INFO[k].img}" alt="${M_INFO[k].name}" loading="lazy">`;
+const mMeeple = (p, sm = false) => {
+  const c = M_PCOLORS[p.color % M_PCOLORS.length], sz = sm ? 16 : 21;
+  return `<svg class="m-mp-svg" width="${sz}" height="${Math.round(sz * 1.12)}" viewBox="0 0 24 27" aria-label="${esc(p.name)}" role="img">
+    <path d="M12 2.2a3.7 3.7 0 1 1 0 7.4 3.7 3.7 0 0 1 0-7.4zm-4.2 8.2h8.4l4.6 5.2-2.6 2.1-2.2-2.2 1.8 9.2H13.5l-1.5-4.3-1.5 4.3H6.2l1.8-9.2-2.2 2.2-2.6-2.1z" fill="${c}" stroke="#231208" stroke-width="1.5" stroke-linejoin="round"/>
+    <path d="M10.4 4.3a1.9 1.9 0 0 1 2.4-.5M8.5 11.7h5.2" stroke="#ffffff88" stroke-width="1.3" stroke-linecap="round" fill="none"/></svg>`;
+};
+const mCoin = (sz = 15) => `<svg class="m-coin-svg" width="${sz}" height="${sz}" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8.5" fill="#e8b954" stroke="#6b440e" stroke-width="1.5"/><circle cx="10" cy="10" r="6" fill="none" stroke="#8a5a14" stroke-width="1" stroke-dasharray="2 1.5"/><path d="M10 6.2v7.6M6.8 10h6.4" stroke="#6b440e" stroke-width="1.5" stroke-linecap="round"/></svg>`;
+const M_DIE_PIPS = { 1: [[14, 14]], 2: [[8.5, 8.5], [19.5, 19.5]], 3: [[8, 8], [14, 14], [20, 20]], 4: [[8.5, 8.5], [19.5, 8.5], [8.5, 19.5], [19.5, 19.5]], 5: [[8, 8], [20, 8], [14, 14], [8, 20], [20, 20]], 6: [[8.5, 7.5], [19.5, 7.5], [8.5, 14], [19.5, 14], [8.5, 20.5], [19.5, 20.5]] };
+const mDie = (n, color, sz = 26) => {
+  const P = M_DIE_PIPS[n] || [];
+  return `<svg class="m-die-svg" width="${sz}" height="${sz}" viewBox="0 0 28 28" aria-label="骰出 ${n} 點" role="img">
+    <rect x="2" y="2" width="24" height="24" rx="5.5" fill="${color}" stroke="#231208" stroke-width="1.8"/>
+    <rect x="4" y="4" width="20" height="20" rx="4" fill="none" stroke="#ffffff55" stroke-width="1"/>
+    ${P.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2.2" fill="#fbf2dc"/>`).join('')}</svg>`;
+};
+const mDieCube = (val, color, i) => {
+  // 目標旋轉角（讓 val 那一面正面朝向玩家，並加上 720° 旋轉圈數，三顆各帶不同拋物與翻滾軌道）
+  const tgt = { 1: [0, 0], 2: [0, -90], 3: [-90, 0], 4: [90, 0], 5: [0, 90], 6: [0, 180] }[val] || [0, 0];
+  const starts = [[-130, 80, -210, -34], [140, -110, 190, 4], [-100, -170, -160, 38]][i % 3];
+  const faces = [1, 2, 3, 4, 5, 6].map((f) => `<div class="m-dface f${f}" style="--dc:${color}"><svg viewBox="0 0 28 28" aria-hidden="true">${M_DIE_PIPS[f].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2.4" fill="#fbf2dc"/>`).join('')}</svg></div>`).join('');
+  return `<div class="m-dthrow" style="--tx0:${starts[3]}px"><div class="m-dcube" style="--rx0:${starts[0]}deg;--ry0:${starts[1]}deg;--rz0:${starts[2]}deg;--rx1:${tgt[0] + 720}deg;--ry1:${tgt[1] + 720}deg">${faces}</div></div>`;
+};
+// 🎲 馬尼拉真 3D 三骰拋擲動畫（3 顆對應貨物色木骰同步拋出翻滾 → 落地定格 → 觸發三船滑行）
+let mDiceTimers = [];
+function closeManilaDice() {
+  mDiceTimers.forEach((id) => { clearTimeout(id); clearInterval(id); });
+  mDiceTimers = [];
+  const box = $('#mDiceStage');
+  if (box) { box.classList.remove('on', 'out'); box.innerHTML = ''; }
+  if (ms.animFrom) { ms.animFrom = null; if (snap?.kind === 'manila') render(); }
+}
+function playManilaDice(ev) {
+  const box = $('#mDiceStage');
+  if (!box || !ev?.dice?.length) return;
+  closeManilaDice();
+  const reduced = matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+  if (!reduced) ms.animFrom = Object.fromEntries(ev.dice.map((x) => [x.ship, x.from]));
+  box.innerHTML = `<div class="m-dtray"><div class="m-dtray-hd">🎲 第 ${ev.roll}/3 次擲骰航行！</div>
+    <div class="m-drow">${ev.dice.map((x, i) => {
+      const info = M_INFO[x.good];
+      const pill = x.alreadyIn ? '<span class="m-dpill port">⚓ 已進港</span>'
+        : x.to >= 14 ? `<span class="m-dpill port">+${x.d} → ⚓ 進港！</span>`
+        : x.to === 13 ? `<span class="m-dpill p13">+${x.d} → ☠ 13格！</span>`
+        : `<span class="m-dpill">+${x.d} · 格 ${x.from}→${x.to}</span>`;
+      const dieEl = x.alreadyIn ? `<div style="font-size:34px;line-height:1">⚓</div>` : mDieCube(x.d, info.color, i);
+      return `<div class="m-dcol">
+        <div class="m-dwrap ${x.alreadyIn || reduced ? '' : 'throw'}" data-di="${i}" style="--dl:${(i * 0.1).toFixed(2)}s">${dieEl}</div>
+        <div class="row" style="gap:4px;justify-content:center">${mGoodImg(x.good)}<b style="font-size:var(--s1)">${info.name}</b></div>
+        <div class="m-dres ${reduced ? 'show' : ''}" data-dr="${i}">${pill}</div>
+      </div>`;
+    }).join('')}</div>
+    <div class="m-dtray-ft">點擊任意處關閉</div></div>`;
+  box.classList.add('on');
+  navigator.vibrate?.([20, 45, 20, 45, 35]);
+
+  if (!reduced) {
+    // 1.25 秒後 3 顆 3D 木骰全數落地定格，亮出結果光環並同步讓木船滑向新格數
+    mDiceTimers.push(setTimeout(() => {
+      ev.dice.forEach((x, i) => {
+        const w = box.querySelector(`[data-di="${i}"]`), r = box.querySelector(`[data-dr="${i}"]`);
+        if (w && !x.alreadyIn) w.classList.add('land');
+        if (r) r.classList.add('show');
+      });
+      const fromMap = ms.animFrom;
+      ms.animFrom = null;
+      ms.sailAnim = fromMap;
+      if (snap?.kind === 'manila') render();
+      mDiceTimers.push(setTimeout(() => { ms.sailAnim = null; }, 950));
+    }, 1220));
+  }
+  mDiceTimers.push(setTimeout(() => {
+    box.classList.add('out');
+    mDiceTimers.push(setTimeout(closeManilaDice, 280));
+  }, reduced ? 1800 : 3100));
+}
+const mBoatSvg = (color) => `<svg class="m-boat-svg" viewBox="0 0 64 98" aria-hidden="true">
+  <path d="M32 3 C46 18 55 39 53 74 C52 86 45 93 32 94 C19 93 12 86 11 74 C9 39 18 18 32 3 Z" fill="#6f4321" stroke="#221207" stroke-width="2.4"/>
+  <path d="M32 9 C42 22 49 41 47 72 C46 82 41 87 32 88 C23 87 18 82 17 72 C15 41 22 22 32 9 Z" fill="#9a6435" stroke="#452710" stroke-width="1.3"/>
+  <line x1="16" y1="47" x2="48" y2="47" stroke="#4f2c11" stroke-width="2"/>
+  <line x1="17" y1="67" x2="47" y2="67" stroke="#4f2c11" stroke-width="2"/>
+  <line x1="32" y1="10" x2="32" y2="87" stroke="#5c361855" stroke-width="1.2"/>
+  <path d="M32 3 L45 10 L32 15 Z" fill="${color}" stroke="#221207" stroke-width="1.1"/></svg>`;
+function mSpotInfo(g, spot) {
+  if (!spot) return null;
+  if (spot.startsWith('ship:')) {
+    const si = +spot.slice(5), s = g.ships[si];
+    if (!s) return null;
+    const info = M_INFO[s.good], cost = info.slots[s.crew.length];
+    return { label: `登上${info.name}船`, cost, gain: 0, note: `進港平分 $${info.payout}` };
+  }
+  if (spot.startsWith('harbor:')) {
+    const hi = +spot.slice(7), h = M_HARBOR[hi];
+    return { label: `港口 ${h.label}`, cost: h.cost, gain: 0, note: `≥${h.need} 船進港得 $${h.reward}` };
+  }
+  if (spot.startsWith('shipyard:')) {
+    const yi = +spot.slice(9), y = M_SHIPYARD[yi];
+    return { label: `修船廠 ${y.label}`, cost: y.cost, gain: 0, note: `≥${y.need} 船進修船廠得 $${y.reward}` };
+  }
+  if (spot === 'insurance') return { label: '🛡️ 保險辦事處', cost: 0, gain: 10, note: '立刻拿 +$10，但須賠付修船廠' };
+  if (spot === 'pirate') return { label: `🏴‍☠️ 海盜${g.board.pirates[0] ? '船員' : '船長'}`, cost: 5, gain: 0, note: '船停 13 格可登船或掠奪' };
+  if (spot === 'nav_small') return { label: '🧭 小領航員', cost: 2, gain: 0, note: '第 3 輪前移動船 ±1 格' };
+  if (spot === 'nav_big') return { label: '🧭 大領航員', cost: 5, gain: 0, note: '第 3 輪前移動船 ±2 格' };
+  return null;
+}
+
+function manila() {
+  const s = snap, g = s.game, me = s.me, mine = g.players.find((p) => p.id === me);
+  const myTurn = g.status === 'play' && g.turn === me;
+  const pById = Object.fromEntries(g.players.map((p) => [p.id, p]));
+  const online = Object.fromEntries(s.players.map((p) => [p.id, p.online]));
+  const nm = (id) => pById[id]?.name ?? '?';
+
+  if (g.status !== 'play') { sheet = false; ms.stockSheet = false; ms.infoSheet = false; }
+  const stageKey = `${g.round}:${g.stage}:${g.roll}:${g.turn}:${g.auction?.high ?? 0}`;
+  if (ms.stageKey !== stageKey) {
+    ms.stageKey = stageKey;
+    if (g.stage === 'bid') ms.bidAmt = Math.max(1, (g.auction?.high ?? 0) + 1);
+    if (g.stage !== 'place') ms.spot = null;
+    if (g.stage !== 'nav_small' && g.stage !== 'nav_big') ms.navMoves = {};
+    if (g.stage === 'pirate_plunder' && g.plunder) ms.plunderShip = g.plunder.mode === 'dest' ? g.plunder.ship : (g.plunder.ships[0] ?? null);
+  }
+
+  seen ??= {};
+  const ev = g.ev, fresh = !!ev && seen.evNo !== undefined && ev.no !== seen.evNo;
+  if (fresh) {
+    if (ev.kind === 'plunder') { skipBanner('🏴‍☠️ 海盜出動掠奪船隻！', 2800); navigator.vibrate?.([60, 40, 60]); }
+    else if (ev.kind === 'masterWon') toast(`⚓ ${nm(ev.by)} 以 $${ev.price} 成為船老大`);
+    else if (ev.kind === 'roll') playManilaDice(ev);
+  }
+  seen.evNo = ev ? ev.no : null;
+
+  // 精簡黑市價格條（單排羊皮紙木牌，點任一格可展開完整黑市與玩家帳本）
+  const mkt = `<div class="m-mkt" aria-label="黑市價格表">${M_GOODS.map((k) => {
+    const info = M_INFO[k], m = g.market[k], hot = m.idx >= 3;
+    const pips = M_PRICES.map((pr, idx) => `<span class="m-pip ${idx <= m.idx ? 'on' : ''} ${idx === 4 ? 'end' : ''}"></span>`).join('');
+    return `<button class="m-good ${hot ? 'hot' : ''}" style="--gc:${info.color}" data-a="mInfoSheet" aria-label="${info.name}黑市 $${m.price}，剩 ${g.supply[k]} 股">
+      <div class="m-good-row">${mGoodImg(k)}<div class="m-good-val"><span class="m-good-p">$${m.price}</span><span class="m-good-sub">${info.name}·${g.supply[k]}</span></div></div>
+      <div class="m-pips" aria-hidden="true">${pips}</div></button>`;
+  }).join('')}</div>`;
+
+  // 橫向單排玩家條（手機左右滑動不換行，點任意玩家看完整帳本）
+  const players = `<div class="m-players" aria-label="玩家資訊">${g.players.map((p) => {
+    const isMe = p.id === me, isTurn = g.status === 'play' && g.turn === p.id, isMaster = g.master === p.id;
+    const mort = p.mortgagedCount ? ` 🔒${p.mortgagedCount}` : '';
+    const bidTag = g.stage === 'bid' && g.auction ? (g.auction.leader === p.id ? `<span class="m-tag" style="--gc:var(--accent)">標$${g.auction.high}</span>` : g.auction.passed.includes(p.id) ? '<span class="mute">PASS</span>' : '') : '';
+    const buyDot = p.bought.length ? `<span class="m-tag" title="公開購入 ${p.bought.length} 股">+${p.bought.length}股</span>` : '';
+    return `<button class="m-pl ${isMe ? 'me' : ''} ${isTurn ? 'turn' : ''} ${p.in ? '' : 'out'}" data-pid="${p.id}" data-a="mInfoSheet">
+      <div class="m-pl-top">${mMeeple(p, true)}<span class="m-pl-nm">${esc(p.name)}${isMe ? '(你)' : ''}</span>${isMaster ? '<span title="船老大">⚓</span>' : ''}${online[p.id] ? '' : '<span>💤</span>'}</div>
+      <div class="m-pl-row"><b>${mCoin(13)} $${p.cash}</b><span>×${p.workers}人 · 📜${p.stockCount}${mort}</span></div>
+      ${bidTag || buyDot ? `<div class="row" style="gap:4px;margin-top:3px">${bidTag}${buyDot}</div>` : ''}</button>`;
+  }).join('')}</div>`;
+
+  const canPlace = myTurn && g.stage === 'place' && mine.workers > 0;
+  const spotAttrs = (spot, cost, open, extraCls = '') => {
+    if (!open) return { cls: `occ ${extraCls}`, attrs: '' };
+    if (!canPlace) return { cls: extraCls, attrs: '' };
+    if (mine.cash < cost) return { cls: `locked ${extraCls}`, attrs: `data-why="現金不足，需要 $${cost}（可點下方「我的股票」先抵押換 $12）"` };
+    const isSel = ms.spot === spot;
+    return { cls: `open ${isSel ? 'sel' : ''} ${extraCls}`, attrs: `data-a="mSpot" data-v="${spot}" role="button" tabindex="0" aria-pressed="${isSel}"` };
+  };
+  const occBadge = (pid) => { const op = pById[pid]; return `<span class="row" style="gap:4px;flex-wrap:nowrap;justify-content:center;min-width:0">${mMeeple(op, true)}<b style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:72px">${esc(op.name)}</b></span>`; };
+
+  // 三條直向馬尼拉航道（里程碑圓牌 0/5/10/☠13/⚓ + 中間細緻黃銅點，清爽零重疊）
+  const dieByShip = Object.fromEntries((g.lastRoll?.dice || []).map((x) => [x.ship, x]));
+  const nodePct = (n) => 6 + (n / 14) * 88;
+  const milestones = new Set([0, 5, 10, 13, 14]);
+  const lanesHTML = [0, 1, 2].map((si) => {
+    const sh = g.ships[si];
+    const basePos = sh ? (ms.animFrom && ms.animFrom[si] !== undefined ? ms.animFrom[si] : sh.pos) : -1;
+    const navD = sh && (g.stage === 'nav_small' || g.stage === 'nav_big') && myTurn ? (ms.navMoves[si] || 0) : 0;
+    const shownPos = sh ? (basePos >= 14 ? 14 : Math.max(0, Math.min(13, basePos + navD))) : -1;
+    const nodes = Array.from({ length: 15 }, (_, c) => {
+      const passed = sh && c < shownPos;
+      if (!milestones.has(c)) return `<div class="m-dot ${passed ? 'passed' : ''}" style="bottom:${nodePct(c).toFixed(1)}%"></div>`;
+      const cls = [c === 5 ? 'n5' : '', c === 13 ? 'n13' : '', c === 14 ? 'n14' : '', passed ? 'passed' : ''].filter(Boolean).join(' ');
+      const txt = c === 14 ? '⚓港' : c === 13 ? '☠13' : c;
+      return `<div class="m-node ${cls}" style="bottom:${nodePct(c).toFixed(1)}%">${txt}</div>`;
+    }).join('');
+    let boatHTML = '';
+    if (sh) {
+      const info = M_INFO[sh.good], arrived = shownPos >= 14, at13 = shownPos === 13, die = dieByShip[si];
+      const nextCost = info.slots[sh.crew.length];
+      const canTapBoat = canPlace && sh.pos < 14 && nextCost != null && mine.cash >= nextCost;
+      const isBoatSel = ms.spot === `ship:${si}`;
+      const crewPawns = sh.crew.map((oid) => mMeeple(pById[oid], true)).join('');
+      const dieBadge = !ms.animFrom && die && !die.alreadyIn ? `<div class="m-boat-die">${mDie(die.d, info.color, 24)}</div>` : '';
+      const posTxt = arrived ? '⚓ 進港' : at13 ? '☠ 13格' : `格 ${shownPos}${navD ? `(${navD > 0 ? `+${navD}` : navD})` : ''}`;
+      const sailFrom = ms.sailAnim && ms.sailAnim[si] !== undefined && ms.sailAnim[si] !== shownPos ? ms.sailAnim[si] : null;
+      const sailStyle = sailFrom !== null ? `;--from-b:${nodePct(sailFrom).toFixed(1)}%;--to-b:${nodePct(shownPos).toFixed(1)}%` : '';
+      boatHTML = `<div class="m-boat ${sailFrom !== null ? 'sailing' : ''} ${canTapBoat ? 'can' : ''} ${isBoatSel ? 'sel' : ''} ${arrived ? 'arrived' : at13 ? 'danger' : ''}" style="bottom:${nodePct(shownPos).toFixed(1)}%${sailStyle}" ${canTapBoat ? `data-a="mSpot" data-v="ship:${si}" role="button" tabindex="0"` : ''}>
+        ${mBoatSvg(info.color)}
+        <img class="m-boat-cargo" src="${info.img}" alt="${info.name}">
+        <div class="m-boat-crew">${crewPawns}</div>
+        ${dieBadge}
+        <span class="m-boat-pos">${posTxt}</span>
+      </div>`;
+    }
+    return `<div class="m-lane"><div class="m-launch-zone"></div><div class="m-lane-line"></div>${nodes}${boatHTML}</div>`;
+  }).join('');
+
+  // 全寬水平船隻登船條（每船一列，手下名字完整顯示、觸控目標 >= 42px）
+  const shipRowsHTML = g.ships.length ? `<div class="m-ship-rows">${g.ships.map((sh, si) => {
+    const info = M_INFO[sh.good], arrived = sh.pos >= 14, at13 = sh.pos === 13, nextIdx = sh.crew.length;
+    const stTxt = arrived ? '⚓ 已進港' : at13 ? '☠ 13 格警戒' : `第 ${sh.pos} / 13 格`;
+    const slotsHTML = info.slots.map((cost, ki) => {
+      const ownerId = sh.crew[ki];
+      if (ownerId) {
+        const op = pById[ownerId];
+        return `<div class="m-slot occ">${mMeeple(op, true)}<span class="snm">${esc(op.name)}</span></div>`;
+      }
+      if (ki === nextIdx && !arrived) {
+        const a = spotAttrs(`ship:${si}`, cost, true);
+        return `<button class="m-slot ${a.cls}" ${a.attrs}>+$${cost}</button>`;
+      }
+      return `<div class="m-slot locked">$${cost}</div>`;
+    }).join('');
+    return `<div class="m-srow ${arrived ? 'arrived' : at13 ? 'danger' : ''}" style="--gc:${info.color}">
+      <div class="m-srow-h">
+        <div class="m-srow-id">${mGoodImg(sh.good, 'md')}<div><b>${info.name}船</b><small>進港平分 $${info.payout}</small></div></div>
+        <span class="m-srow-st">${stTxt}</span>
+      </div>
+      <div class="m-crew-row" style="--cols:${info.slots.length}">${slotsHTML}</div></div>`;
+  }).join('')}</div>` : '';
+
+  // 港口 A/B/C（3 欄寬敞卡片）
+  const harborCards = M_HARBOR.map((h, i) => {
+    const occ = g.board.harbor[i], a = spotAttrs(`harbor:${i}`, h.cost, !occ);
+    return `<button class="m-zcard ${a.cls}" ${a.attrs}><b>港 ${h.label}</b><small>≥${h.need} 船得 $${h.reward}</small>${occ ? occBadge(occ) : `<span class="m-price">$${h.cost}</span>`}</button>`;
+  }).join('');
+
+  // 修船廠 A/B/C（3 欄寬敞卡片）
+  const shipyardCards = M_SHIPYARD.map((y, i) => {
+    const occ = g.board.shipyard[i], a = spotAttrs(`shipyard:${i}`, y.cost, !occ);
+    return `<button class="m-zcard ${a.cls}" ${a.attrs}><b>修 ${y.label}</b><small>≥${y.need} 船得 $${y.reward}</small>${occ ? occBadge(occ) : `<span class="m-price">$${y.cost}</span>`}</button>`;
+  }).join('');
+
+  // 海盜兩格（2 欄大卡）
+  const p0 = g.board.pirates[0], p1 = g.board.pirates[1];
+  const p0A = spotAttrs('pirate', 5, !p0), p1A = spotAttrs('pirate', 5, !!p0 && !p1);
+  const pirateCards = `
+    <button class="m-zcard ${p0A.cls}" ${p0A.attrs}><b>海盜船長</b><small>優先登船與決定去向</small>${p0 ? occBadge(p0) : '<span class="m-price">$5</span>'}</button>
+    <button class="m-zcard ${p1A.cls}" ${p1A.attrs}><b>海盜船員</b><small>${p0 ? '共同掠奪平分利潤' : '需先有人當船長'}</small>${p1 ? occBadge(p1) : '<span class="m-price">$5</span>'}</button>`;
+
+  // 領航員兩格（2 欄大卡）
+  const ns = g.board.navSmall, nb = g.board.navBig;
+  const nsA = spotAttrs('nav_small', 2, !ns), nbA = spotAttrs('nav_big', 5, !nb);
+  const navCards = `
+    <button class="m-zcard ${nsA.cls}" ${nsA.attrs}><b>小領航員</b><small>第 3 輪前調船 ±1 格</small>${ns ? occBadge(ns) : '<span class="m-price">$2</span>'}</button>
+    <button class="m-zcard ${nbA.cls}" ${nbA.attrs}><b>大領航員</b><small>第 3 輪前調船 ±2 格</small>${nb ? occBadge(nb) : '<span class="m-price">$5</span>'}</button>`;
+
+  // 保險辦事處（全寬橫幅）
+  const ins = g.board.insurance, insA = spotAttrs('insurance', 0, !ins, !ins && canPlace ? 'ins-box ins-open' : 'ins-box');
+  const insCard = `<button class="m-zcard row ${insA.cls}" ${insA.attrs}><span><b>🛡️ 保險辦事處</b><br><small>立刻領 +$10；若有船進修船廠須代付賠償</small></span>${ins ? occBadge(ins) : '<span class="m-price" style="color:#116b38">+$10</span>'}</button>`;
+
+  // 船老大階段：把三大特權工作台放在主畫面捲動區，不擠爆底部固定托盤！
+  let masterDeskHTML = '';
+  if (myTurn && g.stage === 'master') {
+    const chosen = ms.masterGoods;
+    const sum = chosen.reduce((a, k) => a + (ms.masterPos[k] ?? 0), 0);
+    const buyBar = g.masterBought
+      ? '<div class="mute" style="font-size:var(--s1);margin-bottom:10px">✅ 本航程已行使購股特權（限買 1 張）</div>'
+      : `<div style="margin-bottom:12px"><div class="mute" style="font-size:var(--s1);margin-bottom:6px">① 特權：可買 1 張股票（依黑市價，最低 $5，可略過）</div>
+        <div class="m-chips">${M_GOODS.map((k) => {
+          const info = M_INFO[k], price = g.market[k].buy, avail = g.supply[k] > 0, ok = avail && mine.cash >= price;
+          const why = !avail ? '已售完' : !ok ? `現金不足 $${price}（可點下方「我的股票」先抵押）` : '';
+          return `<span class="w" data-why="${esc(why)}"><button class="m-chip" style="--gc:${info.color};width:100%" data-a="mBuy" data-v="${k}" ${ok ? '' : 'disabled'}><span class="row" style="gap:6px;flex-wrap:nowrap">${mGoodImg(k)}<span>${info.name} <small class="mute">剩${g.supply[k]}</small></span></span><b>$${price}</b></button></span>`;
+        }).join('')}</div></div>`;
+    const pickGoods = `<div style="margin-bottom:12px"><div class="mute" style="font-size:var(--s1);margin-bottom:6px">② 挑選 3 種貨物裝船（已選 ${chosen.length}/3）</div>
+      <div class="m-chips">${M_GOODS.map((k) => {
+        const info = M_INFO[k], on = chosen.includes(k);
+        return `<button class="m-chip ${on ? 'on' : ''}" style="--gc:${info.color}" data-a="mPickGood" data-v="${k}" aria-pressed="${on}"><span class="row" style="gap:6px;flex-wrap:nowrap">${mGoodImg(k)}<span>${info.name}</span></span><small>${on ? '✓ 裝船' : '未選'}</small></button>`;
+      }).join('')}</div></div>`;
+    const alloc = chosen.length === 3 ? `<div>
+      <div class="row" style="justify-content:space-between;margin-bottom:4px">
+        <span class="mute" style="font-size:var(--s1)">③ 分配出發格數（0–5，總和須為 9：<b style="color:${sum === 9 ? '#5ce09e' : 'var(--accent)'}">${sum}/9</b>）</span>
+        <span class="row" style="gap:4px"><button class="ghost m-bar-btn" data-a="mPreset" data-v="3,3,3">3-3-3</button><button class="ghost m-bar-btn" data-a="mPreset" data-v="5,3,1">5-3-1</button></span>
+      </div>
+      ${chosen.map((k) => {
+        const info = M_INFO[k], v = ms.masterPos[k] ?? 0;
+        return `<div class="m-alloc" style="--gc:${info.color}"><span class="row" style="gap:6px;flex-wrap:nowrap">${mGoodImg(k)}<b>${info.name}</b> <small class="mute">($${info.payout})</small></span>
+          <div class="m-step"><button class="ghost" data-a="mPos" data-v="${k}:-1" ${v <= 0 ? 'disabled' : ''}>−</button><b>${v}</b><button class="ghost" data-a="mPos" data-v="${k}:1" ${v >= 5 ? 'disabled' : ''}>+</button></div></div>`;
+      }).join('')}</div>` : '';
+    masterDeskHTML = `<div class="m-desk"><h2>⚓ 船老大特權工作台</h2>${buyBar}${pickGoods}${alloc}</div>`;
+  }
+
+  const boardHTML = `${masterDeskHTML}<div class="m-map-wrap"><div class="m-map" role="region" aria-label="1821 馬尼拉灣古航海圖板">
+    <div class="m-bay-box">
+      <div class="m-bay-head"><b>⛵ 駛向馬尼拉港</b><span>0–5 起航 · ☠13 海盜 · 骰 ${g.roll}/3</span></div>
+      <div class="m-bay">${lanesHTML}${!g.ships.length ? `<div class="m-bay-empty"><span>${g.stage === 'bid' ? '⚓ 競標船老大中，待得標者決定 3 艘貨船啟航…' : myTurn ? '⬆ 請在上方船老大工作台挑選貨物並分配 9 格出發點' : `⚓ 等待船老大 ${esc(nm(g.master))} 裝載貨物與分配起點…`}</span></div>` : ''}</div>
+    </div>
+    ${shipRowsHTML}
+    <div class="m-zones-stack">
+      <div class="m-plaque"><div class="m-plaque-h"><b>⚓ 馬尼拉港</b><small>三次擲骰超過 13 格進港</small></div><div class="m-grid3">${harborCards}</div></div>
+      <div class="m-plaque"><div class="m-plaque-h"><b>🔧 修船廠</b><small>三次擲骰未過 13 格進入</small></div><div class="m-grid3">${shipyardCards}</div></div>
+      <div class="m-plaque dark"><div class="m-plaque-h"><b>🏴‍☠️ 海盜船</b><small>船停 13 格觸發${g.rules.pirateKick ? ' · 可踢人' : ''}</small></div><div class="m-grid2">${pirateCards}</div></div>
+      <div class="m-plaque navy"><div class="m-plaque-h"><b>🧭 領航員</b><small>第 3 次擲骰前調整船位</small></div><div class="m-grid2">${navCards}</div></div>
+      <div class="wide">${insCard}</div>
+    </div>
+  </div></div>`;
+
+  // --- 底部精簡拇指操作區 ---
+  const mortCnt = g.myStocks.filter((x) => x.mortgaged).length;
+  const myBar = `<div class="m-bar">
+    <span>${mCoin(15)} <b>$${mine.cash}</b> · ${mMeeple(mine, true)} <b>×${mine.workers}</b></span>
+    <button class="ghost m-bar-btn" data-a="mStockSheet">📜 我的股票 (${g.myStocks.length}${mortCnt ? ` · 🔒${mortCnt}` : ''})</button>
+    <b class="cd" aria-live="off"></b>
+  </div>`;
+
+  let trayBody = '';
+  if (!myTurn) {
+    const stageDesc = {
+      bid: `競標船老大中（目前最高 ${g.auction?.high ? `$${g.auction.high} · ${esc(nm(g.auction.leader))}` : '尚未出價'}）`,
+      master: `等待船老大 ${esc(nm(g.turn))} 買股票與安排出發船隻…`,
+      place: `等待 ${esc(nm(g.turn))} 派遣手下…`,
+      nav_small: `等待小領航員 ${esc(nm(g.turn))} 調整船位…`,
+      nav_big: `等待大領航員 ${esc(nm(g.turn))} 調整船位…`,
+      roll: `等待船老大 ${esc(nm(g.turn))} 擲第 ${g.roll + 1}/3 次骰子…`,
+      pirate_board: `等待海盜 ${esc(nm(g.turn))} 決定是否登船…`,
+      pirate_plunder: `等待海盜 ${esc(nm(g.turn))} 決定掠奪船隻去向…`,
+    }[g.stage] || `等待 ${esc(nm(g.turn))} 行動…`;
+    trayBody = `<div class="mute" style="text-align:center;padding:6px 0">${stageDesc}</div>`;
+  } else if (g.stage === 'bid') {
+    const minBid = Math.max(1, (g.auction?.high ?? 0) + 1);
+    const amt = Math.max(minBid, ms.bidAmt);
+    const canBid = mine.cash >= amt;
+    const bidWhy = canBid ? '' : `現金不足 $${amt}（可點上方「我的股票」抵押 +$12）`;
+    trayBody = `<div class="row" style="justify-content:space-between;margin-bottom:8px">
+      <b class="crown">⚓ 競標船老大</b>
+      <small class="mute">${g.auction.high ? `目前最高 $${g.auction.high}（${esc(nm(g.auction.leader))}）` : '最低 1 元起標'}</small></div>
+      <div class="row" style="justify-content:space-between;margin-bottom:10px">
+        <div class="m-step">
+          <button class="ghost" data-a="mBidStep" data-v="-1" ${amt <= minBid ? 'disabled' : ''}>−1</button>
+          <b>$${amt}</b>
+          <button class="ghost" data-a="mBidStep" data-v="1">+1</button>
+          <button class="ghost" data-a="mBidStep" data-v="3">+3</button>
+        </div>
+        <small class="mute">現金上限 $${mine.cash}</small>
+      </div>
+      <div class="row act">
+        <button class="ghost" data-a="mPass">PASS 放棄</button>
+        <span class="w" data-why="${esc(bidWhy)}"><button data-a="mBid" data-v="${amt}" ${canBid ? '' : 'disabled'}>出價 $${amt}</button></span>
+      </div>`;
+  } else if (g.stage === 'master') {
+    const chosen = ms.masterGoods;
+    const sum = chosen.reduce((a, k) => a + (ms.masterPos[k] ?? 0), 0);
+    const ready = chosen.length === 3 && sum === 9;
+    const sailWhy = chosen.length !== 3 ? '請先在上方挑選 3 種貨物' : sum !== 9 ? `出發格數總和須為 9（目前 ${sum}）` : '';
+    trayBody = `<div class="row act"><span class="w" data-why="${esc(sailWhy)}"><button data-a="mSail" ${ready ? '' : 'disabled'}>${ready ? '⚓ 啟航！開始派遣手下' : `請完成上方船老大設定（${chosen.length}/3 貨 · ${sum}/9 格）`}</button></span></div>`;
+  } else if (g.stage === 'place') {
+    const info = mSpotInfo(g, ms.spot);
+    const placeWhy = info ? '' : '請先點擊上方圖板的虛線空位或木船';
+    trayBody = `<div style="margin-bottom:8px"><b class="crown">🧍 輪到你派遣手下</b>
+      <div class="mute" style="font-size:var(--s1);margin-top:2px">${info ? `已選：<b>${info.label}</b>（${info.gain ? `+$${info.gain}` : `花費 $${info.cost}`} · ${info.note}）` : '點上方船隻、港口、修船廠、海盜、領航員或保險'}</div></div>
+      <div class="row act">
+        <button class="ghost" data-a="mPassPlace">跳過本次</button>
+        <span class="w" data-why="${esc(placeWhy)}"><button data-a="mPlace" ${info ? '' : 'disabled'}>${info ? `確認派遣（${info.gain ? `+$${info.gain}` : `$${info.cost}`}）` : '請選擇位置'}</button></span>
+      </div>`;
+  } else if (g.stage === 'nav_small' || g.stage === 'nav_big') {
+    const budget = g.stage === 'nav_small' ? 1 : 2;
+    const spent = Object.values(ms.navMoves).reduce((a, d) => a + Math.abs(d), 0);
+    const left = budget - spent;
+    const controls = g.ships.map((s, si) => {
+      const info = M_INFO[s.good], d = ms.navMoves[si] || 0;
+      if (s.pos >= 14) return `<div class="m-alloc" style="--gc:${info.color};opacity:.5"><span class="row" style="gap:6px">${mGoodImg(s.good)}${info.name}船</span><small class="mute">已進港，無法移動</small></div>`;
+      const cur = s.pos + d;
+      const canMinus = cur > 0 && (d > 0 || left > 0);
+      const canPlus = cur < 13 && (d < 0 || left > 0);
+      return `<div class="m-alloc" style="--gc:${info.color}"><span class="row" style="gap:6px;flex-wrap:nowrap">${mGoodImg(s.good)}<b>${info.name}</b> <small class="mute">格 ${s.pos}${d ? ` → <b>${cur}</b>` : ''}</small></span>
+        <div class="m-step"><button class="ghost" data-a="mNav" data-v="${si}:-1" ${canMinus ? '' : 'disabled'}>−1</button><b>${d > 0 ? `+${d}` : d}</b><button class="ghost" data-a="mNav" data-v="${si}:1" ${canPlus ? '' : 'disabled'}>+1</button></div></div>`;
+    }).join('');
+    trayBody = `<div class="row" style="justify-content:space-between;margin-bottom:6px">
+      <b class="crown">🧭 ${g.stage === 'nav_small' ? '小領航員' : '大領航員'}行動</b>
+      <small class="mute">剩餘可調 <b>${left}/${budget}</b> 格（限 0–13 格）</small></div>
+      <div style="margin-bottom:10px">${controls}</div>
+      <div class="row act"><button data-a="mNavGo">${spent ? '確認領航移動' : '按兵不動（不移動）'}</button></div>`;
+  } else if (g.stage === 'roll') {
+    trayBody = `<div class="mute" style="text-align:center;margin-bottom:8px">所有手下已就位，請船老大擲出三色貨物骰！</div>
+      <div class="row act"><button data-a="mRoll">🎲 擲骰航行（第 ${g.roll + 1}/3 次）</button></div>`;
+  } else if (g.stage === 'pirate_board') {
+    const ships13 = g.ships.filter((s) => s.pos === 13);
+    const btns = ships13.map((s) => {
+      const info = M_INFO[s.good], hasSpace = s.crew.length < info.slots.length;
+      if (hasSpace) {
+        return `<button data-a="mPBoard" data-v="${s.idx}:-1" style="width:100%;margin-bottom:6px">🏴‍☠️ 免費登上${info.name}船（空位）</button>`;
+      }
+      if (g.rules.pirateKick) {
+        const victims = s.crew.map((ownerId, ki) => ownerId === me ? '' : `<button data-a="mPBoard" data-v="${s.idx}:${ki}" style="flex:1">踢下 ${esc(nm(ownerId))}</button>`).filter(Boolean).join('');
+        if (victims) return `<div style="margin-bottom:8px"><small class="mute">${info.name}船已滿（變體：可踢人登船）</small><div class="row" style="margin-top:4px">${victims}</div></div>`;
+      }
+      return '';
+    }).join('');
+    trayBody = `<b class="crown" style="display:block;margin-bottom:8px">🏴‍☠️ 海盜登船時機！（第 2 次擲骰停 13 格）</b>${btns}
+      <div class="row act"><button class="ghost" data-a="mPBoard" data-v="skip">留在海盜船（等待第 3 輪掠奪）</button></div>`;
+  } else if (g.stage === 'pirate_plunder') {
+    const pl = g.plunder;
+    const pickUI = pl.mode === 'pick' ? `<div style="margin-bottom:8px"><small class="mute">選擇要掠奪的船隻（停在 13 格）：</small><div class="row" style="margin-top:4px">${pl.ships.map((si) => {
+      const info = M_INFO[g.ships[si].good], on = ms.plunderShip === si;
+      return `<button class="${on ? '' : 'ghost'}" data-a="mPPick" data-v="${si}">${info.name}（$${info.payout}）</button>`;
+    }).join('')}</div></div>` : `<div class="mute" style="margin-bottom:8px">已掠奪 <b>${M_INFO[g.ships[pl.ship].good].name}船</b>（利潤 $${M_INFO[g.ships[pl.ship].good].payout}）！選擇要送去哪裡：</div>`;
+    const targetShip = pl.mode === 'dest' ? pl.ship : ms.plunderShip;
+    trayBody = `<b class="crown" style="display:block;margin-bottom:6px">🏴‍☠️ 海盜掠奪成功！決定船隻去向</b>${pickUI}
+      <div class="row act">
+        <button data-a="mPDecide" data-v="${targetShip}:harbor">⚓ 送進港口（漲股價）</button>
+        <button class="ghost" data-a="mPDecide" data-v="${targetShip}:shipyard">🔧 送進修船廠（保險賠）</button>
+      </div>`;
+  }
+
+  const tray = g.status !== 'play' ? manilaOverlay(g, s) : `<div class="tray">${myBar}${trayBody}</div>`;
+
+  // 黑市行情 & 玩家公開帳本抽屜（點頂部黑市條或玩家條開啟）
+  const infoSheetUI = ms.infoSheet && g.status === 'play' ? `<div class="overlay sheet"><div class="bd" data-a="mInfoSheet"></div><div class="modal" role="dialog" aria-label="黑市行情與玩家帳本">
+    <div class="row" style="justify-content:space-between"><h2 style="margin:0;color:var(--ink)">📊 黑市行情與玩家帳本</h2><button class="ghost ic" data-a="mInfoSheet" aria-label="關閉">✕</button></div>
+    <h2 style="margin-top:12px">黑市價格軌道（任一達 $30 結束）</h2>
+    ${M_GOODS.map((k) => {
+      const info = M_INFO[k], m = g.market[k];
+      return `<div class="res" style="border-left:4px solid ${info.color}">
+        <div class="row" style="justify-content:space-between"><span class="row" style="gap:8px">${mGoodImg(k, 'md')}<b>${info.name}</b><small class="mute">進港分 $${info.payout}</small></span><b>$${m.price} <small class="mute">· 檯面剩 ${g.supply[k]} 股</small></b></div>
+        <div class="row" style="gap:4px;margin-top:6px;font-size:var(--s1)">${M_PRICES.map((pr, idx) => `<span style="flex:1;text-align:center;padding:2px 0;border-radius:6px;background:${idx === m.idx ? info.color : '#1b110a'};color:${idx === m.idx ? '#fff' : 'var(--mute)'};font-weight:${idx === m.idx ? 600 : 400}">$${pr}</span>`).join('')}</div></div>`;
+    }).join('')}
+    <h2 style="margin-top:16px">各玩家公開資產</h2>
+    ${g.players.map((p) => `<div class="res ${p.id === me ? 'me' : ''}">
+      <div class="row" style="justify-content:space-between"><span class="row" style="gap:6px">${mMeeple(p)}<b>${esc(p.name)}${p.id === me ? '（你）' : ''}${p.id === g.master ? ' ⚓' : ''}</b></span><b>${mCoin(14)} $${p.cash} · ×${p.workers}人</b></div>
+      <div class="mute" style="font-size:var(--s1);margin-top:4px">持股 ${p.stockCount} 張${p.mortgagedCount ? `（🔒 ${p.mortgagedCount} 張已抵押）` : ''}${p.bought.length ? ` · 公開購得：${p.bought.map((k) => M_INFO[k].name).join('、')}` : ''}</div></div>`).join('')}
+  </div></div>` : '';
+
+  // 復古羊皮紙股票證書抽屜（隨時可抵押／贖回）
+  const stockSheetUI = ms.stockSheet && g.status === 'play' ? `<div class="overlay sheet"><div class="bd" data-a="mStockSheet"></div><div class="modal" role="dialog" aria-label="我的股票證書與抵押贖回">
+    <div class="row" style="justify-content:space-between"><h2 style="margin:0;color:var(--ink)">📜 1821 馬尼拉股票證書</h2><button class="ghost ic" data-a="mStockSheet" aria-label="關閉">✕</button></div>
+    <p class="mute" style="margin:6px 0 8px">現有現金 ${mCoin(14)} <b>$${mine.cash}</b> · 抵押立刻拿 <b>+$12</b>，贖回需 <b>−$15</b>（終局強制贖回）。</p>
+    ${g.myStocks.map((st) => {
+      const info = M_INFO[st.good], curVal = g.market[st.good].price, canRedeem = mine.cash >= 15;
+      return `<div class="m-cert ${st.mortgaged ? 'mort' : ''}" style="--gc:${info.color}">
+        <div class="row" style="gap:10px;flex-wrap:nowrap;min-width:0">${mGoodImg(st.good, 'lg')}
+          <div style="min-width:0"><b>${info.name}股票</b><div><small>${st.public ? '公開購得' : '秘密起始'} · 黑市現價 <b>$${curVal}</b></small></div>${st.mortgaged ? '<span class="m-wax">🔒 紅蠟抵押 · 贖回 $15</span>' : ''}</div></div>
+        ${st.mortgaged
+          ? `<span data-why="${canRedeem ? '' : '現金不足 $15'}"><button data-a="mRedeem" data-v="${st.idx}" ${canRedeem ? '' : 'disabled'}>贖回 −$15</button></span>`
+          : `<button class="ghost" style="border-color:#7d5b28;color:#3d240b" data-a="mMortgage" data-v="${st.idx}">抵押 +$12</button>`}
+      </div>`;
+    }).join('')}
+  </div></div>` : '';
+
+  // 資訊面板（玩法、動態、離開）
+  const sheetUI = sheet && g.status === 'play' ? `<div class="overlay sheet"><div class="bd" data-a="sheet"></div><div class="modal" role="dialog" aria-label="玩法與航程動態">
+    <div class="row" style="justify-content:space-between"><h2 style="margin:0">⚓ 馬尼拉（第 ${g.round} 航程）</h2><button class="ghost ic" data-a="sheet" aria-label="關閉">✕</button></div>
+    <p class="mute" style="margin:8px 0">海盜第 2 輪規則：<b>${g.rules.pirateKick ? '變體（船滿可踢人）' : '標準（僅佔空位）'}</b></p>
+    <h2 style="margin-top:12px">完整玩法</h2>${manilaRules()}
+    <h2 style="margin-top:16px">航程動態</h2><div class="log">${g.log.map(esc).join('<br>')}</div>
+    <button class="ghost" data-a="leave" style="width:100%;margin-top:16px">離開房間</button></div></div>` : '';
+
+  const lastLog = g.log.at(-1) || '準備啟航！';
+  const ticker = `<button class="fticker" data-a="sheet" aria-label="查看玩法與動態"><span>${esc(lastLog)}</span><i aria-hidden="true">›</i></button>`;
+
+  return `<div class="row" style="flex-wrap:nowrap"><b style="flex:1;min-width:0">⚓ 馬尼拉 · ${s.code}</b>
+    <span class="fmeta">航程 ${g.round} · 骰 ${g.roll}/3</span>
+    <span class="rxw"><button class="ghost ic" data-a="rxMenu" aria-label="送表情" aria-expanded="${rxOpen}">😀</button>${rxOpen ? `<div class="rxp">${EMOJI.map((e) => `<button data-a="react" data-v="${e}" aria-label="${e}">${e}</button>`).join('')}</div>` : ''}</span>
+    <button class="ghost ic" data-a="sheet" aria-label="玩法與動態">📋</button></div>
+  ${ticker}${mkt}${players}${boardHTML}${tray}${infoSheetUI}${stockSheetUI}${sheetUI}`;
+}
+
+function manilaOverlay(g, s) {
+  const sm = g.summary, over = g.status === 'over', me = s.me, host = me === s.host;
+  const pById = Object.fromEntries(g.players.map((p) => [p.id, p]));
+  const nm = (id) => esc(pById[id]?.name ?? '?');
+  const head = over
+    ? (g.winners.includes(me) ? '<span class="trophy">🏆</span> 你是馬尼拉走私大王！' : `🏆 ${g.winners.map(nm).join('、')} 成為走私大王！`)
+    : `⚓ 第 ${sm.round} 航程結算`;
+
+  const shipLines = sm.ships.map((sr) => {
+    const info = M_INFO[sr.good];
+    const who = sr.payouts.length ? sr.payouts.map((x) => `${nm(x.id)} +$${x.amount}`).join('、') : '無人分紅';
+    return `<div class="res" style="border-left:4px solid ${info.color}">
+      <div class="row" style="justify-content:space-between"><span class="row" style="gap:6px">${mGoodImg(sr.good)}<b>${sr.name}船</b></span><span>${sr.plundered ? '🏴‍☠️ 被海盜掠奪 → ' : ''}${sr.dest === 'harbor' ? '⚓ 進港' : '🔧 修船廠'}</span></div>
+      <small class="mute">${who}</small></div>`;
+  }).join('');
+
+  const mktLine = sm.priceChanges.length
+    ? `<div class="res"><b>📈 黑市價格調漲</b><div class="row" style="margin-top:6px;font-size:var(--s1);gap:10px">${sm.priceChanges.map((x) => `<span class="row" style="gap:4px">${mGoodImg(x.good)}${x.name} $${x.before}→<b>$${x.after}</b></span>`).join('')}</div></div>`
+    : '<div class="res mute">本航程無船進港，黑市價格未變動</div>';
+
+  const insLine = sm.insurance && sm.insurance.owed > 0
+    ? `<div class="res"><b>🛡️ 保險理賠</b><div style="margin-top:4px;font-size:var(--s1)">${esc(sm.insurance.name)} 賠付修船廠 <b>$${sm.insurance.paid}</b>${sm.insurance.autoMortgaged ? `（自動抵押 ${sm.insurance.autoMortgaged} 股）` : ''}${sm.insurance.bankCovered ? `（銀行補足 $${sm.insurance.bankCovered}）` : ''}</div></div>`
+    : '';
+
+  const roundRows = sm.rows.map((r) => `<div class="res ${r.id === me ? 'me' : ''}">
+    <div class="row" style="justify-content:space-between"><span class="row" style="gap:5px">${mMeeple(pById[r.id], true)}<b>${esc(r.name)}${r.id === me ? '（你）' : ''}</b></span><span>本航程 <b>${r.net >= 0 ? `+$${r.net}` : `−$${Math.abs(r.net)}`}</b> → ${mCoin(13)} $${r.cash}</span></div>
+    <small class="mute">${[r.cargo && `船員+$${r.cargo}`, r.pirate && `海盜+$${r.pirate}`, r.harbor && `港口+$${r.harbor}`, r.shipyard && `修船廠+$${r.shipyard}`, r.insurancePaid && `保險−$${r.insurancePaid}`].filter(Boolean).join(' · ') || '無收支'}</small></div>`).join('');
+
+  const finalBoard = over && sm.finalRows ? sm.finalRows.map((r) => {
+    const rank = sm.finalRows.findIndex((q) => q.total === r.total);
+    const stDesc = M_GOODS.filter((k) => r.byGood[k] > 0).map((k) => `<span class="row" style="gap:3px;display:inline-flex;margin-right:6px">${mGoodImg(k)}${r.byGood[k]}×$${sm.market[k]}</span>`).join('');
+    return `<div class="res rk ${r.id === me ? 'me' : ''}"><div class="row" style="justify-content:space-between;flex-wrap:nowrap">
+      <div><b class="row" style="gap:5px;flex-wrap:nowrap"><span style="display:inline-block;min-width:1.4em">${['🏆', '🥈', '🥉'][rank] ?? rank + 1}</span>${mMeeple(pById[r.id], true)}${esc(r.name)}${r.id === me ? '（你）' : ''}</b>
+        <div style="font-size:var(--s1);font-weight:400;opacity:.85;margin-top:2px">現金 $${r.cash} ＋ 股票 $${r.stockValue}${r.debt ? ` − 贖回 $${r.debt}` : ''}</div>
+        <div style="font-size:11px;font-weight:400;opacity:.9;margin-top:4px">${stDesc || '無持股'}</div></div>
+      <b>$${r.total}</b></div></div>`;
+  }).join('') : '';
+
+  const activePs = g.players.filter((p) => p.in);
+  const readySet = new Set(g.nextReady || []);
+  const myReady = readySet.has(me);
+  const readyBar = !over ? `<div class="m-ready-bar" aria-label="下一航程準備狀態">${activePs.map((p) => `<span class="m-rchip ${readySet.has(p.id) ? 'ok' : ''}">${mMeeple(p, true)}${esc(p.name)} ${readySet.has(p.id) ? '✓' : '…'}</span>`).join('')}</div>` : '';
+  const foot = over
+    ? (host ? '<button data-a="back">回到房間再來一局</button><button class="ghost" data-a="leave">離開房間</button>' : `<span class="mute">等 ${nm(s.host)} 開新局…</span><button class="ghost" data-a="leave">離開房間</button>`)
+    : myReady
+    ? `<button class="ghost" disabled>✅ 已準備，等待其他玩家（${readySet.size}/${activePs.length}）</button>`
+    : `<button data-a="next">開始第 ${sm.round + 1} 航程（${readySet.size}/${activePs.length} 已準備）</button>`;
+
+  return `<div class="overlay"><div class="modal res-m"><div class="body">
+    <div class="hd">${head}</div>
+    ${over ? `<div class="row mute" style="margin-bottom:8px;gap:8px;font-size:var(--s1)">黑市終盤：${M_GOODS.map((k) => `<span class="row" style="gap:3px">${mGoodImg(k)}$${sm.market[k]}</span>`).join('')}</div>${finalBoard}` : `${shipLines}${mktLine}${insLine}<h2 style="margin-top:12px">本航程收支</h2>${roundRows}`}
+  </div><div class="foot">${readyBar}<div class="row act">${foot}</div></div></div></div>`;
+}
+
 function render() {
-  const form = [...document.querySelectorAll('#name,#code,#target,#rounds,#turn,[data-r]')].map((e) => [e, e.type === 'checkbox' ? e.checked : e.value]); // 建房表單：重繪不能洗掉使用者已填／已勾的
+  const form = [...document.querySelectorAll('#name,#code,#target,#rounds,#turn,#pirateKick,[data-r]')].map((e) => [e, e.type === 'checkbox' ? e.checked : e.value]); // 建房表單：重繪不能洗掉使用者已填／已勾的
   const keep = Object.fromEntries(form.map(([e, v]) => [e.id || e.dataset.r, v]));
-  if (!snap?.game) seen = null; // 離開／重開一場遊戲後不要沿用舊手牌
+  if (!snap?.game) { seen = null; resetMs(); } // 離開／重開一場遊戲後不要沿用舊手牌
   document.body.classList.toggle('cats-mode', !!(snap?.game && snap.kind === 'cats'));
-  $('#app').innerHTML = !sess ? lobby() : !snap ? '<p>連線中…</p>' : snap.game ? (snap.kind === 'fuji' ? fuji() : snap.kind === 'cats' ? cats() : game()) : room();
-  for (const e of document.querySelectorAll('#name,#code,#target,#rounds,#turn,[data-r]')) { const v = keep[e.id || e.dataset.r]; if (v !== undefined) e.type === 'checkbox' ? (e.checked = v) : (e.value = v); }
+  document.body.classList.toggle('manila-mode', !!(snap?.game && snap.kind === 'manila'));
+  $('#app').innerHTML = !sess ? lobby() : !snap ? '<p>連線中…</p>' : snap.game ? (snap.kind === 'fuji' ? fuji() : snap.kind === 'cats' ? cats() : snap.kind === 'manila' ? manila() : game()) : room();
+  for (const e of document.querySelectorAll('#name,#code,#target,#rounds,#turn,#pirateKick,[data-r]')) { const v = keep[e.id || e.dataset.r]; if (v !== undefined) e.type === 'checkbox' ? (e.checked = v) : (e.value = v); }
   const all = [...document.querySelectorAll('[data-r]')]; if (all.length && all.every((b) => b.checked)) { const b = $('[data-a="allRules"]'); if (b) b.textContent = '全不選'; }
   tick();
 }
@@ -1099,6 +1848,7 @@ const A = {
     const body = { kind: pick, name: $('#name').value, turn: +$('#turn').value };
     if (pick === 'phase10') Object.assign(body, { target: +$('#target').value, rules: Object.fromEntries(RULES.map(([k]) => [k, !!$(`[data-r="${k}"]`)?.checked])) });
     if (pick === 'cats') body.rounds = +$('#rounds').value;
+    if (pick === 'manila') body.pirateKick = !!$('#pirateKick')?.checked;
     const r = await post('create', body).catch((e) => toast(e.message)); if (r) { localStorage.setItem('p10name', $('#name').value); enter(r); }
   },
   fold(v) { folds.has(v) ? folds.delete(v) : folds.add(v); render(); },
@@ -1133,6 +1883,64 @@ const A = {
   ccard(v) { if (snap?.game?.myPick != null) return toast('已蓋牌，點下方「收回重選」即可換牌'); sel = new Set(sel.has(+v) ? [] : [+v]); render(); }, // 貓貓食堂一次選一張蓋牌
   cpick: () => call('act', { action: { type: 'pick', card: [...sel][0] } }).then((r) => r && sel.clear()),
   cunpick: () => call('act', { action: { type: 'unpick' } }),
+  // 馬尼拉動作
+  mStockSheet() { ms.stockSheet = !ms.stockSheet; render(); },
+  mInfoSheet() { ms.infoSheet = !ms.infoSheet; render(); },
+  mMortgage: (v) => call('act', { action: { type: 'mortgage', idx: +v } }),
+  mRedeem: (v) => call('act', { action: { type: 'redeem', idx: +v } }),
+  mBidStep(v) {
+    const min = Math.max(1, (snap?.game?.auction?.high ?? 0) + 1);
+    ms.bidAmt = Math.max(min, (ms.bidAmt || min) + +v);
+    render();
+  },
+  mBid: (v) => call('act', { action: { type: 'bid', amount: +v } }),
+  mPass: () => call('act', { action: { type: 'pass' } }),
+  mBuy: (v) => call('act', { action: { type: 'buyStock', good: v } }),
+  mPickGood(v) {
+    const arr = ms.masterGoods;
+    if (arr.includes(v)) ms.masterGoods = arr.filter((x) => x !== v);
+    else if (arr.length < 3) { ms.masterGoods = [...arr, v]; if (ms.masterGoods.length === 3) { ms.masterGoods.forEach((k) => (ms.masterPos[k] = 3)); } }
+    else toast('最多選 3 種貨物，請先取消其中一種');
+    render();
+  },
+  mPreset(v) {
+    const nums = v.split(',').map(Number);
+    ms.masterGoods.forEach((k, i) => { ms.masterPos[k] = nums[i] ?? 0; });
+    render();
+  },
+  mPos(v) {
+    const [k, d] = v.split(':');
+    ms.masterPos[k] = Math.max(0, Math.min(5, (ms.masterPos[k] ?? 0) + +d));
+    render();
+  },
+  mSail() {
+    const ships = ms.masterGoods.map((good) => ({ good, pos: ms.masterPos[good] ?? 0 }));
+    return call('act', { action: { type: 'setupShips', ships } });
+  },
+  mSpot(v) { ms.spot = ms.spot === v ? null : v; render(); },
+  mPlace: () => call('act', { action: { type: 'place', spot: ms.spot } }).then((r) => { if (r) ms.spot = null; }),
+  mPassPlace: () => call('act', { action: { type: 'passPlace' } }),
+  mNav(v) {
+    const [si, d] = v.split(':').map(Number);
+    ms.navMoves[si] = (ms.navMoves[si] || 0) + d;
+    if (!ms.navMoves[si]) delete ms.navMoves[si];
+    render();
+  },
+  mNavGo() {
+    const moves = Object.entries(ms.navMoves).filter(([, d]) => d !== 0).map(([si, delta]) => ({ ship: +si, delta }));
+    return call('act', { action: { type: 'navigate', moves } }).then((r) => { if (r) ms.navMoves = {}; });
+  },
+  mRoll: () => call('act', { action: { type: 'roll' } }),
+  mPBoard(v) {
+    if (v === 'skip') return call('act', { action: { type: 'pirateBoard', ship: null } });
+    const [si, ki] = v.split(':').map(Number);
+    return call('act', { action: { type: 'pirateBoard', ship: si, ...(ki >= 0 ? { kickIdx: ki } : {}) } });
+  },
+  mPPick(v) { ms.plunderShip = +v; render(); },
+  mPDecide(v) {
+    const [si, dest] = v.split(':');
+    return call('act', { action: { type: 'pirateDecide', ship: +si, dest } });
+  },
   fseat(v) {
     const p = snap?.game?.players?.find((x) => x.id === v);
     if (!p) return;
@@ -1183,6 +1991,7 @@ const A = {
   },
 };
 $('#skipBan').addEventListener('click', (e) => { const v = e.target.dataset.v; if (v) { $('#skipBan').classList.remove('on'); call('react', { e: v }); } }); // 被跳過時橫幅上的快捷表情
+$('#mDiceStage').addEventListener('click', closeManilaDice); // 擲骰動畫點任意處可提前關閉
 // 拖曳百搭：放開時越過最前／最後一張數字牌的中心 → 整段順子平移一格（等於 los 加減一），所以伺服器不用改
 $('#app').addEventListener('pointerdown', (e) => {
   noClick = false;
@@ -1231,7 +2040,7 @@ $('#app').addEventListener('change', (e) => {
   }
   const k = e.target.dataset.c;
   if (k) e.target.blur(); // 選完就放開焦點，不然「焦點在 select 時略過重繪」會讓房主一直看不到新加入的玩家
-  if (k) call('settings', { [k]: k === 'target' || k === 'rounds' ? +e.target.value : e.target.value });
+  if (k) call('settings', { [k]: e.target.type === 'checkbox' ? e.target.checked : (k === 'target' || k === 'rounds' ? +e.target.value : e.target.value) });
 });
 if (sess) connect(); else render();
 </script>

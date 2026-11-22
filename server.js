@@ -8,9 +8,10 @@ const { randomInt, randomUUID } = require('node:crypto');
 const G = require('./game');
 const F = require('./fuji');
 const C = require('./cats');
+const M = require('./manila');
 
 const TURN_SEC = 60; // 每回合預設秒數；建房時可改（10–600），手機切去 LINE 回訊息再回來要來得及，所以下限不能太短
-const KINDS = { phase10: { eng: G, min: 2, max: 6 }, fuji: { eng: F, min: 3, max: 8 }, cats: { eng: C, min: 3, max: 6 } }; // 遊戲種類：規則引擎（同一組介面 create/act/leave/autoPlay/view）與人數；新增遊戲在這裡加一行
+const KINDS = { phase10: { eng: G, min: 2, max: 6 }, fuji: { eng: F, min: 3, max: 8 }, cats: { eng: C, min: 3, max: 6 }, manila: { eng: M, min: 3, max: 5 } }; // 遊戲種類：規則引擎（同一組介面 create/act/leave/autoPlay/view）與人數；新增遊戲在這裡加一行
 const K = (room) => KINDS[room.kind];
 const EMOJI = ['😮', '😡', '😂', '👏', '😭', '😎', '🙏', '😴']; // 白名單；index.html 有同一份，改的時候兩邊一起改
 const RULES = ['catchUp', 'first', 'rv', 'sh', 'xn', 'xc']; // 建房時可開的特殊規則（見 game.js），全部預設關 = 標準 Phase 10；index.html 有同一份鍵名，test.js 會比對
@@ -87,6 +88,7 @@ const actions = {
     if (room.game) G.err('遊戲進行中不能改設定');
     if (room.kind === 'phase10' && Number.isInteger(b.target) && b.target >= 1 && b.target <= 10) room.settings.target = b.target;
     if (room.kind === 'cats' && Number.isInteger(b.rounds) && b.rounds >= 1 && b.rounds <= 10) room.settings.rounds = b.rounds;
+    if (room.kind === 'manila' && typeof b.pirateKick === 'boolean') room.settings.pirateKick = b.pirateKick;
   },
   shuffle(room, p) { // 隨機排座位：座位 = room.players 的順序，G.create 照這個順序發牌、輪流
     if (room.host !== p.id) G.err('只有房主可以排位子');
@@ -149,6 +151,15 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
       return res.end(fs.readFileSync(path.join(__dirname, 'index.html')));
     }
+    if (req.method === 'GET' && url.pathname.startsWith('/assets/')) {
+      const rel = url.pathname.slice('/assets/'.length);
+      if (!/^[a-zA-Z0-9_/-]+\.(jpg|jpeg|png|webp|svg)$/.test(rel)) return json(res, 404, { error: 'not found' });
+      const file = path.join(__dirname, 'assets', rel);
+      if (!fs.existsSync(file)) return json(res, 404, { error: 'not found' });
+      const mime = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', svg: 'image/svg+xml' }[rel.split('.').pop()];
+      res.writeHead(200, { 'content-type': mime, 'cache-control': 'public, max-age=86400' });
+      return res.end(fs.readFileSync(file));
+    }
     if (req.method === 'GET' && url.pathname === '/api/lan') { // 本機開發用：localhost 開的頁面拿區網 IP 組邀請連結／QR。只回應本機請求，部署後（請求來自 proxy）一律 null，不洩漏內網位址
       const local = /^(::1|127\.|::ffff:127\.)/.test(req.socket.remoteAddress ?? '');
       const ips = local ? Object.values(os.networkInterfaces()).flat().filter((i) => i.family === 'IPv4' && !i.internal).map((i) => i.address) : [];
@@ -184,7 +195,8 @@ const server = http.createServer(async (req, res) => {
           const rounds = b.rounds ?? C.DEFAULT_ROUNDS;
           if (kind === 'cats' && (!Number.isInteger(rounds) || rounds < 1 || rounds > 10)) G.err('遊戲輪數要在 1–10 之間');
           const extra = kind === 'phase10' ? { target, rules: Object.fromEntries(RULES.map((k) => [k, b.rules?.[k] === true])) }
-            : kind === 'cats' ? { rounds } : {};
+            : kind === 'cats' ? { rounds }
+            : kind === 'manila' ? { pirateKick: b.pirateKick === true } : {};
           room = newRoom(kind, turn, extra);
         } else {
           room = rooms.get(String(b.code ?? '').toUpperCase());
@@ -218,6 +230,6 @@ setInterval(() => {
 
 if (require.main === module) {
   const port = process.env.PORT || 3000;
-  server.listen(port, '0.0.0.0', () => console.log(`Phase 10 / 富士流 / 貓貓食堂 → http://localhost:${port}`));
+  server.listen(port, '0.0.0.0', () => console.log(`Phase 10 / 富士流 / 貓貓食堂 / 馬尼拉 → http://localhost:${port}`));
 }
 module.exports = Object.assign(server, { rooms }); // rooms 只給測試改狀態用
