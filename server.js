@@ -110,10 +110,10 @@ function watch(room) {
     }
   }
 
-  // 輪到電腦玩家時自動執行 AI 決策（留出足夠閱讀其他玩家動作大通知與擲骰動畫的時間）
+  // 輪到電腦玩家時自動執行 AI 決策（留出足夠閱讀其他玩家動作大通知與 3D 擲骰動畫的時間）
   if (isBot(room, cur) && K(room).eng.botPlay && !(room.kind === 'magical' && g.stage === 'select')) {
     room.dl = null;
-    const baseDelay = room.settings.botDelay ?? (room.kind === 'magical' ? (g.ev?.kind === 'roll' ? 1500 : 1000) : (g.ev?.kind === 'roll' ? 3400 : 1350));
+    const baseDelay = room.settings.botDelay ?? (room.kind === 'magical' ? (g.stage === 'race' ? 2350 : 950) : (g.ev?.kind === 'roll' ? 3400 : 1350));
     room.botTimer = setTimeout(() => {
       if (room.game !== g || g.status !== 'play' || g.turnNo !== no) return;
       try { K(room).eng.botPlay(g, cur); } catch (e) { console.error(e); try { K(room).eng.autoPlay(g, cur); } catch {} }

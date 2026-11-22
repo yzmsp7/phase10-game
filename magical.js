@@ -277,7 +277,7 @@ function startDraft(g) {
   const startIdx = indexOf(g, ro.winner);
   const roTxt = ro.rolls.map((x) => `${playerOf(g, x.id).name} 🎲${x.d}`).join('、');
   log(g, `🎲 選秀比骰：${roTxt} → ${playerOf(g, ro.winner).name} 先選！`);
-  emit(g, { kind: 'rollOff', title: `${playerOf(g, ro.winner).name} 贏得先選權！`, sub: roTxt, tone: 'gold' });
+  emit(g, { kind: 'rollOff', rolls: ro.rolls, winner: ro.winner, title: `${playerOf(g, ro.winner).name} 贏得先選權！`, sub: roTxt, tone: 'gold' });
 
   const totalRounds = g.mode === '3p2' ? 4 : 2;
   g.draft = { round: 1, totalRounds, startIdx, pool: [], order: [], idx: 0 };
@@ -374,6 +374,7 @@ function beginRaceSelect(g, nextStarterIdx) {
     g.activePlayerIdx = indexOf(g, ro.winner);
     const roTxt = ro.rolls.map((x) => `${playerOf(g, x.id).name} 🎲${x.d}`).join('、');
     log(g, `🏁 第 ${g.race}/4 場（${g.track === 'wild' ? '🌋 狂野賽道' : '🌼 溫和賽道'}）！比骰決定先手：${roTxt} → ${playerOf(g, ro.winner).name} 先攻！`);
+    emit(g, { kind: 'rollOff', rolls: ro.rolls, winner: ro.winner, tag: '先攻', title: `第 ${g.race} 場：${playerOf(g, ro.winner).name} 先攻！`, sub: roTxt, tone: 'gold' });
   } else {
     g.activePlayerIdx = nextStarterIdx;
     log(g, `🏁 第 ${g.race}/4 場（${g.track === 'wild' ? '🌋 狂野賽道' : '🌼 溫和賽道'}）！本場由 ${g.players[g.activePlayerIdx].name} 先攻！`);
@@ -1442,7 +1443,7 @@ function act(g, pid, a) {
       g.prompt = null;
       ctx.roll = randomInt(1, 7);
       log(g, `🎲 ${racerLabel(g, r)} 擲出 ${ctx.roll} 點${ctx.geniusGuess ? `（預測 ${ctx.geniusGuess}）` : ''}`);
-      emit(g, { kind: 'roll', by: pid, racerId: r.id, racer: r.base, d: ctx.roll, guess: ctx.geniusGuess, title: `${racerLabel(g, r)} 擲出 ${ctx.roll} 點`, tone: 'gold' });
+      emit(g, { kind: 'roll', by: pid, racerId: r.id, racer: r.base, d: ctx.roll, from: r.pos, guess: ctx.geniusGuess, title: `${racerLabel(g, r)} 擲出 ${ctx.roll} 點`, tone: 'gold' });
       ctx.phase = 'afterRoll';
       return continueTurn(g);
     }
@@ -1487,7 +1488,7 @@ function act(g, pid, a) {
       ctx.magicianRerolls++;
       ctx.roll = randomInt(1, 7);
       log(g, `🎩 ${racerLabel(g, r)} 施展魔術重骰 → 骰出 ${ctx.roll} 點！`);
-      emit(g, { kind: 'roll', by: pid, racerId: r.id, racer: r.base, d: ctx.roll, reroll: true, title: `${racerLabel(g, r)} 魔術重骰：${ctx.roll} 點`, tone: 'gold' });
+      emit(g, { kind: 'roll', by: pid, racerId: r.id, racer: r.base, d: ctx.roll, from: r.pos, reroll: 'mag', title: `${racerLabel(g, r)} 魔術重骰：${ctx.roll} 點`, tone: 'gold' });
       triggerScoocher(g, r, 'magician');
       ctx.phase = 'afterRoll';
       return continueTurn(g);
@@ -1498,7 +1499,7 @@ function act(g, pid, a) {
       ctx.dicemongerUsed = true;
       ctx.roll = randomInt(1, 7);
       log(g, `🎰 ${racerLabel(g, r)} 使用骰子商人重骰 → 骰出 ${ctx.roll} 點！`);
-      emit(g, { kind: 'roll', by: pid, racerId: r.id, racer: r.base, d: ctx.roll, reroll: true, title: `${racerLabel(g, r)} 商人重骰：${ctx.roll} 點`, tone: 'gold' });
+      emit(g, { kind: 'roll', by: pid, racerId: r.id, racer: r.base, d: ctx.roll, from: r.pos, reroll: 'dm', title: `${racerLabel(g, r)} 商人重骰：${ctx.roll} 點`, tone: 'gold' });
       const dms = racersWithPower(g, 'dicemonger', r.id);
       for (const dm of dms) {
         triggerScoocher(g, dm, 'dicemonger');
@@ -1561,7 +1562,7 @@ function act(g, pid, a) {
       const d1 = randomInt(1, 7), d2 = randomInt(1, 7);
       const win = d1 >= d2 ? dl : foe;
       log(g, `⚔️ 決鬥！${racerLabel(g, dl)} 🎲${d1} vs ${racerLabel(g, foe)} 🎲${d2} → ${racerLabel(g, win)} 勝出前進 2 格！`);
-      emit(g, { kind: 'duel', by: pid, racer: dl.base, d1, d2, winner: win.id, title: `⚔️ 決鬥！${d1} vs ${d2}`, sub: `${racerLabel(g, win)} 勝出前進 2 格`, tone: 'gold' });
+      emit(g, { kind: 'duel', by: pid, racer: dl.base, racer1: dl.base, owner1: dl.ownerId, racer2: foe.base, owner2: foe.ownerId, d1, d2, winner: win.id, winSide: d1 >= d2 ? 1 : 2, title: `⚔️ 決鬥！${d1} vs ${d2}`, sub: `${racerLabel(g, win)} 勝出前進 2 格`, tone: 'gold' });
       triggerScoocher(g, dl, 'duelist');
       moveRacer(g, win, 2, { reason: '決鬥勝出' });
     }

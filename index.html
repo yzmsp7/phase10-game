@@ -562,6 +562,23 @@ body.magical-mode .slot{background:#161229}
 .ma-pod.p1{border-color:#ffd23f;background:linear-gradient(180deg,#3d3017,#251d3a)}
 .ma-pod.p2{border-color:#c9d6e8;background:linear-gradient(180deg,#2d3448,#211d3a)}
 .ma-pod img{width:56px;height:56px;border-radius:50%;object-fit:cover;border:3px solid #fff;margin:4px auto;display:block}
+.ma-tok.hop{animation:maHop .65s cubic-bezier(.2,1.35,.35,1) both;z-index:5}
+@keyframes maHop{0%{transform:translateY(-22px) scale(1.28);box-shadow:0 0 0 3px var(--accent),0 10px 20px #000c}55%{transform:translateY(3px) scale(.92)}80%{transform:translateY(-6px) scale(1.08)}100%{transform:none}}
+.m-dtray.ma-dtray{background:radial-gradient(circle at 50% 25%,#332861 0%,#17132c 84%);border:3px solid var(--accent);box-shadow:0 20px 48px #000e,inset 0 0 28px #0a0718bb,0 0 28px #ffd23f33;color:#fbf8f1}
+.ma-dsingle{display:flex;flex-direction:column;align-items:center;gap:12px}
+.ma-dhero{display:flex;align-items:center;gap:10px;background:#120e24;border:2px solid var(--pc,var(--accent));border-radius:999px;padding:4px 14px 4px 4px;box-shadow:0 4px 12px #0008}
+.ma-dhero img{width:42px;height:42px;border-radius:50%;object-fit:cover;border:2px solid #fff;display:block}
+.ma-dhero-tx{text-align:left;line-height:1.2}
+.ma-dhero-tx b{display:block;font-size:var(--s2)}.ma-dhero-tx small{font-size:var(--s1);color:var(--mute)}
+.ma-dduel{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center}
+.ma-dvs{font-size:var(--s3);font-weight:600;color:var(--accent);text-shadow:0 2px 8px #000}
+.ma-dcol-win .m-dpill{background:#185e3a;border-color:#7fe8b0;color:#e6fff2}
+.ma-dcol-lose{opacity:.68;transition:opacity .3s ease}
+.ma-dro{display:flex;flex-wrap:wrap;justify-content:center;gap:12px}
+.ma-dro .m-dcol{min-width:86px;flex:0 1 auto}
+.ma-dpill{display:inline-block;padding:4px 12px;border-radius:10px;font-size:var(--s1);font-weight:600;background:#120e24;border:1.5px solid var(--accent);color:#fff;font-variant-numeric:tabular-nums}
+.ma-dpill.win{background:#185e3a;border-color:#7fe8b0;color:#e6fff2}
+.ma-dpill.bad{background:#7d1c24;border-color:#ff938b;color:#fff}
 @media(max-width:600px){
 .ma-cell{min-height:56px}.ma-tok{width:28px;height:28px}.ma-tok.sm{width:24px;height:24px}
 }
@@ -733,8 +750,8 @@ let pick = (() => { try { const k = localStorage.getItem('p10pick'); return Obje
 let dl = null, sess = store.get(), snap = null, es = null, sel = new Set(), slots = {}, los = {}, seen = null, sheet = false, endFor = null, actSlot = null, byColor = false, rxOpen = false, rxSeq = null, histFor = null, drag = null, noClick = false, xs = { target: null, v: null, give: null }; // xs = 交換牌的三個選擇（對象／數字或顏色／要換出的牌）。 // drag = 正在拖的百搭（拖曳中不重繪，不然 DOM 重建會把它弄丟）；noClick = 剛拖完，吃掉隨後的 click。 histFor = 正在看誰的撿棄牌歷史（玩家 id）。 rxOpen = 表情選單開著；rxSeq = 已播到的表情編號（null = 還沒收到第一筆快照）。每次 render 會重建 DOM，UI 狀態要存在這：sheet = 底部資訊面板開著；endFor = 正在選「接前/接後」的順子；actSlot = 放階段時作用中的那一組
 let ms = { bidAmt: 1, spot: null, masterGoods: ['jade', 'silk', 'nutmeg'], masterPos: { jade: 3, silk: 3, nutmeg: 3, ginseng: 0 }, navMoves: {}, plunderShip: null, stockSheet: false, infoSheet: false, cashWarn: null, pendingBuy: null, holdOverlay: false, animFrom: null, sailAnim: null, stageKey: null };
 const resetMs = () => { ms = { bidAmt: 1, spot: null, masterGoods: ['jade', 'silk', 'nutmeg'], masterPos: { jade: 3, silk: 3, nutmeg: 3, ginseng: 0 }, navMoves: {}, plunderShip: null, stockSheet: false, infoSheet: false, cashWarn: null, pendingBuy: null, holdOverlay: false, animFrom: null, sailAnim: null, stageKey: null }; closeManilaDice(); clearManilaActs(); };
-let ma = { draftSel: null, pickSel: [], guess: null, inspect: null, dex: false, flipOpen: false };
-const resetMa = () => { ma = { draftSel: null, pickSel: [], guess: null, inspect: null, dex: false, flipOpen: false }; };
+let ma = { draftSel: null, pickSel: [], guess: null, inspect: null, dex: false, flipOpen: false, animFrom: null, hopIds: null, holdOverlay: false };
+const resetMa = () => { ma = { draftSel: null, pickSel: [], guess: null, inspect: null, dex: false, flipOpen: false, animFrom: null, hopIds: null, holdOverlay: false }; closeManilaDice(); };
 if (sess && urlRoom && sess.code !== urlRoom) sess = null; // 邀請連結指向另一間房 → 先顯示加入畫面
 // 在 localhost 開頁面時，邀請連結／QR 要換成手機連得到的區網 IP（undefined = 查詢中，null = 查不到）。部署後網址不是 localhost，這段不會跑。
 const isLocal = /^(localhost|127\.|\[?::1)/.test(location.hostname);
@@ -1550,6 +1567,9 @@ function closeManilaDice() {
   ms.animFrom = null;
   ms.sailAnim = null;
   ms.holdOverlay = false;
+  ma.animFrom = null;
+  ma.hopIds = null;
+  ma.holdOverlay = false;
 }
 function finishManilaDice() {
   mDiceTimers.forEach((id) => { clearTimeout(id); clearInterval(id); });
@@ -1558,9 +1578,34 @@ function finishManilaDice() {
   if (box) { box.classList.remove('on', 'out'); box.innerHTML = ''; }
   const after = mDiceAfter;
   mDiceAfter = null;
+  const reduced = matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+  if (snap?.kind === 'magical') {
+    const fromMap = ma.animFrom;
+    ma.animFrom = null;
+    const g = snap.game;
+    const movedIds = fromMap && g?.racers
+      ? g.racers.filter((r) => fromMap[r.id] !== undefined && fromMap[r.id] !== (r.finished ? 30 : r.pos)).map((r) => r.id)
+      : [];
+    if (movedIds.length && !reduced) {
+      ma.hopIds = new Set(movedIds);
+      render();
+      mDiceTimers.push(setTimeout(() => { ma.hopIds = null; }, 750));
+    } else if (fromMap) {
+      render();
+    }
+    if (after) after();
+    if (ma.holdOverlay) {
+      const wait = !reduced && movedIds.length ? 1050 : 400;
+      mDiceTimers.push(setTimeout(() => {
+        ma.hopIds = null;
+        ma.holdOverlay = false;
+        if (snap?.kind === 'magical') render();
+      }, wait));
+    }
+    return;
+  }
   const fromMap = ms.animFrom;
   ms.animFrom = null;
-  const reduced = matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
   const g = snap?.kind === 'manila' ? snap.game : null;
   const anyMoved = !!(fromMap && g?.ships?.some((sh, si) => fromMap[si] !== undefined && fromMap[si] !== sh.pos));
   if (fromMap && !reduced && anyMoved) {
@@ -1579,6 +1624,114 @@ function finishManilaDice() {
       if (snap?.kind === 'manila') render();
     }, wait));
   }
+}
+// 🎲 瘋狂運動會真 3D 擲骰動畫（支援主要移動單骰／重骰、決鬥家雙骰對決、全員先手比骰）
+function playMaDice(ev, opts = {}) {
+  const box = $('#mDiceStage');
+  if (!box || !ev) return;
+  closeManilaDice();
+  const reduced = matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+  const g = snap?.kind === 'magical' ? snap.game : null;
+  const pById = Object.fromEntries((g?.players || []).map((p) => [p.id, p]));
+  const rById = Object.fromEntries((g?.racers || []).map((r) => [r.id, r]));
+  const holdOverlay = !!opts.holdOverlay;
+  ma.holdOverlay = holdOverlay;
+  mDiceAfter = opts.onFinish || null;
+
+  let inner = '';
+  let count = 1;
+  let stayMs = reduced ? 1300 : 2050;
+
+  if (ev.kind === 'roll') {
+    const info = MA_MAP[ev.racer] || { name: '選手', color: '#e6b800' };
+    const owner = pById[ev.by];
+    const pcol = MA_PCOLORS[(owner?.color ?? 0) % MA_PCOLORS.length];
+    const curR = rById[ev.racerId];
+    const toPos = curR ? (curR.finished ? 30 : curR.pos) : null;
+    if (!reduced && ev.from != null && ev.racerId) {
+      ma.animFrom = { [ev.racerId]: ev.from };
+    }
+    const hd = ev.reroll === 'mag' ? '🎩 魔術師重骰！' : ev.reroll === 'dm' ? '🎰 骰子商人重骰！' : '🎲 擲骰移動！';
+    let pill = `<span class="ma-dpill">🎲 骰出 ${ev.d} 點！</span>`;
+    if (ev.guess != null) {
+      pill = ev.guess === ev.d
+        ? `<span class="ma-dpill win">🧠 猜中 ${ev.d} 點！再多一回合！</span>`
+        : `<span class="ma-dpill">🎲 骰出 ${ev.d} 點（預測 ${ev.guess}）</span>`;
+    } else if (curR?.finished) {
+      pill = `<span class="ma-dpill win">🎲 ${ev.d} 點 → 🏁 衝過終點！</span>`;
+    } else if (ev.from != null && toPos != null && toPos !== ev.from && !opts.pendingChoice) {
+      pill = `<span class="ma-dpill ${toPos < ev.from ? 'bad' : 'win'}">🎲 ${ev.d} 點 · 第 ${ev.from} → ${toPos} 格</span>`;
+    }
+    if (opts.pendingChoice) stayMs = reduced ? 1100 : 1700;
+    inner = `<div class="m-dtray ma-dtray"><div class="m-dtray-hd">${hd}</div>
+      <div class="ma-dsingle">
+        <div class="ma-dhero" style="--pc:${pcol}"><img src="${maImg(ev.racer)}" alt="${esc(info.name)}"><div class="ma-dhero-tx"><b>${esc(info.name)}</b><small>${esc(owner?.name || '')}</small></div></div>
+        <div class="m-dwrap ${reduced ? '' : 'throw'}" data-di="0" style="--dl:0s">${mDieCube(ev.d, info.color || pcol, 1)}</div>
+        <div class="m-dres ${reduced ? 'show' : ''}" data-dr="0">${pill}</div>
+      </div>
+      <div class="m-dtray-ft">${holdOverlay ? '點擊任意處跳過骰盤，查看衝線結算' : '點擊任意處快速繼續'}</div></div>`;
+  } else if (ev.kind === 'duel') {
+    count = 2;
+    stayMs = reduced ? 1500 : 2450;
+    const i1 = MA_MAP[ev.racer1 || ev.racer] || { name: '決鬥家', color: '#b556a8' };
+    const i2 = MA_MAP[ev.racer2] || { name: '對手', color: '#3b82c4' };
+    const w1 = ev.winSide === 1 || ev.d1 >= ev.d2;
+    inner = `<div class="m-dtray ma-dtray"><div class="m-dtray-hd">⚔️ DUEL 決鬥比骰！</div>
+      <div class="ma-dduel">
+        <div class="m-dcol" data-dc="0">
+          <div class="m-dwrap ${reduced ? '' : 'throw'}" data-di="0" style="--dl:0s">${mDieCube(ev.d1, i1.color, 0)}</div>
+          <img src="${maImg(i1.id || ev.racer)}" alt="" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #fff">
+          <b style="font-size:var(--s1)">${esc(i1.name)}</b>
+          <div class="m-dres ${reduced ? 'show' : ''}" data-dr="0"><span class="ma-dpill ${w1 ? 'win' : ''}">${w1 ? `🏆 ${ev.d1} 勝 +2格` : `${ev.d1} 點`}</span></div>
+        </div>
+        <div class="ma-dvs">VS</div>
+        <div class="m-dcol" data-dc="1">
+          <div class="m-dwrap ${reduced ? '' : 'throw'}" data-di="1" style="--dl:0.12s">${mDieCube(ev.d2, i2.color, 2)}</div>
+          <img src="${maImg(i2.id || ev.racer2)}" alt="" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #fff">
+          <b style="font-size:var(--s1)">${esc(i2.name)}</b>
+          <div class="m-dres ${reduced ? 'show' : ''}" data-dr="1"><span class="ma-dpill ${!w1 ? 'win' : ''}">${!w1 ? `🏆 ${ev.d2} 勝 +2格` : `${ev.d2} 點`}</span></div>
+        </div>
+      </div>
+      <div class="m-dtray-ft">平手決鬥家勝 · 點擊任意處繼續</div></div>`;
+  } else if (ev.kind === 'rollOff' && ev.rolls?.length) {
+    count = ev.rolls.length;
+    stayMs = reduced ? 1600 : 2550;
+    inner = `<div class="m-dtray ma-dtray"><div class="m-dtray-hd">🎲 比骰決定先手順序！</div>
+      <div class="ma-dro">${ev.rolls.map((x, i) => {
+        const p = pById[x.id], col = MA_PCOLORS[(p?.color ?? i) % MA_PCOLORS.length], win = x.id === ev.winner;
+        return `<div class="m-dcol">
+          <div class="m-dwrap ${reduced ? '' : 'throw'}" data-di="${i}" style="--dl:${(i * 0.08).toFixed(2)}s">${mDieCube(x.d, col, i)}</div>
+          <b style="font-size:var(--s1);max-width:86px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p?.name || '?')}</b>
+          <div class="m-dres ${reduced ? 'show' : ''}" data-dr="${i}"><span class="ma-dpill ${win ? 'win' : ''}">${win ? `👑 ${x.d} ${ev.tag || '先選'}` : `${x.d} 點`}</span></div>
+        </div>`;
+      }).join('')}</div>
+      <div class="m-dtray-ft">最高不重複點數先手 · 點擊任意處繼續</div></div>`;
+  } else {
+    return;
+  }
+
+  box.innerHTML = inner;
+  box.classList.add('on');
+  navigator.vibrate?.(ev.kind === 'duel' ? [25, 45, 35] : [20, 40, 25]);
+
+  if (!reduced) {
+    const landAt = ev.kind === 'roll' ? 1020 : 1180;
+    mDiceTimers.push(setTimeout(() => {
+      for (let i = 0; i < count; i++) {
+        const w = box.querySelector(`[data-di="${i}"]`), r = box.querySelector(`[data-dr="${i}"]`);
+        if (w) w.classList.add('land');
+        if (r) r.classList.add('show');
+      }
+      if (ev.kind === 'duel') {
+        const loseIdx = (ev.winSide === 1 || ev.d1 >= ev.d2) ? 1 : 0;
+        box.querySelector(`[data-dc="${loseIdx}"]`)?.classList.add('ma-dcol-lose');
+      }
+    }, landAt));
+  }
+  mDiceTimers.push(setTimeout(() => {
+    box.classList.add('out');
+    mDiceTimers.push(setTimeout(finishManilaDice, 260));
+  }, stayMs));
 }
 function playManilaDice(ev, opts = {}) {
   const box = $('#mDiceStage');
@@ -2162,25 +2315,42 @@ function magical() {
   };
 
   if (g.status !== 'play') { sheet = false; ma.inspect = null; ma.dex = false; }
+  else ma.holdOverlay = false;
   if (g.stage !== 'draft') ma.draftSel = null;
   if (g.stage !== 'select') ma.pickSel = [];
   if (g.stage === 'draft' && ma.draftSel && !g.draft?.pool.includes(ma.draftSel)) ma.draftSel = null;
   if (g.prompt?.kind !== 'mainAction') { ma.guess = null; ma.flipOpen = false; }
 
-  // 動作橫幅（擲骰、能力觸發、決鬥、吃掉、衝線）
+  // 動作橫幅 & 3D 擲骰動畫（擲骰、重骰、決鬥、先手比骰、能力觸發、吃掉、衝線）
   seen ??= {};
   const feed = g.evFeed || [];
   const lastNo = feed.at(-1)?.no ?? null;
-  if (seen.evNo !== undefined) {
-    const fresh = feed.filter((x) => x.no > (seen.evNo ?? 0));
-    for (const fe of fresh) {
-      if (fe.kind === 'chomp' || fe.kind === 'finish' || fe.kind === 'duel') {
+  const playFreshAlerts = (list) => {
+    for (const fe of list) {
+      if (fe.kind === 'chomp' || fe.kind === 'finish') {
         skipBanner(`${esc(fe.title)}${fe.sub ? `<div style="margin-top:6px;font-size:var(--s2)">${esc(fe.sub)}</div>` : ''}`, 2400);
         navigator.vibrate?.([40, 30, 50]);
-      } else if (fe.title && fe.kind !== 'move' && fe.kind !== 'warp') {
+      } else if (fe.title && fe.kind !== 'move' && fe.kind !== 'warp' && fe.kind !== 'roll' && fe.kind !== 'duel' && fe.kind !== 'rollOff') {
         enqueueManilaAct(fe, null);
       }
     }
+  };
+  if (seen.evNo !== undefined) {
+    const fresh = feed.filter((x) => x.no > (seen.evNo ?? 0));
+    const diceEv = [...fresh].reverse().find((x) => x.kind === 'roll' || x.kind === 'duel' || (x.kind === 'rollOff' && x.rolls?.length));
+    if (diceEv) {
+      const rest = fresh.filter((x) => x !== diceEv);
+      const pendingChoice = !!(g.prompt && ['reroll', 'alchemist', 'rocket'].includes(g.prompt.kind));
+      playMaDice(diceEv, {
+        holdOverlay: g.status !== 'play',
+        pendingChoice,
+        onFinish: rest.length ? () => playFreshAlerts(rest) : null,
+      });
+    } else {
+      playFreshAlerts(fresh);
+    }
+  } else if (g.stage === 'draft' && g.ev?.kind === 'rollOff' && g.ev.rolls?.length && g.draft?.round === 1 && g.myRoster.length === 0) {
+    playMaDice(g.ev);
   }
   seen.evNo = lastNo;
 
@@ -2254,13 +2424,15 @@ function magical() {
     const byPos = {};
     for (const r of g.racers) {
       if (r.eliminated) continue;
-      const k = r.finished ? 30 : r.pos;
+      const held = ma.animFrom && ma.animFrom[r.id] !== undefined ? ma.animFrom[r.id] : null;
+      const k = held !== null ? held : (r.finished ? 30 : r.pos);
       (byPos[k] ??= []).push(r);
     }
     const renderTok = (r, sm = false) => {
       const p = pById[r.ownerId], col = MA_PCOLORS[(p?.color ?? 0) % MA_PCOLORS.length];
       const isAct = g.status === 'play' && (g.prompt?.racerId === r.id || (!g.prompt && g.activeRacerId === r.id));
-      return `<button class="ma-tok ${sm ? 'sm' : ''} ${isAct ? 'act' : ''} ${r.tripped ? 'trip' : ''} ${r.finished ? 'fin' : ''}" style="--pc:${col}" data-a="maInspect" data-v="${esc(r.id)}" title="${esc(rName(r))}（${esc(nm(r.ownerId))}）" aria-label="${esc(rName(r))}"><img src="${maImg(r.base)}" alt="${esc(MA_MAP[r.base].name)}"></button>`;
+      const isHop = ma.hopIds?.has(r.id);
+      return `<button class="ma-tok ${sm ? 'sm' : ''} ${isAct ? 'act' : ''} ${isHop ? 'hop' : ''} ${r.tripped ? 'trip' : ''} ${r.finished && !(ma.animFrom && ma.animFrom[r.id] !== undefined) ? 'fin' : ''}" style="--pc:${col}" data-a="maInspect" data-v="${esc(r.id)}" title="${esc(rName(r))}（${esc(nm(r.ownerId))}）" aria-label="${esc(rName(r))}"><img src="${maImg(r.base)}" alt="${esc(MA_MAP[r.base].name)}"></button>`;
     };
     const startToks = (byPos[0] || []).map((r) => renderTok(r, false)).join('');
     // 5 列 × 6 欄蛇行賽道（1..30；第 30 格 = 終點線；第 15 格標示第 2 轉角供飛船參考）
@@ -2303,7 +2475,7 @@ function magical() {
 
     // 底部互動操作托盤
     if (g.status !== 'play') {
-      trayHTML = magicalOverlay(g, s);
+      trayHTML = ma.holdOverlay ? '<div class="tray"><div class="mute" style="text-align:center;padding:8px 0">🏁 選手衝線中，即將進入結算…</div></div>' : magicalOverlay(g, s);
     } else {
       const pr = g.prompt;
       const isMePrompt = pr && pr.pid === me;
