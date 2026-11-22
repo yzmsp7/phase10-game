@@ -1254,7 +1254,7 @@ function randomInt(n) { return require('node:crypto').randomInt(n); }
     assert.ok(fr.game.turnNo >= 2, '出牌後換人');
     assert.equal((await post('start', f)).status, 400, '已開始');
     const wl = (f2) => [...read(f2).matchAll(/^(?:const KINDS = \{| *const GAMES = \{)(.*)$/gm)].map((m) => [...m[1].matchAll(/\b(\w+): \{/g)].map((x) => x[1]).filter((k) => k !== 'eng').join());
-    assert.equal(wl('server.js')[0], 'phase10,fuji,cats,manila'); assert.equal(wl('index.html')[0], 'phase10,fuji,cats,manila', '伺服器與前端的遊戲鍵名要一致');
+    assert.equal(wl('server.js')[0], 'phase10,fuji,cats,manila,magical'); assert.equal(wl('index.html')[0], 'phase10,fuji,cats,manila,magical', '伺服器與前端的遊戲鍵名要一致');
   }
   { // 貓貓食堂：人數 3–6、輪數預設 3 且可自訂（1–10）、房主可在等待室修改輪數、同時蓋牌同步與隱藏
     for (const bad of [0, 11, 2.5, '3']) assert.equal((await post('create', { name: 'c', kind: 'cats', rounds: bad })).status, 400, `輪數 ${bad} 不合法`);
@@ -1346,6 +1346,195 @@ function randomInt(n) { return require('node:crypto').randomInt(n); }
     void sseB;
     assert.equal((await post('leave', mb)).status, 200);
     assert.ok(!server.rooms.has(mb.code), '最後真人離開後應自動清理僅剩電腦的房間');
+  }
+  { // 瘋狂運動會（Magical Athlete）：36 選手完整性、規則單元測試、2P/3P雙選手/4P標準整局模擬、HTTP+SSE+電腦玩家
+    const MA = require('./magical');
+    assert.equal(MA.RACERS.length, 36, '應有完整 36 位選手');
+    assert.equal(new Set(MA.RACERS.map((r) => r.id)).size, 36, '36 位選手 ID 皆唯一');
+    // 檢查 index.html 的 MA_RACERS 與 magical.js 一致，且 36 張裁切插圖皆可讀取
+    const maIdsInPage = [...read('index.html').split('const MA_RACERS = [')[1].split('const MA_MAP')[0].matchAll(/id: '(\w+)'/g)].map((m) => m[1]);
+    assert.deepEqual(maIdsInPage, MA.RACERS.map((r) => r.id), '前端與後端 36 位選手清單要一致');
+    for (const r of MA.RACERS) {
+      const resp = await fetch(`${base}/assets/magical/${r.id}.jpg`);
+      assert.equal(resp.status, 200, `${r.id}.jpg 應可讀取`);
+      assert.equal(resp.headers.get('content-type'), 'image/jpeg');
+    }
+
+    // 1. 蛇行選秀：4 人標準（2 輪×8 張→每人 4 位）、2 人變體（2 輪×8 張 ABBAABBA→每人 8 位）、3 人雙選手（4 輪×6 張→每人 8 位）
+    const makePs = (cnt) => Array.from({ length: cnt }, (_, i) => ({ id: `p${i}`, name: `玩家${i}` }));
+    const simDraft = (g) => {
+      let guard = 0;
+      while (g.stage === 'draft' && guard++ < 50) MA.botPlay(g, g.draft.order[g.draft.idx]);
+    };
+    const g4 = MA.create(makePs(4), { schedule: 'std' });
+    assert.equal(g4.mode, 'std');
+    simDraft(g4);
+    assert.equal(g4.stage, 'select');
+    assert.ok(g4.players.every((p) => p.roster.length === 4), '4 人標準每人 4 位選手');
+
+    const g2 = MA.create(makePs(2), { schedule: 'std' });
+    assert.equal(g2.mode, '2p');
+    assert.equal(g2.draft.order.join(',').split(',').length, 8);
+    simDraft(g2);
+    assert.equal(g2.stage, 'select');
+    assert.ok(g2.players.every((p) => p.roster.length === 8), '2 人變體每人 8 位選手');
+
+    const g3d = MA.create(makePs(3), { schedule: 'wild', double3p: true });
+    assert.equal(g3d.mode, '3p2');
+    simDraft(g3d);
+    assert.equal(g3d.stage, 'select');
+    assert.ok(g3d.players.every((p) => p.roster.length === 8), '3 人雙選手每人 8 位選手');
+
+    // 2. 關鍵能力與連鎖精確驗證（建構乾淨起跑賽局）
+    const mkRace = (specs, track = 'mild') => {
+      const ps = specs.map((sp, i) => ({ id: `p${i}`, name: `P${i}` }));
+      const g = MA.create(ps, { schedule: track === 'wild' ? 'wild' : 'mild' });
+      g.stage = 'select';
+      g.race = 1;
+      g.track = track;
+      g.activePlayerIdx = 0;
+      g.players.forEach((p, i) => { p.roster = [specs[i], 'banana', 'coach', 'legs']; p.used = []; p.selected = null; });
+      specs.forEach((sp, i) => MA.act(g, `p${i}`, { type: 'selectRacers', racers: [sp] }));
+      return g;
+    };
+
+    // 2a. 大長腿(5) + 同格教練(+1) + 對手黏液怪(-1) = 5 格
+    {
+      const g = mkRace(['legs', 'coach', 'gunk']);
+      assert.equal(g.prompt.kind, 'mainAction');
+      MA.act(g, 'p0', { type: 'legs' });
+      assert.equal(g.racers[0].pos, 5, '大長腿 5 + 教練 1 - 黏液 1 = 5 格');
+    }
+    // 2b. 香蕉絆倒超越者 + 絆倒者下回合爬起跳過主要移動 + 吐槽怪觸發 +2
+    {
+      const g = mkRace(['legs', 'banana', 'heckler']);
+      g.racers[1].pos = 2; // 香蕉在 2 格
+      MA.act(g, 'p0', { type: 'legs' }); // 大長腿 0→5 超越香蕉
+      assert.equal(g.racers[0].pos, 5);
+      assert.equal(g.racers[0].tripped, true, '超越香蕉應絆倒');
+      // 讓 p1、p2 動完回到 p0
+      MA.act(g, 'p1', { type: 'roll' });
+      MA.act(g, 'p2', { type: 'roll' });
+      // 輪到 p0 時應自動爬起來跳過主要移動，並立刻觸發吐槽怪 +2
+      assert.equal(g.racers[0].tripped, false, 'p0 輪到自己時應自動爬起來');
+      assert.equal(g.racers[0].pos, 5, '絆倒恢復不移動');
+    }
+    // 2c. 巨嬰 + 挪動怪無限循環防護（PDF p.21 規則 #8）
+    {
+      const g = mkRace(['legs', 'huge_baby', 'scoocher']);
+      g.racers[1].pos = 6; // 巨嬰在 6 格
+      g.racers[2].pos = 5; // 挪動怪在 5 格（別人發動能力→挪到 6→被巨嬰擠回 5→巨嬰發動能力→挪動怪又想挪到 6）
+      MA.act(g, 'p0', { type: 'legs' }); // 大長腿發動能力觸發挪動怪
+      assert.equal(g.racers[2].pos, 5, '巨嬰與挪動怪循環應依規則完成一次後中止，不當機');
+    }
+    // 2d. 規則魔人阻擋超過終點
+    {
+      const g = mkRace(['legs', 'stickler', 'coach']);
+      g.racers[0].pos = 27; // 27 + 5 = 32 > 30
+      MA.act(g, 'p0', { type: 'legs' });
+      assert.equal(g.racers[0].pos, 27, '規則魔人在場時超過 30 格應停在原地');
+      assert.equal(g.racers[0].finished, false);
+    }
+    // 2e. 幕後黑手預言自己拿第 1 → 同時拿第 1 和第 2 並立刻結束比賽！
+    {
+      const g = mkRace(['mastermind', 'banana', 'coach']);
+      assert.equal(g.prompt.kind, 'mastermindPick');
+      MA.act(g, 'p0', { type: 'mastermindPick', targetId: g.racers[0].id });
+      g.racers[0].pos = 29;
+      MA.act(g, 'p0', { type: 'roll' });
+      assert.equal(g.status, 'raceEnd', '幕後黑手預言自己奪冠並衝線，比賽應立刻結束');
+      assert.equal(g.summary.first.ownerId, 'p0');
+      assert.equal(g.summary.second.ownerId, 'p0', '幕後黑手應同時包辦第 1 與第 2 名');
+      assert.equal(g.players[0].golds[0] + g.players[0].silvers[0], 4, '第 1 場金盃 3 + 銀徽章 1 = 4 分');
+    }
+    // 2f. 西西弗斯賽前拿 4 分 + 可愛魯蛇獨自墊底拿 1 分 + 大嘴怪淘汰對手（狂野賽道箭頭）
+    {
+      const g = mkRace(['sisyphus', 'lovable_loser', 'banana']);
+      assert.equal(g.players[0].bronze, 4, '西西弗斯賽前應先拿 4 分');
+      g.racers[0].pos = 4; g.racers[2].pos = 3; g.racers[1].pos = 0; // lovable_loser 獨自墊底
+      MA.act(g, 'p0', { type: 'roll' });
+      // 輪到 p1 (lovable_loser) 時自動觸發「主要移動前獨自墊底 +1 分」
+      assert.equal(g.players[1].bronze, 1, '可愛魯蛇獨自墊底應拿 1 枚銅分');
+    }
+    {
+      // 大嘴怪（p0）踩到狂野賽道第 5 格箭頭(+2)→落到第 7 格與單一對手同格，吃掉對方！
+      const g = mkRace(['mouth', 'banana', 'coach'], 'wild');
+      g.racers[0].pos = 0; g.racers[1].pos = 7; g.racers[2].pos = 10;
+      // 讓 p0 剛好停在 7 格：設定 p0 在 6 格並測停格吃人（透過雙胞胎/夾腳拖/直接移到 5 格箭頭）
+      g.racers[0].pos = 5;
+      // 用電燈泡 / 催眠師不需動 p0；改測 p0 用普通擲骰或直接用「奇蹟蛋→大長腿」無法；改讓 p0 是大嘴怪、p1 在 5 格、p2 在 10 格，把 p0 放在 14 格（箭頭+3→17）且把對手放 17 格不太需要骰；最直接：催眠師(p0)或夾腳拖(p0)讓大嘴怪(p1)傳送到剛好 1 人的格！
+      const g2 = mkRace(['flip_flop', 'mouth', 'banana']);
+      g2.racers[0].pos = 8; // flip_flop 在 8
+      g2.racers[1].pos = 1; // mouth 在 1
+      g2.racers[2].pos = 8; // banana 也在 8（與 flip_flop 同格）
+      // flip_flop 和 mouth 互換 → mouth 傳送到第 8 格（剛好只有 banana 1 人）→ 一口吃掉 banana！
+      MA.act(g2, 'p0', { type: 'flipFlop', targetId: g2.racers[1].id });
+      assert.equal(g2.racers[1].pos, 8, '大嘴怪換到第 8 格');
+      assert.equal(g2.racers[2].eliminated, true, '大嘴怪停在剛好只有 1 位對手的格子應淘汰對方');
+      assert.equal(g2.firstEliminatedOwner, 'p2', '應記錄首位被淘汰玩家供下場先攻');
+    }
+    // 2g. 夾腳拖同時互換位置（不算移動）
+    {
+      const g = mkRace(['flip_flop', 'banana', 'coach']);
+      g.racers[1].pos = 12;
+      MA.act(g, 'p0', { type: 'flipFlop', targetId: g.racers[1].id });
+      assert.equal(g.racers[0].pos, 12, '夾腳拖應換到 12 格');
+      assert.equal(g.racers[1].pos, 0, '香蕉應換到 0 格');
+      assert.equal(g.racers[0].tripped, false, '傳送不算超越香蕉，不絆倒');
+    }
+
+    // 3. 完整 4 場機器人整局模擬（標準 4 人、2 人變體、3 人雙選手變體、6 人大亂鬥）
+    for (const [cnt, opts, tag] of [
+      [2, { schedule: 'std' }, '2人變體'],
+      [3, { schedule: 'wild', double3p: true }, '3人雙選手狂野'],
+      [4, { schedule: 'std' }, '4人標準'],
+      [6, { schedule: 'wildFirst' }, '6人標準'],
+    ]) {
+      const sim = MA.create(makePs(cnt), opts);
+      let steps = 0;
+      while (sim.status !== 'over' && steps++ < 4000) {
+        if (sim.status === 'raceEnd') {
+          for (const p of sim.players) if (p.in && !sim.nextReady.includes(p.id)) MA.botPlay(sim, p.id);
+        } else if (sim.stage === 'select') {
+          for (const p of sim.players) if (p.in && !p.selected) MA.botPlay(sim, p.id);
+        } else {
+          MA.botPlay(sim, sim.players[sim.turn].id);
+        }
+      }
+      assert.equal(sim.status, 'over', `${tag} 應在合理步數內完成 4 場比賽（目前 ${sim.status} 第 ${sim.race} 場）`);
+      assert.equal(sim.race, 4, `${tag} 應跑完 4 場`);
+      assert.ok(sim.winners.length >= 1, `${tag} 應產生總冠軍`);
+    }
+
+    // 4. HTTP + SSE + AI 電腦玩家整合測試
+    assert.equal((await post('create', { name: 'bad', kind: 'magical', schedule: 'hack' })).status, 400, '無效賽程被拒');
+    const mg = (await post('create', { name: '跑者甲', kind: 'magical', schedule: 'wildFirst', double3p: true })).json;
+    const mgr = server.rooms.get(mg.code);
+    assert.equal(mg.kind, 'magical');
+    assert.deepEqual([mgr.settings.schedule, mgr.settings.double3p], ['wildFirst', true]);
+    assert.equal((await post('settings', { ...mg, schedule: 'std', double3p: false })).status, 200);
+    assert.deepEqual([mgr.settings.schedule, mgr.settings.double3p], ['std', false]);
+    const mgv0 = await sseOnce(mg);
+    assert.deepEqual([mgv0.kind, mgv0.min, mgv0.max], ['magical', 2, 6]);
+    assert.equal((await post('start', mg)).status, 400, '瘋狂運動會 1 人不能開');
+    assert.equal((await post('addBot', mg)).status, 200, '瘋狂運動會支援加電腦玩家');
+    assert.equal((await post('addBot', mg)).status, 200);
+    assert.equal(mgr.players.length, 3);
+    mgr.settings.botDelay = 10;
+    const acM = new AbortController();
+    const sseM = await fetch(`${base}/api/events?code=${mg.code}&token=${mg.token}`, { signal: acM.signal });
+    assert.equal((await post('start', mg)).status, 200);
+    // 電腦應自動完成自己的選秀順位
+    if (mgr.game.draft.order[mgr.game.draft.idx] === mgr.players[0].id) {
+      await post('act', { ...mg, action: { type: 'draftPick', racer: mgr.game.draft.pool[0] } });
+    }
+    const mgTurn0 = mgr.game.turnNo;
+    await new Promise((r) => setTimeout(r, 200));
+    assert.ok(mgr.game.turnNo > mgTurn0, '瘋狂運動會電腦玩家應自動選秀推進回合');
+    acM.abort();
+    void sseM;
+    assert.equal((await post('leave', mg)).status, 200);
+    assert.ok(!server.rooms.has(mg.code), '最後真人離開後應自動清理瘋狂運動會房間');
   }
   const cardsIn = (g) => g.players.reduce((a, p) => a + p.hand.length, 0) + g.groups.reduce((a, x) => a + x.cards.length, 0) + g.draw.length + g.disc.length;
 

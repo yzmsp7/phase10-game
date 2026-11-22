@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Phase 10・富士流・貓貓食堂・馬尼拉</title>
+<title>Phase 10・富士流・貓貓食堂・馬尼拉・瘋狂運動會</title>
 <style>
 /* 字級只有 4 級、字重只有 400/600；間距走 4/8 格線。--mute 在 --panel2 上 4.84:1（原 #a8c7b8 只有 3.57） */
 :root{--s1:12px;--s2:16px;--s3:20px;--s4:28px;--bg:#0f3d2e;--panel:#165740;--panel2:#1d6a4f;--ink:#f6f3ea;--mute:#cfe3d8;--accent:#f6c945;--R:#d64545;--B:#3b73d4;--G:#2e9e5b;--Y:#e0b020}
@@ -116,7 +116,7 @@ input[readonly]{width:100%}
 .card.X b{font-size:var(--s3)}.card.X i{font-size:11px;line-height:1.1;text-align:center;max-width:100%}
 .trophy{display:inline-block;animation:pop .7s cubic-bezier(.2,1.4,.4,1)}
 /* 首頁選遊戲、房間、富士流牌桌（手機優先；字級只用 --s1..4，間距 4/8 格線） */
-.gsel{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}@media(min-width:640px){.gsel{grid-template-columns:repeat(4,1fr)}}.gsel button{min-height:92px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:12px 8px;line-height:1.2}.gsel .gi{font-size:var(--s4);line-height:1}.gsel small{font-weight:400}
+.gsel{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}@media(min-width:640px){.gsel{grid-template-columns:repeat(5,1fr)}}.gsel button{min-height:92px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:12px 8px;line-height:1.2}.gsel .gi{font-size:var(--s4);line-height:1}.gsel small{font-weight:400}
 .how{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}.how div{background:#0c2f23;border-radius:12px;padding:12px 8px;text-align:center;font-size:var(--s1);line-height:1.3}.how span{display:block;font-size:var(--s4);line-height:1.2;margin-bottom:4px}
 .fold{background:transparent;color:var(--mute);font-weight:400;width:100%;min-height:44px;padding:8px 0;display:flex;align-items:center;gap:8px;text-align:left}.fold::before{content:'▸'}.fold[aria-expanded=true]::before{content:'▾'}.foldb{padding-bottom:8px}
 .av{flex:none;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:600;color:#fff;background:hsl(var(--h) 45% 38%)}
@@ -396,6 +396,11 @@ body.manila-mode button.ghost{border-color:#9e7d4a;color:#f3e4c3}
 .m-chips{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
 .m-chip{min-height:48px;padding:6px 10px;border-radius:10px;background:#1e130b;border:1.5px solid #75562c;color:#f8eed8;display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:var(--s1)}
 .m-chip.on{border-color:var(--gc);background:#342214;box-shadow:0 0 0 1.5px var(--gc)}
+.m-chip.short{opacity:.78;border-style:dashed;border-color:#a86c36;cursor:pointer}
+.m-chip.short b{color:#ff9e90}
+.m-buy-banner{background:linear-gradient(180deg,#4a3019,#332010);border:1.5px solid #e8b954;border-radius:10px;padding:10px 12px;margin-top:10px;color:#fff7e2;font-size:var(--s1)}
+.m-buy-banner.ready{background:linear-gradient(180deg,#1c4a31,#133322);border-color:#5ce09e}
+.overlay.m-in{animation:mFadeIn .28s ease-out both}
 .m-alloc{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;background:#1d120a;border-radius:10px;margin-top:8px;border:1px solid #6b4e27;border-left:4px solid var(--gc)}
 .m-cert{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px;background:linear-gradient(180deg,#f4e4c2,#e0c38c);color:#2b1a0e;border:2px solid #8a6630;border-left:5px solid var(--gc);border-radius:10px;margin-top:10px;box-shadow:inset 0 0 0 2px #fff6df88,0 4px 10px #0a050288;position:relative}
 .m-cert.mort{background:linear-gradient(180deg,#dfd1b6,#c7b494);border-style:dashed;border-left-style:solid}
@@ -482,6 +487,84 @@ body.manila-mode button.ghost{border-color:#9e7d4a;color:#f3e4c3}
 .m-map{padding:10px 8px;gap:10px}.m-bay{height:300px;gap:5px}
 .m-boat-svg{width:52px;height:78px}.m-boat-cargo{top:13px;width:24px;height:24px}.m-boat-crew{top:41px;width:36px}
 }
+/* 瘋狂運動會（Magical Athlete）：CMYK 美漫賽道主題（4 級字級、4/8 格線、手機優先） */
+body.magical-mode{--bg:#151226;--panel:#211d3a;--panel2:#2d274e;--ink:#fbf8f1;--mute:#c9c4e4;--accent:#ffd23f;background:radial-gradient(circle at 50% 0%,#28214a 0%,#151226 72%)}
+body.magical-mode .tray{border-top:2px solid #483f78;box-shadow:0 -10px 24px #090712cc}
+body.magical-mode .fmeta,body.magical-mode .fticker{border-color:#483f78}
+body.magical-mode .rxp{border-color:#483f78;box-shadow:0 8px 20px #090712cc}
+body.magical-mode .slot{background:#161229}
+.ma-pbar{display:flex;gap:8px;overflow-x:auto;padding:8px 0 4px;scrollbar-width:none}.ma-pbar::-webkit-scrollbar{display:none}
+.ma-pl{flex:0 0 auto;min-width:116px;padding:8px 10px;border-radius:12px;background:var(--panel);border:2px solid #3c3466;text-align:left;color:var(--ink);cursor:pointer;transition:border-color .2s,transform .15s}
+.ma-pl.me{background:#2a244a;border-color:#685ca6}
+.ma-pl.turn{border-color:var(--accent);box-shadow:0 0 14px #ffd23f44}
+.ma-pl.out{opacity:.4}
+.ma-pl-top{display:flex;align-items:center;gap:6px;font-size:var(--s1);font-weight:600}
+.ma-pdot{width:10px;height:10px;border-radius:50%;flex:none;border:1.5px solid #fff}
+.ma-pl-nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:90px}
+.ma-pl-pts{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:4px;font-size:var(--s1);color:var(--mute);font-variant-numeric:tabular-nums}
+.ma-pl-pts b{font-size:var(--s2);color:var(--accent)}
+.ma-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:8px 0 12px}
+@media(min-width:640px){.ma-grid{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:860px){.ma-grid{grid-template-columns:repeat(4,1fr)}}
+.ma-rcard{position:relative;display:flex;flex-direction:column;padding:0;overflow:hidden;border-radius:14px;background:#1b1730;border:2.5px solid var(--rc,#ffd23f);color:var(--ink);text-align:left;cursor:pointer;box-shadow:0 6px 16px #07050f99;transition:transform .16s ease,box-shadow .16s ease}
+.ma-rcard:active{transform:scale(.98)}
+.ma-rcard.sel{outline:3px solid var(--accent);box-shadow:0 0 0 3px var(--accent),0 10px 22px #07050fcc;transform:translateY(-3px)}
+.ma-rcard.used{opacity:.42;filter:grayscale(.7);cursor:default}
+.ma-rcard-img{width:100%;aspect-ratio:155/115;object-fit:cover;display:block;border-bottom:2px solid #0b0914;background:#0e0c1a}
+.ma-rcard-bd{padding:8px 10px 10px;display:flex;flex-direction:column;gap:4px;flex:1}
+.ma-rcard-nm{font-size:var(--s2);font-weight:600;line-height:1.2;display:flex;align-items:baseline;justify-content:space-between;gap:4px;flex-wrap:wrap}
+.ma-rcard-nm small{font-size:11px;font-weight:400;color:var(--mute)}
+.ma-rcard-tx{font-size:var(--s1);color:#e5e1f7;line-height:1.35;font-weight:400}
+.ma-rtag{position:absolute;top:6px;right:6px;padding:2px 7px;border-radius:8px;font-size:11px;font-weight:600;background:#141024e8;color:var(--accent);border:1px solid var(--accent)}
+.ma-board{background:#120f21;border:3px solid #090710;border-radius:16px;padding:10px;margin:8px 0 12px;box-shadow:inset 0 0 0 2px #3c3466,0 10px 24px #06040dcc}
+.ma-board.wild{background:linear-gradient(180deg,#23122c 0%,#160e26 100%);box-shadow:inset 0 0 0 2px #a145c4,0 10px 24px #06040dcc}
+.ma-bhd{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;font-size:var(--s1)}
+.ma-start{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-height:46px;padding:6px 10px;margin-bottom:8px;border-radius:12px;background:linear-gradient(90deg,#2c7be5,#3b9ae8);border:2px solid #090710;color:#fff;box-shadow:inset 0 2px 0 #ffffff44}
+.ma-start-lb{font-weight:600;font-size:var(--s1);letter-spacing:1px;background:#0b0914aa;padding:2px 8px;border-radius:8px;flex:none}
+.ma-track{display:flex;flex-direction:column;gap:6px}
+.ma-trow{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;position:relative}
+.ma-cell{position:relative;min-height:66px;border-radius:10px;border:2px solid #090710;padding:3px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;box-shadow:inset 0 1.5px 0 #ffffff44;overflow:visible}
+.ma-cell.c1{background:#e874a8;color:#1b0812}
+.ma-cell.c2{background:#f5c83d;color:#211700}
+.ma-cell.c3{background:#3bb56b;color:#052110}
+.ma-cell.c4{background:#4794e6;color:#05182e}
+.ma-cell.c5{background:#eb5a3c;color:#fff}
+.ma-cell.corner{box-shadow:inset 0 0 0 2px #fff,0 0 10px #ffd23f66}
+.ma-cell.finish{background:repeating-conic-gradient(#141222 0 25%,#f9f6ee 0 50%) 50% / 14px 14px;border-color:var(--accent);box-shadow:0 0 14px #ffd23f88}
+.ma-cnum{position:absolute;top:2px;left:4px;font-size:10px;font-weight:600;line-height:1;opacity:.85;font-variant-numeric:tabular-nums;background:#00000033;color:#fff;padding:1px 4px;border-radius:5px}
+.ma-cdir{position:absolute;bottom:2px;right:3px;font-size:10px;opacity:.55;pointer-events:none;font-weight:600}
+.ma-csp{font-size:10px;font-weight:600;line-height:1.1;padding:1px 4px;border-radius:6px;background:#120d22dd;color:#fff;border:1px solid #ffffff55;white-space:nowrap;z-index:1}
+.ma-csp.star{color:#ffd23f;border-color:#ffd23f}
+.ma-csp.trip{color:#ff938b;border-color:#ff7266}
+.ma-csp.arr{color:#8df2b8;border-color:#5fe094}
+.ma-csp.back{color:#ffb4a8;border-color:#ff7b6b}
+.ma-toks{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:2px;z-index:2;max-width:100%}
+.ma-tok{position:relative;width:34px;height:34px;border-radius:50%;padding:0;border:2.5px solid var(--pc,#fff);background:#120f21;box-shadow:0 3px 8px #000b;cursor:pointer;flex:none;transition:transform .2s ease}
+.ma-tok img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
+.ma-tok.act{box-shadow:0 0 0 2.5px var(--accent),0 0 14px var(--accent);transform:scale(1.12);z-index:4}
+.ma-tok.trip{transform:rotate(-88deg);filter:brightness(.78)}
+.ma-tok.trip::after{content:'💫';position:absolute;top:-7px;right:-6px;font-size:13px;transform:rotate(88deg)}
+.ma-tok.fin::after{content:'🏆';position:absolute;top:-7px;right:-6px;font-size:12px}
+.ma-tok.sm{width:28px;height:28px}
+.ma-rbar{display:flex;gap:6px;overflow-x:auto;padding:4px 0 8px;scrollbar-width:none}.ma-rbar::-webkit-scrollbar{display:none}
+.ma-rchip{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;padding:4px 8px 4px 4px;border-radius:999px;background:var(--panel);border:1.5px solid #423970;color:var(--ink);font-size:var(--s1);cursor:pointer;white-space:nowrap}
+.ma-rchip.act{border-color:var(--accent);background:#332b5e}
+.ma-rchip.elim{opacity:.42;text-decoration:line-through}
+.ma-rchip img{width:24px;height:24px;border-radius:50%;object-fit:cover;border:2px solid var(--pc,#fff)}
+.ma-die-big{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:10px;background:#fff;color:#151226;font-size:var(--s4);font-weight:600;border:2.5px solid #090710;box-shadow:0 4px 10px #0008;font-variant-numeric:tabular-nums}
+.ma-opt-grid{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 8px}
+.ma-opt-grid button{min-height:40px;padding:6px 10px;font-size:var(--s1);display:inline-flex;align-items:center;gap:6px}
+.ma-opt-grid button img{width:22px;height:22px;border-radius:50%;object-fit:cover}
+.ma-guess{display:flex;gap:4px;align-items:center;margin-bottom:8px}
+.ma-guess button{flex:1;min-height:38px;padding:4px 0;font-size:var(--s2);font-variant-numeric:tabular-nums}
+.ma-podium{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0 12px}
+.ma-pod{background:var(--panel2);border-radius:12px;padding:10px;text-align:center;border:2px solid #483f78}
+.ma-pod.p1{border-color:#ffd23f;background:linear-gradient(180deg,#3d3017,#251d3a)}
+.ma-pod.p2{border-color:#c9d6e8;background:linear-gradient(180deg,#2d3448,#211d3a)}
+.ma-pod img{width:56px;height:56px;border-radius:50%;object-fit:cover;border:3px solid #fff;margin:4px auto;display:block}
+@media(max-width:600px){
+.ma-cell{min-height:56px}.ma-tok{width:28px;height:28px}.ma-tok.sm{width:24px;height:24px}
+}
 </style>
 </head>
 <body>
@@ -513,7 +596,65 @@ const store = {
   set(v) { try { v ? localStorage.setItem('p10', JSON.stringify(v)) : localStorage.removeItem('p10'); } catch {} },
 };
 // 遊戲種類（鍵名跟 server.js 的 KINDS 同一份）。邀請連結帶 &game=，收到的人直接進該遊戲的加入畫面；舊連結沒帶 = Phase 10
-const GAMES = { phase10: { name: 'Phase 10', icon: '🃏', people: '2–6', sub: '湊齊 10 個階段' }, fuji: { name: '富士流', icon: '🌊', people: '3–8', sub: '順水流走，先出完' }, cats: { name: '貓貓食堂', icon: '🐱', people: '3–6', sub: '猜首領去哪吃，別吃得比老大好！' }, manila: { name: '馬尼拉', icon: '⚓', people: '3–5', sub: '走私、競標、股票與海盜的博弈' } };
+const GAMES = { phase10: { name: 'Phase 10', icon: '🃏', people: '2–6', sub: '湊齊 10 個階段' }, fuji: { name: '富士流', icon: '🌊', people: '3–8', sub: '順水流走，先出完' }, cats: { name: '貓貓食堂', icon: '🐱', people: '3–6', sub: '猜首領去哪吃，別吃得比老大好！' }, manila: { name: '馬尼拉', icon: '⚓', people: '3–5', sub: '走私、競標、股票與海盜的博弈' }, magical: { name: '瘋狂運動會', icon: '🏃', people: '2–6', sub: '36 位怪咖選手大亂鬥，擲骰觸發超荒謬連鎖！' } };
+const MA_RACERS = [
+  { id: 'alchemist', name: '煉金術師', en: 'Alchemist', color: '#e6b800', short: '骰出 1 或 2 可改走 4 格', desc: '主要移動骰出 1 或 2 時，可以改為移動 4 格。' },
+  { id: 'baba_yaga', name: '芭芭雅嘎', en: 'Baba Yaga', color: '#4c73c4', short: '與我同格就絆倒對方', desc: '任何選手停在我所在格子，或我停在對方格子時，對方絆倒。' },
+  { id: 'banana', name: '香蕉', en: 'Banana', color: '#e6be1c', short: '超越我的選手會絆倒', desc: '任何選手在移動中超越我時，完成移動後會絆倒。' },
+  { id: 'blimp', name: '飛船', en: 'Blimp', color: '#d96b38', short: '15格前 +3，之後 −1', desc: '回合開始時若在第 2 轉角（15 格）前，主要移動 +3；在 15 格或之後則 −1。' },
+  { id: 'centaur', name: '半人馬', en: 'Centaur', color: '#d64545', short: '超越對手踢退 2 格', desc: '當我移動並超越其他選手時，該選手後退 2 格（最遠退回起點）。' },
+  { id: 'cheerleader', name: '啦啦隊長', en: 'Cheerleader', color: '#d4497a', short: '幫最後一名 +2，自己 +1', desc: '主要移動前，可讓所有最後一名選手移動 2 格；若這麼做，我也移動 1 格。' },
+  { id: 'coach', name: '教練', en: 'Coach', color: '#2e9e5b', short: '同格所有人主要移動 +1', desc: '和我同格的所有選手（包含我自己），主要移動都獲得 +1。' },
+  { id: 'copycat', name: '模仿貓', en: 'Copycat', color: '#3b82c4', short: '持續複製領先者的能力', desc: '我持續擁有目前領先者的能力（平手由我選擇，但不複製「賽前」能力）。' },
+  { id: 'dicemonger', name: '骰子商人', en: 'Dicemonger', color: '#b83b6e', short: '誰重骰主要移動我就 +1', desc: '所有選手每回合可重骰主要移動 1 次；每當其他選手重骰時，我移動 1 格。' },
+  { id: 'duelist', name: '決鬥家', en: 'Duelist', color: '#b556a8', short: '同格可喊決鬥！贏家 +2', desc: '每當有選手與我同格時，我可喊出決鬥！雙方比骰點，高者移動 2 格（平手我贏）。' },
+  { id: 'egg', name: '奇蹟蛋', en: 'Egg', color: '#3aa374', short: '賽前抽 3 張選手挑 1 能力', desc: '比賽開始前，從牌堆抽 3 張新選手並選 1 張，本場獲得其能力（含賽前能力）。' },
+  { id: 'flip_flop', name: '夾腳拖', en: 'Flip Flop', color: '#d9534f', short: '可不擲骰直接與人換位', desc: '可跳過主要移動擲骰，改為與另一位選手同時互換位置（視為傳送，不算移動）。' },
+  { id: 'genius', name: '天才', en: 'Genius', color: '#4a5fd4', short: '猜中骰點再多一回合', desc: '主要移動前可預測骰點；若猜中，本回合結束後我立刻再進行一個回合。' },
+  { id: 'gunk', name: '黏液怪', en: 'Gunk', color: '#7ea632', short: '所有其他選手主要移動 −1', desc: '其他所有選手的主要移動距離 −1（只減移動格數，不改變骰面點數）。' },
+  { id: 'hare', name: '野兔', en: 'Hare', color: '#459ed6', short: '主要移動 +2；獨自領先就睡著', desc: '我的主要移動 +2；但若回合開始時我獨自領先，則跳過本次主要移動。' },
+  { id: 'heckler', name: '吐槽怪', en: 'Heckler', color: '#c44690', short: '有人整回合只走 ≤1 格我就 +2', desc: '當任一選手結束回合時，位置與回合開始時相差 ≤1 格，我移動 2 格。' },
+  { id: 'huge_baby', name: '巨嬰', en: 'Huge Baby', color: '#d96ba8', short: '誰也不能跟我同格（退後1格）', desc: '除了起點外，沒有人能待在我的格子上；否則將對方放到我身後 1 格（不算移動）。' },
+  { id: 'hypnotist', name: '催眠師', en: 'Hypnotist', color: '#c49d27', short: '主要移動前可把一人傳過來', desc: '主要移動前，可選擇另一位選手傳送到我所在的格子（不算移動）。' },
+  { id: 'inchworm', name: '尺蠖', en: 'Inchworm', color: '#7a52b8', short: '別人骰 1 取消移動，我 +1', desc: '當其他選手主要移動骰出 1 時，取消該次移動，並由我移動 1 格。' },
+  { id: 'lackey', name: '跟班', en: 'Lackey', color: '#c44536', short: '別人骰 6 我搶先 +2', desc: '當其他選手主要移動骰出 6 時，在對方移動前我先移動 2 格。' },
+  { id: 'leaptoad', name: '跳蛙', en: 'Leaptoad', color: '#3b88d4', short: '移動時直接跳過有人的格子', desc: '移動過程中，會直接跳過所有有其他選手的格子（不計入步數）。' },
+  { id: 'legs', name: '大長腿', en: 'Legs', color: '#2e9968', short: '可不擲骰直接走 5 格', desc: '可跳過主要移動擲骰，改為直接移動 5 格（視為主要移動，會受加減影響）。' },
+  { id: 'lovable_loser', name: '可愛魯蛇', en: 'Lovable Loser', color: '#d45a8c', short: '獨自墊底就白拿 1 分', desc: '主要移動前，若我獨自位居最後一名，立刻獲得 1 枚銅分籌碼（+1 分）。' },
+  { id: 'magician', name: '魔術師', en: 'Magician', color: '#7b4cc4', short: '主要移動最多可重骰 2 次', desc: '我的主要移動最多可以重骰 2 次，且必須採用最後一次的結果。' },
+  { id: 'mastermind', name: '幕後黑手', en: 'Mastermind', color: '#2b8a5c', short: '預言誰拿第一，猜中我直接拿第二', desc: '首回合開始時預言一位冠軍（可選自己）；若猜中，比賽立刻結束且我獲得第 2 名！' },
+  { id: 'mouth', name: '大嘴怪', en: 'M.O.U.T.H.', color: '#d43d3d', short: '停在只有 1 人的格子就把他吃掉', desc: '當我停在剛好只有 1 位其他選手的格子時，將對方直接淘汰出本場比賽！' },
+  { id: 'party_animal', name: '派對動物', en: 'Party Animal', color: '#cc8b1f', short: '全場向我靠攏 1 格，同格每人 +1', desc: '主要移動前，全場其他選手往我的方向移動 1 格；同格每位對手讓我主要移動 +1。' },
+  { id: 'rocket_scientist', name: '火箭科學家', en: 'Rocket Scientist', color: '#d9573b', short: '骰完可選雙倍移動，但會絆倒', desc: '主要移動擲骰後，可選擇移動 2 倍點數；若這麼做，移動結束後我會絆倒。' },
+  { id: 'romantic', name: '浪漫主義者', en: 'Romantic', color: '#e0537a', short: '哪格剛好湊成兩人我就 +2', desc: '每當任一選手停在剛好有 1 位其他選手的格子上（兩人同格）時，我移動 2 格。' },
+  { id: 'scoocher', name: '挪動怪', en: 'Scoocher', color: '#9c6638', short: '別人每次發動能力我就 +1', desc: '每當其他選手的能力觸發發動時，我移動 1 格。' },
+  { id: 'sisyphus', name: '西西弗斯', en: 'Sisyphus', color: '#b87a2e', short: '賽前先拿 4 分；骰 6 退回起點扣 1 分', desc: '賽前先拿 4 分；但主要移動骰出 6 時不移動，改傳送回起點並失去 1 分。' },
+  { id: 'skipper', name: '船長', en: 'Skipper', color: '#2b78a8', short: '任何人骰出 1，下個換我！', desc: '每當任何選手主要移動骰出 1 時，下一個回合直接換我行動（接著依序順時針）。' },
+  { id: 'stickler', name: '規則魔人', en: 'Stickler', color: '#4554b8', short: '對手必須剛好步數才能衝線', desc: '其他選手必須移動剛好到終點的格數才能過線；若超過則留在原地不動。' },
+  { id: 'suckerfish', name: '吸盤魚', en: 'Suckerfish', color: '#469e5c', short: '同格對手移動時可搭便車', desc: '當與我同格的選手移動時，我可以跟著移動到對方的新格子（也能跟著衝過終點）。' },
+  { id: 'third_wheel', name: '電燈泡', en: 'Third Wheel', color: '#2d998c', short: '主要移動前可傳到剛好 2 人的格', desc: '主要移動前，可傳送到任一剛好有 2 位選手的格子，接著照常進行主要移動。' },
+  { id: 'twin', name: '雙胞胎', en: 'Twin', color: '#c45e9c', short: '賽前複製先前場次的冠軍能力', desc: '比賽開始前，可選擇一位先前場次奪冠的選手並獲得其能力（含賽前能力）。' },
+];
+const MA_MAP = Object.fromEntries(MA_RACERS.map((r) => [r.id, r]));
+const MA_PCOLORS = ['#e63946', '#2a7de1', '#27a85d', '#e59f1a', '#8c4dd6', '#e05a9f'];
+const MA_SCHED_LABELS = { std: '標準（溫和→狂野→溫和→狂野）', mild: '全溫和賽道（4 場 Mild Mile）', wild: '全狂野賽道（4 場 Wild Wilds）', wildFirst: '狂野先開（狂野→溫和→狂野→溫和）' };
+const MA_WILD = {
+  3: { type: 'star', label: '⭐+1' }, 5: { type: 'arrow', delta: 2, label: '➡+2' },
+  8: { type: 'trip', label: '🪨絆' }, 10: { type: 'star', label: '⭐+1' },
+  12: { type: 'arrow', delta: -2, label: '⬅-2' }, 14: { type: 'arrow', delta: 3, label: '➡+3' },
+  16: { type: 'trip', label: '🪨絆' }, 18: { type: 'star', label: '⭐+1' },
+  20: { type: 'arrow', delta: 2, label: '➡+2' }, 23: { type: 'trip', label: '🪨絆' },
+  24: { type: 'arrow', delta: -3, label: '⬅-3' }, 26: { type: 'star', label: '⭐+1' },
+  27: { type: 'arrow', delta: 2, label: '➡+2' }, 28: { type: 'trip', label: '🪨絆' },
+};
+const MAGICAL_RULES = [
+  '蛇行選秀：3–6 人每人輪流招募 4 位選手（2 人局與 3 人雙選手變體每人招募 8 位，每場同時派 2 位出戰）。',
+  '共比 4 場，越後面分數越高！第 1 名金盃依序為 3 / 4 / 5 / 6 分，第 2 名銀徽章依序為 1 / 2 / 3 / 4 分；每場所有選手同時秘密亮牌開跑，每位選手整場遊戲只能出賽一次。',
+  '每回合擲 1 顆骰子移動（稱為「主要移動」），所有選手都有破格能力與連鎖觸發；同時觸發時依「賽道機關 → 當前回合玩家 → 其他玩家順時針」結算。',
+  '絆倒（Trip）的選手會倒地，下回合跳過主要移動（不擲骰，改為爬起來），但絆倒期間能力依然可觸發、也能被其他效果移動！',
+  '狂野賽道（Wild Wilds）含三種特殊格：⭐星星（+1 銅分）、🪨石頭（絆倒）、➡/⬅箭頭（額外獨立移動）。第 2 名衝過 30 格終點時該場立刻結束，4 場總分最高者獲勝！',
+];
+const magicalRules = () => `<ul style="margin:8px 0;padding-left:20px">${MAGICAL_RULES.map((t) => `<li style="margin-top:8px">${t}</li>`).join('')}</ul>`;
 const M_GOODS = ['jade', 'silk', 'nutmeg', 'ginseng'];
 const M_INFO = {
   jade: { name: '玉石', icon: '💎', img: '/assets/manila/good_jade.jpg', color: '#27915c', slots: [3, 4, 5, 5], payout: 36 },
@@ -590,8 +731,10 @@ const fold = (key, title, body) => `<button class="fold" data-a="fold" data-v="$
 const av = (n) => `<span class="av" style="--h:${Math.abs([...n].reduce((a, c) => (a * 31 + c.codePointAt(0)) | 0, 7)) % 360}" aria-hidden="true">${esc([...n][0] ?? '?')}</span>`; // 名字首字 + 依名字決定的底色
 let pick = (() => { try { const k = localStorage.getItem('p10pick'); return Object.hasOwn(GAMES, k) ? k : 'phase10'; } catch { return 'phase10'; } })(); // 首頁選的遊戲，下次進來沿用
 let dl = null, sess = store.get(), snap = null, es = null, sel = new Set(), slots = {}, los = {}, seen = null, sheet = false, endFor = null, actSlot = null, byColor = false, rxOpen = false, rxSeq = null, histFor = null, drag = null, noClick = false, xs = { target: null, v: null, give: null }; // xs = 交換牌的三個選擇（對象／數字或顏色／要換出的牌）。 // drag = 正在拖的百搭（拖曳中不重繪，不然 DOM 重建會把它弄丟）；noClick = 剛拖完，吃掉隨後的 click。 histFor = 正在看誰的撿棄牌歷史（玩家 id）。 rxOpen = 表情選單開著；rxSeq = 已播到的表情編號（null = 還沒收到第一筆快照）。每次 render 會重建 DOM，UI 狀態要存在這：sheet = 底部資訊面板開著；endFor = 正在選「接前/接後」的順子；actSlot = 放階段時作用中的那一組
-let ms = { bidAmt: 1, spot: null, masterGoods: ['jade', 'silk', 'nutmeg'], masterPos: { jade: 3, silk: 3, nutmeg: 3, ginseng: 0 }, navMoves: {}, plunderShip: null, stockSheet: false, infoSheet: false, animFrom: null, sailAnim: null, stageKey: null };
-const resetMs = () => { ms = { bidAmt: 1, spot: null, masterGoods: ['jade', 'silk', 'nutmeg'], masterPos: { jade: 3, silk: 3, nutmeg: 3, ginseng: 0 }, navMoves: {}, plunderShip: null, stockSheet: false, infoSheet: false, animFrom: null, sailAnim: null, stageKey: null }; closeManilaDice(); clearManilaActs(); };
+let ms = { bidAmt: 1, spot: null, masterGoods: ['jade', 'silk', 'nutmeg'], masterPos: { jade: 3, silk: 3, nutmeg: 3, ginseng: 0 }, navMoves: {}, plunderShip: null, stockSheet: false, infoSheet: false, cashWarn: null, pendingBuy: null, holdOverlay: false, animFrom: null, sailAnim: null, stageKey: null };
+const resetMs = () => { ms = { bidAmt: 1, spot: null, masterGoods: ['jade', 'silk', 'nutmeg'], masterPos: { jade: 3, silk: 3, nutmeg: 3, ginseng: 0 }, navMoves: {}, plunderShip: null, stockSheet: false, infoSheet: false, cashWarn: null, pendingBuy: null, holdOverlay: false, animFrom: null, sailAnim: null, stageKey: null }; closeManilaDice(); clearManilaActs(); };
+let ma = { draftSel: null, pickSel: [], guess: null, inspect: null, dex: false, flipOpen: false };
+const resetMa = () => { ma = { draftSel: null, pickSel: [], guess: null, inspect: null, dex: false, flipOpen: false }; };
 if (sess && urlRoom && sess.code !== urlRoom) sess = null; // 邀請連結指向另一間房 → 先顯示加入畫面
 // 在 localhost 開頁面時，邀請連結／QR 要換成手機連得到的區網 IP（undefined = 查詢中，null = 查不到）。部署後網址不是 localhost，這段不會跑。
 const isLocal = /^(localhost|127\.|\[?::1)/.test(location.hostname);
@@ -648,7 +791,7 @@ function connect() {
 // 手機切去別的 App 再回來，iOS 的 EventSource 常常是死的 → 回前景一律重連
 document.addEventListener('visibilitychange', () => { if (!document.hidden && sess) connect(); });
 function exit() {
-  es?.close(); sess = snap = null; xs = { target: null, v: null, give: null }; resetMs(); sel.clear(); slots = {}; los = {}; rxOpen = false; histFor = null; sheet = false; folds.clear(); store.set(null);
+  es?.close(); sess = snap = null; xs = { target: null, v: null, give: null }; resetMs(); resetMa(); sel.clear(); slots = {}; los = {}; rxOpen = false; histFor = null; sheet = false; folds.clear(); store.set(null);
   history.replaceState(null, '', '/'); render();
 }
 function enter(r) {
@@ -757,12 +900,14 @@ function qrBox(link) {
 }
 
 function lobby() {
-  const kind = urlRoom ? urlGame : pick, GM = GAMES[kind], fj = kind === 'fuji', ct = kind === 'cats', mn = kind === 'manila'; // 收到邀請連結 = 直接是那個遊戲，不顯示選單
+  const kind = urlRoom ? urlGame : pick, GM = GAMES[kind], fj = kind === 'fuji', ct = kind === 'cats', mn = kind === 'manila', mg = kind === 'magical'; // 收到邀請連結 = 直接是那個遊戲，不顯示選單
   const rules = RULES.map(([k, t, d]) => `<label class="rule"><input type="checkbox" data-r="${k}"><i aria-hidden="true">✓</i><span><b>${t}</b><small>${d}</small></span></label>`).join('');
   const picker = `<div class="panel"><h2>想玩哪一個？</h2><div class="gsel">${Object.entries(GAMES).map(([k, x]) => `<button class="${k === kind ? '' : 'ghost'}" data-a="pick" data-v="${k}" aria-pressed="${k === kind}"><span class="gi">${x.icon}</span><b>${x.name}</b><small>${x.people} 人</small></button>`).join('')}</div><p class="mute" style="margin:12px 0 0">${GM.sub}</p></div>`;
   const turnFld = '<div class="fld"><label for="turn">每回合秒數</label><input id="turn" type="number" inputmode="numeric" min="10" max="600" value="60"></div>';
   const roundsFld = `<div class="fld"><label for="rounds">遊戲輪數</label><select id="rounds">${[...Array(10)].map((_, i) => `<option value="${i + 1}" ${i === 2 ? 'selected' : ''}>${i + 1} 輪${i === 2 ? '（標準）' : ''}</option>`).join('')}</select></div>`;
   const pirateRule = `<label class="rule" style="margin-top:12px"><input id="pirateKick" type="checkbox"><i aria-hidden="true">✓</i><span><b>🏴‍☠️ 海盜踢人變體規則</b><small>第 2 次擲骰船停在 13 格且客滿時，海盜可踢下一位其他玩家的手下強行登船（預設關閉＝僅能佔空位）</small></span></label>`;
+  const maSchedFld = `<div class="fld"><label for="maSched">四場賽道賽程</label><select id="maSched">${Object.entries(MA_SCHED_LABELS).map(([k, t]) => `<option value="${k}">${t}</option>`).join('')}</select></div>`;
+  const maDouble3p = `<label class="rule" style="margin-top:12px"><input id="maDouble3p" type="checkbox"><i aria-hidden="true">✓</i><span><b>👥 3 人雙選手變體規則</b><small>剛好 3 人遊玩時，每人招募 8 位選手、每場各派 2 位出戰（6 位選手同場大亂鬥！）</small></span></label>`;
   const create = fj
     ? `<div class="panel"><h2>開新房間</h2><div class="row">${turnFld}</div><p class="mute" style="margin:8px 0 0">時間到會自動代打（出最小的牌）。</p>
       <div class="how"><div><span>🃏</span>每次出一張牌</div><div><span>💦</span>大的沖走小的</div><div><span>🌊</span>沒被沖走就流走</div></div>${fold('howto', '完整玩法', fujiRules())}</div>`
@@ -773,6 +918,10 @@ function lobby() {
     ? `<div class="panel"><h2>開新房間</h2><div class="row">${turnFld}</div><p class="mute" style="margin:8px 0 0">3–5 人遊玩（最佳 4 人）；3 人局每人 4 個手下，4–5 人局每人 3 個手下。</p>
       ${pirateRule}
       <div class="how"><div><span>⚓</span>競標當船老大</div><div><span>⛵</span>派遣手下投資</div><div><span>📈</span>黑市漲至 $30 結算</div></div>${fold('howto', '完整玩法', manilaRules())}</div>`
+    : mg
+    ? `<div class="panel"><h2>開新房間</h2><div class="row">${maSchedFld}${turnFld}</div><p class="mute" style="margin:8px 0 0">2–6 人遊玩（2 人局自動啟用雙選手變體；建房後可加 AI 電腦補位）。</p>
+      ${maDouble3p}
+      <div class="how"><div><span>📋</span>蛇行選秀組隊</div><div><span>🎲</span>擲骰觸發連鎖</div><div><span>🏆</span>4 場總分奪冠</div></div>${fold('howto', '完整玩法', magicalRules())}</div>`
     : `<div class="panel"><h2>開新房間</h2>
       <div class="row"><div class="fld"><label for="target">目標階段</label><select id="target">${[...Array(10)].map((_, i) => `<option value="${i + 1}" ${i === 9 ? 'selected' : ''}>第 ${i + 1} 階段</option>`).join('')}</select></div>${turnFld}</div>
       <p class="mute" style="margin:8px 0 0">時間到會自動代打（抽牌堆、棄最大張）。</p>
@@ -793,7 +942,7 @@ function lobby() {
 }
 
 function room() {
-  const s = snap, host = s.me === s.host, n = s.players.length, st = s.settings, fj = s.kind === 'fuji', ct = s.kind === 'cats', mn = s.kind === 'manila', GM = GAMES[s.kind];
+  const s = snap, host = s.me === s.host, n = s.players.length, st = s.settings, fj = s.kind === 'fuji', ct = s.kind === 'cats', mn = s.kind === 'manila', mg = s.kind === 'magical', hasBot = mn || mg, GM = GAMES[s.kind];
   const link = inviteLink(s.code, s.kind), need = Math.max(0, s.min - n);
   const set = host
     ? `<div class="row"><select data-c="target">${[...Array(10)].map((_, i) => `<option value="${i + 1}" ${st.target === i + 1 ? 'selected' : ''}>目標：第 ${i + 1} 階段</option>`).join('')}</select></div>`
@@ -804,12 +953,18 @@ function room() {
   const manilaSet = host
     ? `<label class="rule"><input type="checkbox" data-c="pirateKick" ${st.pirateKick ? 'checked' : ''}><i aria-hidden="true">✓</i><span><b>🏴‍☠️ 海盜踢人變體規則</b><small>第 2 次擲骰船停在 13 格且客滿時，海盜可踢下一位其他玩家的手下強行登船</small></span></label>`
     : `<div>海盜登船規則：<b>${st.pirateKick ? '變體（客滿可踢人）' : '標準（僅佔空位）'}</b></div>`;
+  const maSet = host
+    ? `<div class="row"><select data-c="schedule">${Object.entries(MA_SCHED_LABELS).map(([k, t]) => `<option value="${k}" ${(st.schedule || 'std') === k ? 'selected' : ''}>賽程：${t}</option>`).join('')}</select></div>
+      <label class="rule"><input type="checkbox" data-c="double3p" ${st.double3p ? 'checked' : ''}><i aria-hidden="true">✓</i><span><b>👥 3 人雙選手變體規則</b><small>剛好 3 人時每人招募 8 位、每場各派 2 位出戰（共 6 位同場競速）</small></span></label>`
+    : `<div>四場賽程：<b>${MA_SCHED_LABELS[st.schedule || 'std']}</b>${st.double3p ? ' · <b>3 人雙選手變體</b>' : ''}</div>`;
   const rulesPanel = fj
     ? `<div class="panel"><h2>規則</h2><p style="margin:0">每回合 ${st.turn} 秒，超時自動代打（出最小的牌）。3–6 人每人發 6 張，7–8 人發 5 張。</p>${fold('rules', '完整玩法', fujiRules())}</div>`
     : ct
     ? `<div class="panel"><h2>規則</h2>${catSet}<p style="margin:8px 0 0">每手 ${st.turn} 秒，超時自動出最小的牌。每輪結算：第一名 +2、第二名 +1、最低分 −1。</p>${fold('rules', '完整玩法', catsRules())}</div>`
     : mn
     ? `<div class="panel"><h2>規則</h2>${manilaSet}<p style="margin:8px 0 0">每回合 ${st.turn} 秒，超時自動跳過或擲骰。起始 30 元與 2 張秘密股票，任一貨物黑市達 30 元即結束結算。</p>${fold('rules', '完整玩法', manilaRules())}</div>`
+    : mg
+    ? `<div class="panel"><h2>規則</h2>${maSet}<p style="margin:8px 0 0">每回合 ${st.turn} 秒，共比 4 場（金盃 3/4/5/6 分，銀徽章 1/2/3/4 分）。2 人局自動啟用雙選手變體！</p>${fold('rules', '完整玩法', magicalRules())}</div>`
     : `<div class="panel"><h2>規則</h2>${set}
     <p>每回合 ${st.turn} 秒，超時自動代打。</p>
     ${RULES.some(([k]) => st.rules[k]) ? `<ul style="margin:8px 0;padding-left:20px">${RULES.filter(([k]) => st.rules[k]).map(([, t, d]) => `<li style="margin-top:8px"><b>${t}</b><br><small class="mute">${d}</small></li>`).join('')}</ul>${['rv', 'sh', 'xn', 'xc'].some((k) => st.rules[k]) ? `<p class="mute" style="margin:8px 0">${SP_NOTE}</p>` : ''}` : '<p class="mute">標準規則</p>'}
@@ -818,9 +973,9 @@ function room() {
   return `<h1>${GM.icon} ${GM.name}</h1>
   <div class="panel"><div class="row" style="justify-content:space-between;flex-wrap:nowrap"><div><div class="mute">房間代碼</div><div class="big">${s.code}</div></div><button data-a="copy" style="min-height:48px">${navigator.share ? '分享邀請' : '複製連結'}</button></div>
     ${fold('qr', '面對面？用 QR code 或連結加入', `<input readonly value="${esc(link)}" onfocus="this.select()" style="width:100%">${qrBox(link)}`)}</div>
-  <div class="panel"><div class="rhd"><h2>玩家 ${n}/${s.max}</h2><div class="row" style="gap:6px">${host && mn && n < s.max ? '<button class="ghost" data-a="addBot">🤖 +電腦</button>' : ''}${host && n > 1 ? '<button class="ghost" data-a="shuffle">🔀 排位子</button>' : ''}</div></div>
-    ${s.players.map((p) => `<div class="pl">${p.bot ? '<span class="av" style="background:#5a3e20" aria-hidden="true">🤖</span>' : av(p.name)}<span class="nmx">${esc(p.name)}${p.id === s.me ? ' <span class="mute">（你）</span>' : ''}${p.id === s.host ? ' <span class="crown">👑</span>' : ''}</span>${host && mn && p.bot ? `<button class="ghost" data-a="removeBot" data-v="${p.id}" style="min-height:36px;padding:4px 10px;font-size:var(--s1)">移除</button>` : `<span class="dot ${p.online ? 'on' : ''}" role="img" aria-label="${p.online ? '在線' : '離線'}" style="margin:0"></span>`}</div>`).join('')}
-    <p class="mute" style="margin:8px 0 0">${need ? (host && mn ? `再邀請 ${need} 位朋友，或點「🤖 +電腦」補人就能開始（${s.min}–${s.max} 人）` : `再邀請 ${need} 位朋友就能開始（${s.min}–${s.max} 人）`) : host ? '人數夠了，可以開始！' : '人數夠了，等房主開始'}</p></div>
+  <div class="panel"><div class="rhd"><h2>玩家 ${n}/${s.max}</h2><div class="row" style="gap:6px">${host && hasBot && n < s.max ? '<button class="ghost" data-a="addBot">🤖 +電腦</button>' : ''}${host && n > 1 ? '<button class="ghost" data-a="shuffle">🔀 排位子</button>' : ''}</div></div>
+    ${s.players.map((p) => `<div class="pl">${p.bot ? '<span class="av" style="background:#5a3e20" aria-hidden="true">🤖</span>' : av(p.name)}<span class="nmx">${esc(p.name)}${p.id === s.me ? ' <span class="mute">（你）</span>' : ''}${p.id === s.host ? ' <span class="crown">👑</span>' : ''}</span>${host && hasBot && p.bot ? `<button class="ghost" data-a="removeBot" data-v="${p.id}" style="min-height:36px;padding:4px 10px;font-size:var(--s1)">移除</button>` : `<span class="dot ${p.online ? 'on' : ''}" role="img" aria-label="${p.online ? '在線' : '離線'}" style="margin:0"></span>`}</div>`).join('')}
+    <p class="mute" style="margin:8px 0 0">${need ? (host && hasBot ? `再邀請 ${need} 位朋友，或點「🤖 +電腦」補人就能開始（${s.min}–${s.max} 人）` : `再邀請 ${need} 位朋友就能開始（${s.min}–${s.max} 人）`) : host ? '人數夠了，可以開始！' : '人數夠了，等房主開始'}</p></div>
   ${rulesPanel}
   <div class="cta"><div class="row"><button class="ghost" data-a="leave" style="min-height:48px">離開</button>${host ? `<span class="w" data-why="${need ? `至少需要 ${s.min} 人` : ''}"><button data-a="start" ${need ? 'disabled' : ''}>開始遊戲</button></span>` : '<span class="mute" style="flex:1;text-align:center">等待房主開始…</span>'}</div></div>`;
 }
@@ -1383,22 +1538,59 @@ function enqueueManilaAct(ev, actor) {
   if (mActQ.length > 4) mActQ.splice(0, mActQ.length - 4);
   if (!mActBusy) showNextManilaAct();
 }
-// 🎲 馬尼拉真 3D 三骰拋擲動畫（3 顆對應貨物色木骰同步拋出翻滾 → 落地定格 → 觸發三船滑行）
+// 🎲 馬尼拉真 3D 三骰拋擲動畫（3 顆對應貨物色木骰同步拋出翻滾 → 落地定格 → 關閉後三船平滑滑行；最後一輪先跑完動畫再進結算）
 let mDiceTimers = [];
+let mDiceAfter = null;
 function closeManilaDice() {
+  mDiceTimers.forEach((id) => { clearTimeout(id); clearInterval(id); });
+  mDiceTimers = [];
+  mDiceAfter = null;
+  const box = $('#mDiceStage');
+  if (box) { box.classList.remove('on', 'out'); box.innerHTML = ''; }
+  ms.animFrom = null;
+  ms.sailAnim = null;
+  ms.holdOverlay = false;
+}
+function finishManilaDice() {
   mDiceTimers.forEach((id) => { clearTimeout(id); clearInterval(id); });
   mDiceTimers = [];
   const box = $('#mDiceStage');
   if (box) { box.classList.remove('on', 'out'); box.innerHTML = ''; }
-  if (ms.animFrom) { ms.animFrom = null; if (snap?.kind === 'manila') render(); }
+  const after = mDiceAfter;
+  mDiceAfter = null;
+  const fromMap = ms.animFrom;
+  ms.animFrom = null;
+  const reduced = matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+  const g = snap?.kind === 'manila' ? snap.game : null;
+  const anyMoved = !!(fromMap && g?.ships?.some((sh, si) => fromMap[si] !== undefined && fromMap[si] !== sh.pos));
+  if (fromMap && !reduced && anyMoved) {
+    ms.sailAnim = fromMap;
+    if (snap?.kind === 'manila') render();
+    mDiceTimers.push(setTimeout(() => { ms.sailAnim = null; }, 950));
+  } else if (fromMap) {
+    if (snap?.kind === 'manila') render();
+  }
+  if (after) after();
+  if (ms.holdOverlay) {
+    const wait = !reduced && anyMoved ? 1400 : 500;
+    mDiceTimers.push(setTimeout(() => {
+      ms.sailAnim = null;
+      ms.holdOverlay = false;
+      if (snap?.kind === 'manila') render();
+    }, wait));
+  }
 }
-function playManilaDice(ev) {
+function playManilaDice(ev, opts = {}) {
   const box = $('#mDiceStage');
   if (!box || !ev?.dice?.length) return;
   closeManilaDice();
   const reduced = matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+  const holdOverlay = !!opts.holdOverlay;
+  ms.holdOverlay = holdOverlay;
+  mDiceAfter = opts.onFinish || null;
   if (!reduced) ms.animFrom = Object.fromEntries(ev.dice.map((x) => [x.ship, x.from]));
-  box.innerHTML = `<div class="m-dtray"><div class="m-dtray-hd">🎲 第 ${ev.roll}/3 次擲骰航行！</div>
+  const hd = ev.roll >= 3 ? `🎲 第 ${ev.roll}/3 次最終擲骰！` : `🎲 第 ${ev.roll}/3 次擲骰航行！`;
+  box.innerHTML = `<div class="m-dtray"><div class="m-dtray-hd">${hd}</div>
     <div class="m-drow">${ev.dice.map((x, i) => {
       const info = M_INFO[x.good];
       const pill = x.alreadyIn ? '<span class="m-dpill port">⚓ 已進港</span>'
@@ -1412,29 +1604,24 @@ function playManilaDice(ev) {
         <div class="m-dres ${reduced ? 'show' : ''}" data-dr="${i}">${pill}</div>
       </div>`;
     }).join('')}</div>
-    <div class="m-dtray-ft">點擊任意處關閉</div></div>`;
+    <div class="m-dtray-ft">${holdOverlay ? '點擊任意處跳過骰盤，查看船隻航行與結算' : '點擊任意處關閉'}</div></div>`;
   box.classList.add('on');
   navigator.vibrate?.([20, 45, 20, 45, 35]);
 
   if (!reduced) {
-    // 1.25 秒後 3 顆 3D 木骰全數落地定格，亮出結果光環並同步讓木船滑向新格數
+    // 1.22 秒後 3 顆 3D 木骰全數落地定格，亮出結果光環與點數膠囊
     mDiceTimers.push(setTimeout(() => {
       ev.dice.forEach((x, i) => {
         const w = box.querySelector(`[data-di="${i}"]`), r = box.querySelector(`[data-dr="${i}"]`);
         if (w && !x.alreadyIn) w.classList.add('land');
         if (r) r.classList.add('show');
       });
-      const fromMap = ms.animFrom;
-      ms.animFrom = null;
-      ms.sailAnim = fromMap;
-      if (snap?.kind === 'manila') render();
-      mDiceTimers.push(setTimeout(() => { ms.sailAnim = null; }, 950));
     }, 1220));
   }
   mDiceTimers.push(setTimeout(() => {
     box.classList.add('out');
-    mDiceTimers.push(setTimeout(closeManilaDice, 280));
-  }, reduced ? 1800 : 3100));
+    mDiceTimers.push(setTimeout(finishManilaDice, 280));
+  }, reduced ? 1600 : 2450));
 }
 const mBoatSvg = (color) => `<svg class="m-boat-svg" viewBox="0 0 64 98" aria-hidden="true">
   <path d="M32 3 C46 18 55 39 53 74 C52 86 45 93 32 94 C19 93 12 86 11 74 C9 39 18 18 32 3 Z" fill="#6f4321" stroke="#221207" stroke-width="2.4"/>
@@ -1473,7 +1660,9 @@ function manila() {
   const online = Object.fromEntries(s.players.map((p) => [p.id, p.online]));
   const nm = (id) => pById[id]?.name ?? '?';
 
-  if (g.status !== 'play') { sheet = false; ms.stockSheet = false; ms.infoSheet = false; }
+  if (g.status !== 'play') { sheet = false; ms.stockSheet = false; ms.infoSheet = false; ms.cashWarn = null; ms.pendingBuy = null; }
+  else ms.holdOverlay = false;
+  if (g.stage !== 'master' || !myTurn || g.masterBought) { ms.cashWarn = null; ms.pendingBuy = null; }
   const stageKey = `${g.round}:${g.stage}:${g.roll}:${g.turn}:${g.auction?.high ?? 0}`;
   if (ms.stageKey !== stageKey) {
     ms.stageKey = stageKey;
@@ -1488,22 +1677,37 @@ function manila() {
   const lastNo = feed.at(-1)?.no ?? null;
   if (seen.evNo !== undefined) {
     const freshEvs = feed.filter((x) => x.no > (seen.evNo ?? 0));
+    const rollEv = freshEvs.find((x) => x.kind === 'roll');
+    const plunderEv = freshEvs.find((x) => x.kind === 'plunder');
+    if (rollEv) {
+      playManilaDice(rollEv, {
+        holdOverlay: g.status !== 'play',
+        onFinish: plunderEv ? () => { skipBanner('🏴‍☠️ 海盜出動掠奪船隻！', 2800); navigator.vibrate?.([60, 40, 60]); } : null,
+      });
+    }
     for (const fe of freshEvs) {
-      if (fe.kind === 'roll') playManilaDice(fe);
-      else if (fe.kind === 'plunder') { skipBanner('🏴‍☠️ 海盜出動掠奪船隻！', 2800); navigator.vibrate?.([60, 40, 60]); }
-      else if (fe.title && (fe.by !== me || fe.kind === 'masterWon' || fe.kind === 'pirateDecide')) {
+      if (fe.kind === 'roll') continue;
+      if (fe.kind === 'plunder') {
+        if (!rollEv) { skipBanner('🏴‍☠️ 海盜出動掠奪船隻！', 2800); navigator.vibrate?.([60, 40, 60]); }
+      } else if (fe.title && (fe.by !== me || fe.kind === 'masterWon' || fe.kind === 'pirateDecide')) {
         enqueueManilaAct(fe, fe.by ? pById[fe.by] : null);
       }
     }
   }
   seen.evNo = lastNo;
 
-  // 精簡黑市價格條（單排羊皮紙木牌，點任一格可展開完整黑市與玩家帳本）
+  // 精簡黑市價格條（單排羊皮紙木牌，點任一格可展開完整黑市與玩家帳本；最後擲骰動畫期間暫維持漲價前以免破梗）
+  const preMarketByGood = ms.animFrom && g.summary?.priceChanges?.length
+    ? Object.fromEntries(g.summary.priceChanges.map((pc) => [pc.good, pc.before]))
+    : null;
   const mkt = `<div class="m-mkt" aria-label="黑市價格表">${M_GOODS.map((k) => {
-    const info = M_INFO[k], m = g.market[k], hot = m.idx >= 3;
-    const pips = M_PRICES.map((pr, idx) => `<span class="m-pip ${idx <= m.idx ? 'on' : ''} ${idx === 4 ? 'end' : ''}"></span>`).join('');
-    return `<button class="m-good ${hot ? 'hot' : ''}" style="--gc:${info.color}" data-a="mInfoSheet" aria-label="${info.name}黑市 $${m.price}，剩 ${g.supply[k]} 股">
-      <div class="m-good-row">${mGoodImg(k)}<div class="m-good-val"><span class="m-good-p">$${m.price}</span><span class="m-good-sub">${info.name}·${g.supply[k]}</span></div></div>
+    const info = M_INFO[k], rawM = g.market[k];
+    const shownPrice = preMarketByGood && k in preMarketByGood ? preMarketByGood[k] : rawM.price;
+    const shownIdx = preMarketByGood && k in preMarketByGood ? Math.max(0, M_PRICES.indexOf(shownPrice)) : rawM.idx;
+    const hot = shownIdx >= 3;
+    const pips = M_PRICES.map((pr, idx) => `<span class="m-pip ${idx <= shownIdx ? 'on' : ''} ${idx === 4 ? 'end' : ''}"></span>`).join('');
+    return `<button class="m-good ${hot ? 'hot' : ''}" style="--gc:${info.color}" data-a="mInfoSheet" aria-label="${info.name}黑市 $${shownPrice}，剩 ${g.supply[k]} 股">
+      <div class="m-good-row">${mGoodImg(k)}<div class="m-good-val"><span class="m-good-p">$${shownPrice}</span><span class="m-good-sub">${info.name}·${g.supply[k]}</span></div></div>
       <div class="m-pips" aria-hidden="true">${pips}</div></button>`;
   }).join('')}</div>`;
 
@@ -1569,8 +1773,9 @@ function manila() {
 
   // 全寬水平船隻登船條（每船一列，手下名字完整顯示、觸控目標 >= 42px）
   const shipRowsHTML = g.ships.length ? `<div class="m-ship-rows">${g.ships.map((sh, si) => {
-    const info = M_INFO[sh.good], arrived = sh.pos >= 14, at13 = sh.pos === 13, nextIdx = sh.crew.length;
-    const stTxt = arrived ? '⚓ 已進港' : at13 ? '☠ 13 格警戒' : `第 ${sh.pos} / 13 格`;
+    const shownPos = ms.animFrom && ms.animFrom[si] !== undefined ? ms.animFrom[si] : sh.pos;
+    const info = M_INFO[sh.good], arrived = shownPos >= 14, at13 = shownPos === 13, nextIdx = sh.crew.length;
+    const stTxt = arrived ? '⚓ 已進港' : at13 ? '☠ 13 格警戒' : `第 ${shownPos} / 13 格`;
     const slotsHTML = info.slots.map((cost, ki) => {
       const ownerId = sh.crew[ki];
       if (ownerId) {
@@ -1630,9 +1835,9 @@ function manila() {
       ? '<div class="mute" style="font-size:var(--s1);margin-bottom:10px">✅ 本航程已行使購股特權（限買 1 張）</div>'
       : `<div style="margin-bottom:12px"><div class="mute" style="font-size:var(--s1);margin-bottom:6px">① 特權：可買 1 張股票（依黑市價，最低 $5，可略過）</div>
         <div class="m-chips">${M_GOODS.map((k) => {
-          const info = M_INFO[k], price = g.market[k].buy, avail = g.supply[k] > 0, ok = avail && mine.cash >= price;
-          const why = !avail ? '已售完' : !ok ? `現金不足 $${price}（可點下方「我的股票」先抵押）` : '';
-          return `<span class="w" data-why="${esc(why)}"><button class="m-chip" style="--gc:${info.color};width:100%" data-a="mBuy" data-v="${k}" ${ok ? '' : 'disabled'}><span class="row" style="gap:6px;flex-wrap:nowrap">${mGoodImg(k)}<span>${info.name} <small class="mute">剩${g.supply[k]}</small></span></span><b>$${price}</b></button></span>`;
+          const info = M_INFO[k], price = g.market[k].buy, avail = g.supply[k] > 0, short = avail && mine.cash < price;
+          const why = !avail ? '已售完' : '';
+          return `<span class="w" data-why="${esc(why)}"><button class="m-chip ${short ? 'short' : ''}" style="--gc:${info.color};width:100%" data-a="mBuy" data-v="${k}" ${avail ? '' : 'disabled'}><span class="row" style="gap:6px;flex-wrap:nowrap">${mGoodImg(k)}<span>${info.name} <small class="mute">剩${g.supply[k]}</small></span></span><b>$${price}</b></button></span>`;
         }).join('')}</div></div>`;
     const pickGoods = `<div style="margin-bottom:12px"><div class="mute" style="font-size:var(--s1);margin-bottom:6px">② 挑選 3 種貨物裝船（已選 ${chosen.length}/3）</div>
       <div class="m-chips">${M_GOODS.map((k) => {
@@ -1777,7 +1982,12 @@ function manila() {
       </div>`;
   }
 
-  const tray = g.status !== 'play' ? manilaOverlay(g, s) : `<div class="tray">${myBar}${trayBody}</div>`;
+  const showOverlay = g.status !== 'play' && !ms.holdOverlay;
+  const tray = showOverlay
+    ? manilaOverlay(g, s)
+    : g.status !== 'play'
+    ? `<div class="tray"><div class="row" style="justify-content:center;gap:10px;padding:4px 0"><span class="mute">⚓ 船隻航行中，即將進入結算…</span><button class="ghost m-bar-btn" data-a="mSkipAnim">直接看結算</button></div></div>`
+    : `<div class="tray">${myBar}${trayBody}</div>`;
 
   // 黑市行情 & 玩家公開帳本抽屜（點頂部黑市條或玩家條開啟）
   const infoSheetUI = ms.infoSheet && g.status === 'play' ? `<div class="overlay sheet"><div class="bd" data-a="mInfoSheet"></div><div class="modal" role="dialog" aria-label="黑市行情與玩家帳本">
@@ -1795,13 +2005,53 @@ function manila() {
       <div class="mute" style="font-size:var(--s1);margin-top:4px">持股 ${p.stockCount} 張${p.mortgagedCount ? `（🔒 ${p.mortgagedCount} 張已抵押）` : ''}${p.bought.length ? ` · 公開購得：${p.bought.map((k) => M_INFO[k].name).join('、')}` : ''}</div></div>`).join('')}
   </div></div>` : '';
 
+  // 購股現金不足通知對話框（不會自動消失；若有未抵押股票則詢問是否抵押）
+  let cashWarnUI = '';
+  if (ms.cashWarn && g.status === 'play' && g.stage === 'master' && myTurn && !g.masterBought) {
+    const wk = ms.cashWarn.good, wInfo = M_INFO[wk], wPrice = g.market[wk]?.buy ?? ms.cashWarn.price;
+    const need = Math.max(0, wPrice - mine.cash);
+    const unmort = g.myStocks.filter((st) => !st.mortgaged);
+    const maxCash = mine.cash + unmort.length * 12;
+    const needCnt = Math.ceil(need / 12);
+    const stockPrompt = unmort.length > 0
+      ? `<div class="res" style="margin-top:10px">
+          <div>你手上有 <b>${unmort.length} 張</b>未抵押股票，每抵押 1 張可立刻獲得 <b>+$12</b>（之後贖回需 −$15）。</div>
+          <div class="mute" style="font-size:var(--s1);margin-top:6px">${maxCash >= wPrice
+            ? `抵押 <b>${needCnt} 張</b>股票即可湊足購買，要現在抵押股票嗎？`
+            : `即使全部抵押最多可湊到 $${maxCash}，仍不足購買此股票的 $${wPrice}，要仍先去抵押股票嗎？`}</div>
+        </div>
+        <div class="row act" style="margin-top:14px">
+          <button class="ghost" data-a="mCashWarnClose">先不用</button>
+          <button data-a="mGoMortgage" data-v="${wk}">🔒 要，去抵押股票</button>
+        </div>`
+      : `<div class="res mute" style="margin-top:10px">${g.myStocks.length > 0 ? `你手上的 ${g.myStocks.length} 張股票皆已抵押，目前沒有可抵押的股票了。` : '你目前手上沒有股票可以抵押。'}</div>
+        <div class="row act" style="margin-top:14px">
+          <button data-a="mCashWarnClose">我知道了</button>
+        </div>`;
+    cashWarnUI = `<div class="overlay m-in"><div class="bd" data-a="mCashWarnClose"></div><div class="modal" role="dialog" aria-modal="true" aria-label="現金不足通知">
+      <div class="row" style="justify-content:space-between"><h2 style="margin:0;color:var(--accent)">💰 目前現金不足</h2><button class="ghost ic" data-a="mCashWarnClose" aria-label="關閉">✕</button></div>
+      <div class="res me" style="margin-top:12px">
+        <div class="row" style="gap:10px;flex-wrap:nowrap">${mGoodImg(wk, 'md')}<div><b>購買 ${wInfo.name}股票需要 $${wPrice}</b><div class="mute" style="font-size:var(--s1);margin-top:2px">你目前只有 <b>$${mine.cash}</b>，還差 <b style="color:#ff9e90">$${need}</b></div></div></div>
+      </div>
+      ${stockPrompt}
+    </div></div>`;
+  }
+
   // 復古羊皮紙股票證書抽屜（隨時可抵押／贖回＋即時現值試算）
+  const pendKey = ms.pendingBuy && g.stage === 'master' && myTurn && !g.masterBought && g.supply[ms.pendingBuy] > 0 ? ms.pendingBuy : null;
+  const pendBanner = pendKey ? (() => {
+    const pInfo = M_INFO[pendKey], pPrice = g.market[pendKey].buy, enough = mine.cash >= pPrice;
+    return enough
+      ? `<div class="m-buy-banner ready"><div class="row" style="justify-content:space-between;gap:8px"><span>✅ 現金已達 <b>$${mine.cash}</b>，可買進 ${pInfo.name}股票！</span></div><button data-a="mBuy" data-v="${pendKey}" style="width:100%;margin-top:8px">📜 立即買進${pInfo.name}股票（$${pPrice}）</button></div>`
+      : `<div class="m-buy-banner">📜 欲買進 <b>${pInfo.name}股票（$${pPrice}）</b>· 目前現金 $${mine.cash}，還差 <b>$${pPrice - mine.cash}</b>，請點下方股票抵押</div>`;
+  })() : '';
   const stockSheetUI = ms.stockSheet && g.status === 'play' ? `<div class="overlay sheet"><div class="bd" data-a="mStockSheet"></div><div class="modal" role="dialog" aria-label="我的股票證書與抵押贖回">
     <div class="row" style="justify-content:space-between"><h2 style="margin:0;color:var(--ink)">📜 1821 馬尼拉股票證書</h2><button class="ghost ic" data-a="mStockSheet" aria-label="關閉">✕</button></div>
     <div class="res me" style="margin-top:10px">
       <div class="row" style="justify-content:space-between"><span>股票現值合計（${g.myStocks.length} 張）</span><b style="color:var(--accent);font-size:var(--s3)">$${stockVal}</b></div>
       <div class="row mute" style="justify-content:space-between;margin-top:4px;font-size:var(--s1)"><span>現金 $${mine.cash} ＋ 股票 $${stockVal}${mortDebt ? ` − 抵押贖回 $${mortDebt}` : ''}</span><span>預估總資產 <b style="color:#fff7e2">$${estTotal}</b></span></div>
     </div>
+    ${pendBanner}
     <p class="mute" style="margin:8px 0 4px;font-size:var(--s1)">抵押立刻拿 <b>+$12</b>，贖回需 <b>−$15</b>（遊戲結束強制以 $15 贖回）。</p>
     ${g.myStocks.map((st) => {
       const info = M_INFO[st.good], curVal = g.market[st.good].price, canRedeem = mine.cash >= 15;
@@ -1823,14 +2073,14 @@ function manila() {
     <h2 style="margin-top:16px">航程動態</h2><div class="log">${g.log.map(esc).join('<br>')}</div>
     <button class="ghost" data-a="leave" style="width:100%;margin-top:16px">離開房間</button></div></div>` : '';
 
-  const lastLog = g.log.at(-1) || '準備啟航！';
+  const lastLog = ms.animFrom ? `🎲 第 ${g.roll}/3 次擲骰航行中…` : (g.log.at(-1) || '準備啟航！');
   const ticker = `<button class="fticker" data-a="sheet" aria-label="查看玩法與動態"><span>${esc(lastLog)}</span><i aria-hidden="true">›</i></button>`;
 
   return `<div class="row" style="flex-wrap:nowrap"><b style="flex:1;min-width:0">⚓ 馬尼拉 · ${s.code}</b>
     <span class="fmeta">航程 ${g.round} · 骰 ${g.roll}/3</span>
     <span class="rxw"><button class="ghost ic" data-a="rxMenu" aria-label="送表情" aria-expanded="${rxOpen}">😀</button>${rxOpen ? `<div class="rxp">${EMOJI.map((e) => `<button data-a="react" data-v="${e}" aria-label="${e}">${e}</button>`).join('')}</div>` : ''}</span>
     <button class="ghost ic" data-a="sheet" aria-label="玩法與動態">📋</button></div>
-  ${ticker}${mkt}${players}${boardHTML}${tray}${infoSheetUI}${stockSheetUI}${sheetUI}`;
+  ${ticker}${mkt}${players}${boardHTML}${tray}${infoSheetUI}${stockSheetUI}${cashWarnUI}${sheetUI}`;
 }
 
 function manilaOverlay(g, s) {
@@ -1881,20 +2131,381 @@ function manilaOverlay(g, s) {
     ? `<button class="ghost" disabled>✅ 已準備，等待其他玩家（${readySet.size}/${activePs.length}）</button>`
     : `<button data-a="next">開始第 ${sm.round + 1} 航程（${readySet.size}/${activePs.length} 已準備）</button>`;
 
-  return `<div class="overlay"><div class="modal res-m"><div class="body">
+  return `<div class="overlay m-in"><div class="modal res-m"><div class="body">
     <div class="hd">${head}</div>
     ${over ? `<div class="row mute" style="margin-bottom:8px;gap:8px;font-size:var(--s1)">黑市終盤：${M_GOODS.map((k) => `<span class="row" style="gap:3px">${mGoodImg(k)}$${sm.market[k]}</span>`).join('')}</div>${finalBoard}` : `${shipLines}${mktLine}${insLine}<h2 style="margin-top:12px">本航程收支</h2>${roundRows}`}
   </div><div class="foot">${readyBar}<div class="row act">${foot}</div></div></div></div>`;
 }
 
+// --- 瘋狂運動會（Magical Athlete）：CMYK 美漫賽道與 36 位選手 ---
+const maImg = (id) => `/assets/magical/${id}.jpg`;
+const maCard = (id, o = {}) => {
+  const r = MA_MAP[id]; if (!r) return '';
+  return `<button class="ma-rcard ${o.cls || ''}" style="--rc:${r.color}" ${o.attrs || ''}>
+    <img class="ma-rcard-img" src="${maImg(id)}" alt="${esc(r.name)} ${esc(r.en)}" loading="lazy">
+    ${o.tag ? `<span class="ma-rtag">${o.tag}</span>` : ''}
+    <div class="ma-rcard-bd"><div class="ma-rcard-nm"><span>${esc(r.name)}</span><small>${esc(r.en)}</small></div>
+      <div class="ma-rcard-tx">${esc(o.full ? r.desc : r.short)}</div></div></button>`;
+};
+
+function magical() {
+  const s = snap, g = s.game, me = s.me;
+  const pById = Object.fromEntries(g.players.map((p) => [p.id, p]));
+  const rById = Object.fromEntries(g.racers.map((r) => [r.id, r]));
+  const online = Object.fromEntries(s.players.map((p) => [p.id, p.online]));
+  const nm = (id) => pById[id]?.name ?? '?';
+  const rName = (r) => {
+    if (!r) return '?';
+    const b = MA_MAP[r.base];
+    const cp = r.copiedPower ? MA_MAP[r.copiedPower] : null;
+    return `${b.name}${cp ? `(${cp.name})` : ''}`;
+  };
+
+  if (g.status !== 'play') { sheet = false; ma.inspect = null; ma.dex = false; }
+  if (g.stage !== 'draft') ma.draftSel = null;
+  if (g.stage !== 'select') ma.pickSel = [];
+  if (g.stage === 'draft' && ma.draftSel && !g.draft?.pool.includes(ma.draftSel)) ma.draftSel = null;
+  if (g.prompt?.kind !== 'mainAction') { ma.guess = null; ma.flipOpen = false; }
+
+  // 動作橫幅（擲骰、能力觸發、決鬥、吃掉、衝線）
+  seen ??= {};
+  const feed = g.evFeed || [];
+  const lastNo = feed.at(-1)?.no ?? null;
+  if (seen.evNo !== undefined) {
+    const fresh = feed.filter((x) => x.no > (seen.evNo ?? 0));
+    for (const fe of fresh) {
+      if (fe.kind === 'chomp' || fe.kind === 'finish' || fe.kind === 'duel') {
+        skipBanner(`${esc(fe.title)}${fe.sub ? `<div style="margin-top:6px;font-size:var(--s2)">${esc(fe.sub)}</div>` : ''}`, 2400);
+        navigator.vibrate?.([40, 30, 50]);
+      } else if (fe.title && fe.kind !== 'move' && fe.kind !== 'warp') {
+        enqueueManilaAct(fe, null);
+      }
+    }
+  }
+  seen.evNo = lastNo;
+
+  // 頂部玩家積分條
+  const playersBar = `<div class="ma-pbar" aria-label="玩家積分">${g.players.map((p) => {
+    const isMe = p.id === me, isTurn = g.status === 'play' && g.turn === p.id && g.stage !== 'select';
+    const col = MA_PCOLORS[p.color % MA_PCOLORS.length];
+    const chips = `${p.golds.length ? `🏆×${p.golds.length} ` : ''}${p.silvers.length ? `🥈×${p.silvers.length} ` : ''}${p.bronze ? `⭐${p.bronze > 0 ? `+${p.bronze}` : p.bronze}` : ''}`.trim() || (g.stage === 'draft' ? `已選 ${p.rosterCount}` : `剩 ${p.availCount} 位`);
+    const st = g.stage === 'select' ? (p.ready ? '✅ 已選好' : '💭 挑選中') : chips;
+    return `<div class="ma-pl ${isMe ? 'me' : ''} ${isTurn ? 'turn' : ''} ${p.in ? '' : 'out'}" data-pid="${p.id}">
+      <div class="ma-pl-top"><span class="ma-pdot" style="background:${col}"></span><span class="ma-pl-nm">${esc(p.name)}${isMe ? '(你)' : ''}</span>${online[p.id] ? '' : '💤'}</div>
+      <div class="ma-pl-pts"><b>${p.points} 分</b><span>${st}</span></div></div>`;
+  }).join('')}</div>`;
+
+  const lastLog = g.log.at(-1) || '瘋狂運動會開跑！';
+  const ticker = `<button class="fticker" data-a="sheet" aria-label="查看玩法與動態"><span>${esc(lastLog)}</span><i aria-hidden="true">›</i></button>`;
+
+  let mainHTML = '';
+  let trayHTML = '';
+
+  if (g.stage === 'draft') {
+    const d = g.draft, isMyPick = d.picker === me;
+    const queuePills = d.order.map((pid, i) => `<span class="m-rchip ${i === 0 ? 'ok' : ''}">${i === 0 ? '👉 ' : ''}${esc(nm(pid))}</span>`).join('');
+    const myTeam = g.myRoster.length
+      ? `<div class="panel" style="padding:10px 12px"><div style="font-size:var(--s1);color:var(--mute);margin-bottom:6px">你的隊伍（已招募 ${g.myRoster.length} 位）</div>
+          <div class="ma-rbar">${g.myRoster.map((id) => `<button class="ma-rchip" data-a="maInspect" data-v="card:${id}"><img src="${maImg(id)}" alt=""><span>${esc(MA_MAP[id].name)}</span></button>`).join('')}</div></div>`
+      : '';
+    mainHTML = `<div class="panel" style="padding:12px">
+      <div class="row" style="justify-content:space-between;margin-bottom:6px"><b>📋 第 ${d.round}/${d.totalRounds} 輪蛇行選秀</b><small class="mute">${g.doubleMode ? '雙選手模式（共組 8 位）' : '每人招募 4 位選手'}</small></div>
+      <div class="row" style="gap:4px;margin-bottom:8px">${queuePills}</div>
+      <div class="ma-grid">${d.pool.map((id) => maCard(id, {
+        cls: ma.draftSel === id ? 'sel' : '',
+        full: true,
+        tag: ma.draftSel === id ? '已選' : '',
+        attrs: isMyPick ? `data-a="maDraftSel" data-v="${id}" aria-pressed="${ma.draftSel === id}"` : `data-a="maInspect" data-v="card:${id}"`,
+      })).join('')}</div></div>${myTeam}`;
+    const chosenInfo = ma.draftSel ? MA_MAP[ma.draftSel] : null;
+    const why = !isMyPick ? `等待 ${nm(d.picker)} 挑選選手` : chosenInfo ? '' : '先點擊上方一位選手卡';
+    trayHTML = `<div class="tray"><div class="row" style="justify-content:space-between;flex-wrap:nowrap;margin-bottom:8px">
+      <b class="${isMyPick ? 'crown' : ''}">${isMyPick ? '✨ 輪到你招募選手！' : `等待 ${esc(nm(d.picker))} 選秀…`}</b><b class="cd" aria-live="off"></b></div>
+      <div class="row act"><span class="w" data-why="${esc(why)}"><button data-a="maDraftGo" ${why ? 'disabled' : ''}>${chosenInfo ? `✨ 招募：${chosenInfo.name} ${chosenInfo.en}` : '點擊上方選手卡招募'}</button></span></div></div>`;
+  } else if (g.stage === 'select') {
+    const need = g.doubleMode ? 2 : 1;
+    const locked = g.mySelected != null;
+    const pickedIds = locked ? g.mySelected : ma.pickSel;
+    const usedSet = new Set(g.myUsed);
+    const trackBadge = g.track === 'wild' ? '🌋 狂野賽道（Wild Wilds）' : '🌼 溫和賽道（Mild Mile）';
+    mainHTML = `<div class="panel" style="padding:12px">
+      <div class="row" style="justify-content:space-between;margin-bottom:4px"><b>🏁 第 ${g.race}/4 場出戰陣容</b><span class="fmeta">🏆+${g.goldChip} · 🥈+${g.silverChip}</span></div>
+      <div class="mute" style="font-size:var(--s1);margin-bottom:10px">${trackBadge} · 先攻：<b>${esc(nm(g.activePlayer))}</b> · ${need === 2 ? '請秘密挑選 2 位未出賽選手' : '請秘密挑選 1 位未出賽選手'}（越後面場次越高分！）</div>
+      <div class="ma-grid">${g.myRoster.map((id) => {
+        const isUsed = usedSet.has(id), isSel = pickedIds.includes(id);
+        return maCard(id, {
+          cls: `${isUsed ? 'used' : ''} ${isSel ? 'sel' : ''}`,
+          full: true,
+          tag: isUsed ? '已出賽' : isSel ? (locked ? '✅ 已鎖定' : '✔ 出戰') : '',
+          attrs: isUsed || locked ? `data-a="maInspect" data-v="card:${id}"` : `data-a="maPickCard" data-v="${id}" aria-pressed="${isSel}"`,
+        });
+      }).join('')}</div></div>`;
+    const readyCnt = g.players.filter((p) => p.in && p.ready).length;
+    const actCnt = g.players.filter((p) => p.in).length;
+    const why = locked ? '' : pickedIds.length === need ? '' : `請選擇 ${need} 位尚未出賽的選手（已選 ${pickedIds.length}/${need}）`;
+    trayHTML = `<div class="tray"><div class="row" style="justify-content:space-between;flex-wrap:nowrap;margin-bottom:8px">
+      <b class="${!locked ? 'crown' : ''}">${locked ? `✅ 已鎖定出戰！等待其他人（${readyCnt}/${actCnt}）` : `秘密挑選 ${need} 位選手出戰（${pickedIds.length}/${need}）`}</b><b class="cd" aria-live="off"></b></div>
+      <div class="row act">${locked
+        ? '<button class="ghost" data-a="maUnselect">收回重選</button>'
+        : `<span class="w" data-why="${esc(why)}"><button data-a="maSelectGo" ${why ? 'disabled' : ''}>🏁 確認秘密出戰（${pickedIds.map((id) => MA_MAP[id].name).join('＋') || `0/${need}`}）</button></span>`}</div></div>`;
+  } else {
+    // 賽道畫面（beforeRace / race / raceEnd / over）
+    const isWild = g.track === 'wild';
+    const byPos = {};
+    for (const r of g.racers) {
+      if (r.eliminated) continue;
+      const k = r.finished ? 30 : r.pos;
+      (byPos[k] ??= []).push(r);
+    }
+    const renderTok = (r, sm = false) => {
+      const p = pById[r.ownerId], col = MA_PCOLORS[(p?.color ?? 0) % MA_PCOLORS.length];
+      const isAct = g.status === 'play' && (g.prompt?.racerId === r.id || (!g.prompt && g.activeRacerId === r.id));
+      return `<button class="ma-tok ${sm ? 'sm' : ''} ${isAct ? 'act' : ''} ${r.tripped ? 'trip' : ''} ${r.finished ? 'fin' : ''}" style="--pc:${col}" data-a="maInspect" data-v="${esc(r.id)}" title="${esc(rName(r))}（${esc(nm(r.ownerId))}）" aria-label="${esc(rName(r))}"><img src="${maImg(r.base)}" alt="${esc(MA_MAP[r.base].name)}"></button>`;
+    };
+    const startToks = (byPos[0] || []).map((r) => renderTok(r, false)).join('');
+    // 5 列 × 6 欄蛇行賽道（1..30；第 30 格 = 終點線；第 15 格標示第 2 轉角供飛船參考）
+    const rows = [
+      { nums: [1, 2, 3, 4, 5, 6], dir: '→' },
+      { nums: [12, 11, 10, 9, 8, 7], dir: '←' },
+      { nums: [13, 14, 15, 16, 17, 18], dir: '→' },
+      { nums: [24, 23, 22, 21, 20, 19], dir: '←' },
+      { nums: [25, 26, 27, 28, 29, 30], dir: '→' },
+    ];
+    const trackHTML = rows.map(({ nums, dir }) => `<div class="ma-trow">${nums.map((n) => {
+      const cIdx = ((n - 1) % 5) + 1;
+      const isFin = n === 30, isCorner = n === 15;
+      const sp = isWild && !isFin ? MA_WILD[n] : null;
+      const toks = (byPos[n] || []).map((r) => renderTok(r, (byPos[n]?.length ?? 0) >= 3)).join('');
+      const spBadge = isFin ? '<span class="ma-csp star">🏁 終點</span>'
+        : sp ? `<span class="ma-csp ${sp.type === 'star' ? 'star' : sp.type === 'trip' ? 'trip' : sp.delta > 0 ? 'arr' : 'back'}">${sp.label}</span>`
+        : isCorner ? '<span class="ma-csp">↩轉角</span>' : '';
+      return `<div class="ma-cell ${isFin ? 'finish' : `c${cIdx}`} ${isCorner ? 'corner' : ''}" aria-label="第 ${n} 格${sp ? ` ${sp.label}` : ''}">
+        <span class="ma-cnum">${n}</span>${!isFin ? `<span class="ma-cdir">${dir}</span>` : ''}
+        ${spBadge}<div class="ma-toks">${toks}</div></div>`;
+    }).join('')}</div>`).join('');
+
+    // 場上選手狀態快覽條（點擊可看詳細能力與複製狀態）
+    const racerStrip = `<div class="ma-rbar">${g.racers.map((r) => {
+      const p = pById[r.ownerId], col = MA_PCOLORS[(p?.color ?? 0) % MA_PCOLORS.length];
+      const isAct = g.activeRacerId === r.id;
+      const st = r.eliminated ? '☠淘汰' : r.finished ? `🏆第${r.finishOrder}` : r.tripped ? `💫${r.pos}格` : `${r.pos}格`;
+      const eff = r.effPower && r.effPower !== r.base ? `→${MA_MAP[r.effPower].name}` : '';
+      return `<button class="ma-rchip ${isAct ? 'act' : ''} ${r.eliminated ? 'elim' : ''}" style="--pc:${col}" data-a="maInspect" data-v="${esc(r.id)}">
+        <img src="${maImg(r.base)}" alt=""><span><b>${esc(MA_MAP[r.base].name)}</b>${eff ? `<small style="color:var(--accent)">${esc(eff)}</small>` : ''} · ${st}</span></button>`;
+    }).join('')}</div>`;
+
+    mainHTML = `<div class="ma-board ${isWild ? 'wild' : ''}">
+      <div class="ma-bhd"><b>${isWild ? '🌋 狂野賽道 Wild Wilds' : '🌼 溫和賽道 Mild Mile'} · 第 ${g.race}/4 場</b>
+        <span class="fmeta">🏆+${g.goldChip} · 🥈+${g.silverChip}</span></div>
+      <div class="ma-start"><span class="ma-start-lb">🚦 起點 0</span>${startToks || '<span style="opacity:.7;font-size:var(--s1)">全員已出發</span>'}</div>
+      <div class="ma-track">${trackHTML}</div>
+    </div>${racerStrip}`;
+
+    // 底部互動操作托盤
+    if (g.status !== 'play') {
+      trayHTML = magicalOverlay(g, s);
+    } else {
+      const pr = g.prompt;
+      const isMePrompt = pr && pr.pid === me;
+      const prRacer = pr?.racerId ? rById[pr.racerId] : null;
+      let body = '';
+
+      if (!isMePrompt) {
+        const who = pr ? nm(pr.pid) : nm(g.activePlayer);
+        const what = pr?.kind === 'duelist' ? '決定是否喊出決鬥…'
+          : pr?.kind === 'suckerfish' ? '決定是否吸盤魚搭便車…'
+          : pr?.kind === 'reroll' ? '決定是否重骰…'
+          : pr?.kind === 'eggPick' ? '選擇奇蹟蛋孵化能力…'
+          : pr?.kind === 'twinPick' ? '選擇雙胞胎複製冠軍…'
+          : '行動中…';
+        body = `<div class="mute" style="text-align:center;padding:8px 0">等待 <b>${esc(who)}</b> ${what}</div>`;
+      } else if (pr.kind === 'eggPick') {
+        body = `<div style="margin-bottom:6px"><b class="crown">🥚 奇蹟蛋賽前孵化！選 1 位獲得其能力</b></div>
+          <div class="ma-grid" style="margin:6px 0">${pr.choices.map((id) => maCard(id, { full: true, attrs: `data-a="maEggPick" data-v="${id}"` })).join('')}</div>`;
+      } else if (pr.kind === 'twinPick') {
+        body = `<div style="margin-bottom:6px"><b class="crown">👯 雙胞胎賽前複製！選擇一位前場冠軍</b></div>
+          <div class="ma-grid" style="margin:6px 0">${pr.choices.map((id) => maCard(id, { full: true, attrs: `data-a="maTwinPick" data-v="${id}"` })).join('')}</div>
+          <div class="row act"><button class="ghost" data-a="maTwinPick" data-v="skip">放棄複製</button></div>`;
+      } else if (pr.kind === 'pickRacer') {
+        body = `<div style="margin-bottom:6px"><b class="crown">🏃 ${pr.onlyOne ? '首回合：選擇 1 位選手出動' : '雙選手回合：選擇先移動哪位選手'}</b></div>
+          <div class="ma-opt-grid">${pr.racerIds.map((rid) => {
+            const rr = rById[rid];
+            return `<button data-a="maPickRacer" data-v="${esc(rid)}"><img src="${maImg(rr.base)}" alt="">${esc(rName(rr))}（第 ${rr.pos} 格${rr.tripped ? '·絆倒' : ''}）</button>`;
+          }).join('')}</div>`;
+      } else if (pr.kind === 'mastermindPick') {
+        body = `<div style="margin-bottom:6px"><b class="crown">🕶️ 幕後黑手首回合預言！預測誰拿第 1 名（猜中你立刻拿第 2！）</b></div>
+          <div class="ma-opt-grid">${pr.targets.map((tid) => {
+            const tr = rById[tid];
+            return `<button data-a="maMastermind" data-v="${esc(tid)}"><img src="${maImg(tr.base)}" alt="">${esc(rName(tr))}（${esc(nm(tr.ownerId))}）</button>`;
+          }).join('')}</div>`;
+      } else if (pr.kind === 'cheerleader') {
+        const lastNames = pr.lastIds.map((id) => rName(rById[id])).join('、');
+        body = `<div style="margin-bottom:8px"><b class="crown">📣 啦啦隊長加油！</b><div class="mute" style="font-size:var(--s1)">讓最後一名（${esc(lastNames)}）前進 2 格，你也前進 1 格</div></div>
+          <div class="row act"><button class="ghost" data-a="maCheer" data-v="0">略過</button><button data-a="maCheer" data-v="1">📣 加油！（墊底+2，我+1）</button></div>`;
+      } else if (pr.kind === 'hypnotist') {
+        body = `<div style="margin-bottom:6px"><b class="crown">🌀 催眠師：把一位對手傳送到你這格（第 ${prRacer.pos} 格）？</b></div>
+          <div class="ma-opt-grid">${pr.targets.map((tid) => {
+            const tr = rById[tid];
+            return `<button data-a="maHypno" data-v="${esc(tid)}"><img src="${maImg(tr.base)}" alt="">${esc(rName(tr))}（${tr.pos}格）</button>`;
+          }).join('')}</div>
+          <div class="row act"><button class="ghost" data-a="maHypno" data-v="skip">不催眠，直接進行主要移動</button></div>`;
+      } else if (pr.kind === 'thirdWheel') {
+        body = `<div style="margin-bottom:6px"><b class="crown">💡 電燈泡：傳送到剛好有 2 人的格子？（之後仍可主要移動）</b></div>
+          <div class="ma-opt-grid">${pr.spaces.map((sp) => `<button data-a="maThirdWheel" data-v="${sp}">傳送到第 ${sp} 格</button>`).join('')}</div>
+          <div class="row act"><button class="ghost" data-a="maThirdWheel" data-v="skip">不傳送</button></div>`;
+      } else if (pr.kind === 'mainAction') {
+        const guessUI = pr.canGenius
+          ? `<div style="font-size:var(--s1);color:var(--mute);margin-bottom:4px">🧠 天才預測骰點（選填，猜中再多跑 1 回合）：</div>
+             <div class="ma-guess">${[1, 2, 3, 4, 5, 6].map((n) => `<button class="${ma.guess === n ? '' : 'ghost'}" data-a="maGuess" data-v="${n}">${n}</button>`).join('')}</div>` : '';
+        const flipUI = ma.flipOpen && pr.flipTargets.length
+          ? `<div class="ma-opt-grid">${pr.flipTargets.map((tid) => {
+              const tr = rById[tid];
+              return `<button data-a="maFlip" data-v="${esc(tid)}"><img src="${maImg(tr.base)}" alt="">換去 ${tr.pos} 格（${esc(rName(tr))}）</button>`;
+            }).join('')}</div>` : '';
+        body = `<div class="row" style="gap:8px;margin-bottom:8px;flex-wrap:nowrap">
+            <img src="${maImg(prRacer.base)}" alt="" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--accent)">
+            <div style="min-width:0"><b class="crown">輪到 ${esc(rName(prRacer))}（第 ${prRacer.pos} 格）</b>
+              <div class="mute" style="font-size:var(--s1)">${esc(MA_MAP[prRacer.effPower || prRacer.base]?.short || '')}</div></div></div>
+          ${guessUI}${flipUI}
+          <div class="row act">
+            <button data-a="maRoll">🎲 擲骰移動${ma.guess ? `（猜 ${ma.guess}）` : ''}</button>
+            ${pr.canLegs ? '<button class="ghost" data-a="maLegs">🦵 直接走 5 格</button>' : ''}
+            ${pr.flipTargets.length ? `<button class="ghost" data-a="maFlipToggle">${ma.flipOpen ? '收起換位' : '🩴 換位傳送'}</button>` : ''}
+          </div>`;
+      } else if (pr.kind === 'reroll') {
+        body = `<div class="row" style="gap:12px;margin-bottom:8px;flex-wrap:nowrap">
+            <span class="ma-die-big">${pr.roll}</span>
+            <div><b class="crown">${esc(rName(prRacer))} 擲出了 ${pr.roll} 點！</b>
+              <div class="mute" style="font-size:var(--s1)">可選擇保留或使用能力重骰（重骰後前一次視為沒發生）</div></div></div>
+          <div class="row act">
+            <button data-a="maKeepRoll">✅ 保留 ${pr.roll} 點</button>
+            ${pr.canMag ? `<button class="ghost" data-a="maRerollMag">🎩 魔術重骰（剩 ${pr.magLeft}）</button>` : ''}
+            ${pr.canDM ? `<button class="ghost" data-a="maRerollDM">🎰 商人重骰${pr.dmSelf ? '' : '（商人+1）'}</button>` : ''}
+          </div>`;
+      } else if (pr.kind === 'alchemist') {
+        body = `<div class="row" style="gap:10px;margin-bottom:8px"><span class="ma-die-big">${pr.roll}</span><div><b class="crown">⚗️ 煉金術師發動！</b><div class="mute" style="font-size:var(--s1)">骰出 ${pr.roll}，要煉金改成移動 4 格嗎？</div></div></div>
+          <div class="row act"><button class="ghost" data-a="maAlch" data-v="0">維持 ${pr.roll} 格</button><button data-a="maAlch" data-v="1">⚗️ 改移動 4 格！</button></div>`;
+      } else if (pr.kind === 'rocket') {
+        body = `<div class="row" style="gap:10px;margin-bottom:8px"><span class="ma-die-big">${pr.roll}</span><div><b class="crown">🚀 火箭科學家噴射選擇！</b><div class="mute" style="font-size:var(--s1)">要雙倍移動 ${pr.roll * 2} 格（但著陸後會絆倒）嗎？</div></div></div>
+          <div class="row act"><button class="ghost" data-a="maRocket" data-v="0">正常走 ${pr.roll} 格</button><button data-a="maRocket" data-v="1">🚀 雙倍走 ${pr.roll * 2} 格（會絆倒）</button></div>`;
+      } else if (pr.kind === 'suckerfish') {
+        const ldr = rById[pr.leaderId];
+        body = `<div style="margin-bottom:8px"><b class="crown">🐟 吸盤魚搭便車！</b><div class="mute" style="font-size:var(--s1)">${esc(rName(ldr))} 移動到了${pr.targetPos >= 30 ? '終點線 🏆' : `第 ${pr.targetPos} 格`}，要跟著滑過去嗎？</div></div>
+          <div class="row act"><button class="ghost" data-a="maSucker" data-v="0">留在原地</button><button data-a="maSucker" data-v="1">🐟 跟著去${pr.targetPos >= 30 ? '終點！' : `第 ${pr.targetPos} 格`}</button></div>`;
+      } else if (pr.kind === 'duelist') {
+        const foe = rById[pr.foeId];
+        body = `<div style="margin-bottom:8px"><b class="crown">⚔️ 決鬥家同格遭遇！</b><div class="mute" style="font-size:var(--s1)">與 ${esc(rName(foe))}（${esc(nm(foe.ownerId))}）同格，要喊出決鬥嗎？（贏家 +2 格，平手你贏）</div></div>
+          <div class="row act"><button class="ghost" data-a="maDuel" data-v="0">不決鬥</button><button data-a="maDuel" data-v="1">⚔️ 喊出 DUEL 決鬥！</button></div>`;
+      } else if (pr.kind === 'copycatPick') {
+        body = `<div style="margin-bottom:6px"><b class="crown">🐱 模仿貓：多位領先者平手，選擇你要複製誰的能力！</b></div>
+          <div class="ma-opt-grid">${pr.cands.map((cid) => {
+            const cr = rById[cid];
+            return `<button data-a="maCopycat" data-v="${esc(cid)}"><img src="${maImg(cr.base)}" alt="">${esc(rName(cr))}</button>`;
+          }).join('')}</div>`;
+      }
+
+      trayHTML = `<div class="tray"><div class="row" style="justify-content:space-between;flex-wrap:nowrap;margin-bottom:4px">
+        <small class="mute">${pr ? (isMePrompt ? '⚡ 輪到你回應' : `等待 ${esc(nm(pr.pid))}`) : ''}</small><b class="cd" aria-live="off"></b></div>${body}</div>`;
+    }
+  }
+
+  // 檢視選手詳細能力彈窗
+  let inspectUI = '';
+  if (ma.inspect && g.status === 'play') {
+    const isCard = ma.inspect.startsWith('card:');
+    const rObj = isCard ? null : rById[ma.inspect];
+    const baseId = isCard ? ma.inspect.slice(5) : rObj?.base;
+    const info = MA_MAP[baseId];
+    if (info) {
+      const eff = rObj?.effPower ? MA_MAP[rObj.effPower] : null;
+      const mmTgt = rObj?.mastermindTarget ? rById[rObj.mastermindTarget] : null;
+      inspectUI = `<div class="overlay sheet"><div class="bd" data-a="maInspect"></div><div class="modal" role="dialog" aria-label="${esc(info.name)} 選手詳情">
+        <div class="row" style="justify-content:space-between;margin-bottom:10px"><h2 style="margin:0;color:var(--ink)">${esc(info.name)} <small class="mute">${esc(info.en)}</small></h2><button class="ghost ic" data-a="maInspect" aria-label="關閉">✕</button></div>
+        <img src="${maImg(baseId)}" alt="${esc(info.name)}" style="width:100%;max-width:260px;border-radius:12px;display:block;margin:0 auto 12px;border:2.5px solid ${info.color}">
+        ${rObj ? `<div class="res" style="margin-bottom:10px">玩家：<b>${esc(nm(rObj.ownerId))}</b> · 位置：<b>${rObj.finished ? `🏆 第 ${rObj.finishOrder} 名` : rObj.eliminated ? '☠ 本場淘汰' : `第 ${rObj.pos} 格`}</b>${rObj.tripped ? ' · <b>💫 絆倒中</b>' : ''}</div>` : ''}
+        <p style="margin:0 0 8px;line-height:1.5">${esc(info.desc)}</p>
+        ${eff && eff.id !== baseId ? `<div class="res me"><b>當前生效能力：${esc(eff.name)} ${esc(eff.en)}</b><div style="margin-top:4px;font-size:var(--s1)">${esc(eff.desc)}</div></div>` : ''}
+        ${mmTgt ? `<div class="res">🕶️ 預言冠軍：<b>${esc(rName(mmTgt))}（${esc(nm(mmTgt.ownerId))}）</b></div>` : ''}
+      </div></div>`;
+    }
+  }
+
+  // 36 位選手圖鑑抽屜
+  const dexUI = ma.dex && g.status === 'play' ? `<div class="overlay sheet"><div class="bd" data-a="maDex"></div><div class="modal" role="dialog" aria-label="36 位選手圖鑑">
+    <div class="row" style="justify-content:space-between;margin-bottom:10px"><h2 style="margin:0;color:var(--ink)">📖 36 位怪咖選手圖鑑</h2><button class="ghost ic" data-a="maDex" aria-label="關閉">✕</button></div>
+    <div class="ma-grid">${MA_RACERS.map((r) => maCard(r.id, { full: true, attrs: 'disabled style="cursor:default;opacity:1"' })).join('')}</div>
+  </div></div>` : '';
+
+  // 玩法與戰報抽屜
+  const sheetUI = sheet && g.status === 'play' ? `<div class="overlay sheet"><div class="bd" data-a="sheet"></div><div class="modal" role="dialog" aria-label="玩法與賽況動態">
+    <div class="row" style="justify-content:space-between"><h2 style="margin:0">🏃 瘋狂運動會 · ${g.race ? `第 ${g.race}/4 場` : '蛇行選秀'}</h2><button class="ghost ic" data-a="sheet" aria-label="關閉">✕</button></div>
+    <p class="mute" style="margin:8px 0">四場賽程：${g.schedule.map((t, i) => `${i + 1}.${t === 'wild' ? '狂野' : '溫和'}`).join(' → ')}</p>
+    <button class="ghost" data-a="maDex" style="width:100%;margin-bottom:8px">📖 查看 36 位選手完整圖鑑</button>
+    <h2 style="margin-top:8px">完整玩法</h2>${magicalRules()}
+    <h2 style="margin-top:16px">賽事動態</h2><div class="log">${g.log.map(esc).join('<br>')}</div>
+    <button class="ghost" data-a="leave" style="width:100%;margin-top:16px">離開房間</button></div></div>` : '';
+
+  return `<div class="row" style="flex-wrap:nowrap"><b style="flex:1;min-width:0">🏃 瘋狂運動會 · ${s.code}</b>
+    <span class="fmeta">${g.stage === 'draft' ? `選秀 ${g.draft.round}/${g.draft.totalRounds}` : `第 ${g.race}/4 場`}</span>
+    <button class="ghost ic" data-a="maDex" aria-label="選手圖鑑">📖</button>
+    <span class="rxw"><button class="ghost ic" data-a="rxMenu" aria-label="送表情" aria-expanded="${rxOpen}">😀</button>${rxOpen ? `<div class="rxp">${EMOJI.map((e) => `<button data-a="react" data-v="${e}" aria-label="${e}">${e}</button>`).join('')}</div>` : ''}</span>
+    <button class="ghost ic" data-a="sheet" aria-label="玩法與動態">📋</button></div>
+  ${ticker}${playersBar}${mainHTML}${trayHTML}${inspectUI}${dexUI}${sheetUI}`;
+}
+
+function magicalOverlay(g, s) {
+  const sm = g.summary, over = g.status === 'over', me = s.me, host = me === s.host;
+  const nm = (id) => esc(g.players.find((p) => p.id === id)?.name ?? '?');
+  const head = over
+    ? (g.winners.includes(me) ? '<span class="trophy">🏆</span> 你是瘋狂運動會總冠軍！' : `🏆 ${g.winners.map(nm).join('、')} 奪下總冠軍！`)
+    : `🏁 第 ${sm.race}/4 場結算（${sm.track === 'wild' ? '🌋 狂野賽道' : '🌼 溫和賽道'}）`;
+
+  const pod = sm.first ? `<div class="ma-podium">
+    <div class="ma-pod p1"><div style="font-size:var(--s1);color:var(--accent)">🏆 第 1 名 · 金盃 +${sm.first.pts} 分</div>
+      <img src="${maImg(sm.first.base)}" alt=""><b>${esc(MA_MAP[sm.first.base].name)}</b><div class="mute" style="font-size:var(--s1)">${nm(sm.first.ownerId)}</div></div>
+    <div class="ma-pod p2"><div style="font-size:var(--s1);color:#d7e3f5">🥈 第 2 名 · ${sm.second ? `銀徽章 +${sm.second.pts} 分` : '從缺（全遭淘汰）'}</div>
+      ${sm.second ? `<img src="${maImg(sm.second.base)}" alt=""><b>${esc(MA_MAP[sm.second.base].name)}</b><div class="mute" style="font-size:var(--s1)">${nm(sm.second.ownerId)}</div>` : '<div class="mute" style="padding:20px 0">本場銀徽章作廢</div>'}</div>
+  </div>` : '';
+
+  const rows = sm.rows.map((r) => {
+    const rank = sm.rows.findIndex((q) => q.total === r.total);
+    const chips = [
+      r.golds.length ? `🏆 ${r.golds.join('+')}` : '',
+      r.silvers.length ? `🥈 ${r.silvers.join('+')}` : '',
+      r.bronze ? `⭐ ${r.bronze > 0 ? `+${r.bronze}` : r.bronze}` : '',
+    ].filter(Boolean).join(' · ') || '尚無籌碼';
+    return `<div class="res ${over ? 'rk' : ''} ${r.id === me ? 'me' : ''}"><div class="row" style="justify-content:space-between;flex-wrap:nowrap">
+      <div><b><span style="display:inline-block;min-width:1.6em">${['🥇', '🥈', '🥉'][rank] ?? rank + 1}</span>${esc(r.name)}${r.id === me ? '（你）' : ''}</b>
+        <div style="font-size:var(--s1);font-weight:400;opacity:.85;margin-top:2px">${chips}${!over && r.racePts ? ` · 本場 ${r.racePts > 0 ? `+${r.racePts}` : r.racePts}` : ''}</div></div>
+      <b>${r.total} 分</b></div></div>`;
+  }).join('');
+
+  const activePs = g.players.filter((p) => p.in);
+  const readySet = new Set(g.nextReady || []);
+  const myReady = readySet.has(me);
+  const readyBar = !over ? `<div class="m-ready-bar">${activePs.map((p) => `<span class="m-rchip ${readySet.has(p.id) ? 'ok' : ''}">${esc(p.name)} ${readySet.has(p.id) ? '✓' : '…'}</span>`).join('')}</div>` : '';
+  const foot = over
+    ? (host ? '<button data-a="back">回到房間再來一局</button><button class="ghost" data-a="leave">離開房間</button>' : `<span class="mute">等 ${nm(s.host)} 開新局…</span><button class="ghost" data-a="leave">離開房間</button>`)
+    : myReady
+    ? `<button class="ghost" disabled>✅ 已準備，等待其他玩家（${readySet.size}/${activePs.length}）</button>`
+    : `<button data-a="next">進入第 ${sm.race + 1}/4 場（${readySet.size}/${activePs.length} 已準備）</button>`;
+
+  return `<div class="overlay"><div class="modal res-m"><div class="body">
+    <div class="hd">${head}</div>${pod}
+    ${!over && sm.nextStarter ? `<p class="mute" style="margin:0 0 8px;font-size:var(--s1)">下一場由 <b>${nm(sm.nextStarter)}</b> 先攻！</p>` : ''}
+    ${rows}
+  </div><div class="foot">${readyBar}<div class="row act">${foot}</div></div></div></div>`;
+}
+
 function render() {
-  const form = [...document.querySelectorAll('#name,#code,#target,#rounds,#turn,#pirateKick,[data-r]')].map((e) => [e, e.type === 'checkbox' ? e.checked : e.value]); // 建房表單：重繪不能洗掉使用者已填／已勾的
+  const form = [...document.querySelectorAll('#name,#code,#target,#rounds,#turn,#pirateKick,#maSched,#maDouble3p,[data-r]')].map((e) => [e, e.type === 'checkbox' ? e.checked : e.value]); // 建房表單：重繪不能洗掉使用者已填／已勾的
   const keep = Object.fromEntries(form.map(([e, v]) => [e.id || e.dataset.r, v]));
-  if (!snap?.game) { seen = null; resetMs(); } // 離開／重開一場遊戲後不要沿用舊手牌
+  if (!snap?.game) { seen = null; resetMs(); resetMa(); } // 離開／重開一場遊戲後不要沿用舊手牌
   document.body.classList.toggle('cats-mode', !!(snap?.game && snap.kind === 'cats'));
   document.body.classList.toggle('manila-mode', !!(snap?.game && snap.kind === 'manila'));
-  $('#app').innerHTML = !sess ? lobby() : !snap ? '<p>連線中…</p>' : snap.game ? (snap.kind === 'fuji' ? fuji() : snap.kind === 'cats' ? cats() : snap.kind === 'manila' ? manila() : game()) : room();
-  for (const e of document.querySelectorAll('#name,#code,#target,#rounds,#turn,#pirateKick,[data-r]')) { const v = keep[e.id || e.dataset.r]; if (v !== undefined) e.type === 'checkbox' ? (e.checked = v) : (e.value = v); }
+  document.body.classList.toggle('magical-mode', !!(snap?.game && snap.kind === 'magical'));
+  $('#app').innerHTML = !sess ? lobby() : !snap ? '<p>連線中…</p>' : snap.game ? (snap.kind === 'fuji' ? fuji() : snap.kind === 'cats' ? cats() : snap.kind === 'manila' ? manila() : snap.kind === 'magical' ? magical() : game()) : room();
+  for (const e of document.querySelectorAll('#name,#code,#target,#rounds,#turn,#pirateKick,#maSched,#maDouble3p,[data-r]')) { const v = keep[e.id || e.dataset.r]; if (v !== undefined) e.type === 'checkbox' ? (e.checked = v) : (e.value = v); }
   const all = [...document.querySelectorAll('[data-r]')]; if (all.length && all.every((b) => b.checked)) { const b = $('[data-a="allRules"]'); if (b) b.textContent = '全不選'; }
   tick();
 }
@@ -1918,6 +2529,7 @@ const A = {
     if (pick === 'phase10') Object.assign(body, { target: +$('#target').value, rules: Object.fromEntries(RULES.map(([k]) => [k, !!$(`[data-r="${k}"]`)?.checked])) });
     if (pick === 'cats') body.rounds = +$('#rounds').value;
     if (pick === 'manila') body.pirateKick = !!$('#pirateKick')?.checked;
+    if (pick === 'magical') { body.schedule = $('#maSched')?.value || 'std'; body.double3p = !!$('#maDouble3p')?.checked; }
     const r = await post('create', body).catch((e) => toast(e.message)); if (r) { localStorage.setItem('p10name', $('#name').value); enter(r); }
   },
   fold(v) { folds.has(v) ? folds.delete(v) : folds.add(v); render(); },
@@ -1955,8 +2567,11 @@ const A = {
   cpick: () => call('act', { action: { type: 'pick', card: [...sel][0] } }).then((r) => r && sel.clear()),
   cunpick: () => call('act', { action: { type: 'unpick' } }),
   // 馬尼拉動作
-  mStockSheet() { ms.stockSheet = !ms.stockSheet; render(); },
+  mStockSheet() { ms.stockSheet = !ms.stockSheet; if (!ms.stockSheet) ms.pendingBuy = null; render(); },
   mInfoSheet() { ms.infoSheet = !ms.infoSheet; render(); },
+  mCashWarnClose() { ms.cashWarn = null; render(); },
+  mGoMortgage(v) { ms.cashWarn = null; ms.pendingBuy = v || null; ms.stockSheet = true; render(); },
+  mSkipAnim() { closeManilaDice(); render(); },
   mMortgage: (v) => call('act', { action: { type: 'mortgage', idx: +v } }),
   mRedeem: (v) => call('act', { action: { type: 'redeem', idx: +v } }),
   mBidStep(v) {
@@ -1966,7 +2581,19 @@ const A = {
   },
   mBid: (v) => call('act', { action: { type: 'bid', amount: +v } }),
   mPass: () => call('act', { action: { type: 'pass' } }),
-  mBuy: (v) => call('act', { action: { type: 'buyStock', good: v } }),
+  mBuy(v) {
+    const g = snap?.game, mine = g?.players?.find((p) => p.id === snap.me);
+    if (!g || !mine) return;
+    if (g.supply[v] <= 0) return toast(`${M_INFO[v].name}股票已售完`);
+    const price = g.market[v]?.buy ?? 5;
+    if (mine.cash < price) {
+      ms.cashWarn = { good: v, price };
+      return render();
+    }
+    return call('act', { action: { type: 'buyStock', good: v } }).then((r) => {
+      if (r) { ms.cashWarn = null; ms.pendingBuy = null; ms.stockSheet = false; }
+    });
+  },
   mPickGood(v) {
     const arr = ms.masterGoods;
     if (arr.includes(v)) ms.masterGoods = arr.filter((x) => x !== v);
@@ -2012,6 +2639,41 @@ const A = {
     const [si, dest] = v.split(':');
     return call('act', { action: { type: 'pirateDecide', ship: +si, dest } });
   },
+  // 瘋狂運動會動作
+  maDraftSel(v) { ma.draftSel = ma.draftSel === v ? null : v; render(); },
+  maDraftGo() { const r = ma.draftSel; return call('act', { action: { type: 'draftPick', racer: r } }).then((ok) => { if (ok) ma.draftSel = null; }); },
+  maPickCard(v) {
+    const need = snap?.game?.doubleMode ? 2 : 1;
+    if (ma.pickSel.includes(v)) ma.pickSel = ma.pickSel.filter((x) => x !== v);
+    else if (need === 1) ma.pickSel = [v];
+    else if (ma.pickSel.length < 2) ma.pickSel = [...ma.pickSel, v];
+    else ma.pickSel = [ma.pickSel[1], v];
+    render();
+  },
+  maSelectGo() { const racers = [...ma.pickSel]; return call('act', { action: { type: 'selectRacers', racers } }).then((ok) => { if (ok) ma.pickSel = []; }); },
+  maUnselect: () => call('act', { action: { type: 'unselectRacers' } }),
+  maEggPick: (v) => call('act', { action: { type: 'eggPick', racer: v } }),
+  maTwinPick: (v) => call('act', { action: { type: 'twinPick', racer: v === 'skip' ? null : v } }),
+  maPickRacer: (v) => call('act', { action: { type: 'pickRacer', racerId: v } }),
+  maMastermind: (v) => call('act', { action: { type: 'mastermindPick', targetId: v } }),
+  maCheer: (v) => call('act', { action: { type: 'cheerleader', use: v === '1' } }),
+  maHypno: (v) => call('act', { action: { type: 'hypnotist', targetId: v === 'skip' ? null : v } }),
+  maThirdWheel: (v) => call('act', { action: { type: 'thirdWheel', space: v === 'skip' ? null : +v } }),
+  maGuess(v) { ma.guess = ma.guess === +v ? null : +v; render(); },
+  maRoll() { const g = ma.guess; ma.guess = null; return call('act', { action: g != null ? { type: 'roll', guess: g } : { type: 'roll' } }); },
+  maLegs: () => call('act', { action: { type: 'legs' } }),
+  maFlipToggle() { ma.flipOpen = !ma.flipOpen; render(); },
+  maFlip: (v) => call('act', { action: { type: 'flipFlop', targetId: v } }),
+  maKeepRoll: () => call('act', { action: { type: 'keepRoll' } }),
+  maRerollMag: () => call('act', { action: { type: 'rerollMag' } }),
+  maRerollDM: () => call('act', { action: { type: 'rerollDM' } }),
+  maAlch: (v) => call('act', { action: { type: 'alchemist', use: v === '1' } }),
+  maRocket: (v) => call('act', { action: { type: 'rocket', use: v === '1' } }),
+  maSucker: (v) => call('act', { action: { type: 'suckerfish', use: v === '1' } }),
+  maDuel: (v) => call('act', { action: { type: 'duelist', use: v === '1' } }),
+  maCopycat: (v) => call('act', { action: { type: 'copycatPick', targetId: v } }),
+  maInspect(v) { ma.inspect = v || null; render(); },
+  maDex() { ma.dex = !ma.dex; sheet = false; render(); },
   fseat(v) {
     const p = snap?.game?.players?.find((x) => x.id === v);
     if (!p) return;
@@ -2062,7 +2724,7 @@ const A = {
   },
 };
 $('#skipBan').addEventListener('click', (e) => { const v = e.target.dataset.v; if (v) { $('#skipBan').classList.remove('on'); call('react', { e: v }); } }); // 被跳過時橫幅上的快捷表情
-$('#mDiceStage').addEventListener('click', closeManilaDice); // 擲骰動畫點任意處可提前關閉
+$('#mDiceStage').addEventListener('click', finishManilaDice); // 擲骰動畫點任意處可提前關閉骰盤並播放船隻航行
 // 拖曳百搭：放開時越過最前／最後一張數字牌的中心 → 整段順子平移一格（等於 los 加減一），所以伺服器不用改
 $('#app').addEventListener('pointerdown', (e) => {
   noClick = false;

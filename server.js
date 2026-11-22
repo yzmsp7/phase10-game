@@ -9,13 +9,15 @@ const G = require('./game');
 const F = require('./fuji');
 const C = require('./cats');
 const M = require('./manila');
+const MA = require('./magical');
 
 const TURN_SEC = 60; // 每回合預設秒數；建房時可改（10–600），手機切去 LINE 回訊息再回來要來得及，所以下限不能太短
-const KINDS = { phase10: { eng: G, min: 2, max: 6 }, fuji: { eng: F, min: 3, max: 8 }, cats: { eng: C, min: 3, max: 6 }, manila: { eng: M, min: 3, max: 5 } }; // 遊戲種類：規則引擎（同一組介面 create/act/leave/autoPlay/view）與人數；新增遊戲在這裡加一行
+const KINDS = { phase10: { eng: G, min: 2, max: 6 }, fuji: { eng: F, min: 3, max: 8 }, cats: { eng: C, min: 3, max: 6 }, manila: { eng: M, min: 3, max: 5 }, magical: { eng: MA, min: 2, max: 6 } }; // 遊戲種類：規則引擎（同一組介面 create/act/leave/autoPlay/view）與人數；新增遊戲在這裡加一行
 const K = (room) => KINDS[room.kind];
 const EMOJI = ['😮', '😡', '😂', '👏', '😭', '😎', '🙏', '😴']; // 白名單；index.html 有同一份，改的時候兩邊一起改
 const RULES = ['catchUp', 'first', 'rv', 'sh', 'xn', 'xc']; // 建房時可開的特殊規則（見 game.js），全部預設關 = 標準 Phase 10；index.html 有同一份鍵名，test.js 會比對
 const BOT_NAMES = ['老船長(電腦)', '海盜王(電腦)', '香料商(電腦)', '黑市通(電腦)'];
+const MA_BOT_NAMES = ['閃電豹(電腦)', '火箭龜(電腦)', '香蕉俠(電腦)', '魔術兔(電腦)', '狂野喵(電腦)'];
 const rooms = new Map();
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
 
@@ -69,17 +71,17 @@ function watch(room) {
   const anyHumanOnline = [...room.clients.values()].some((s) => s.size);
   if (!g || !anyHumanOnline) { room.dl = null; return; }
 
-  // 馬尼拉結算畫面：電腦玩家自動按下「開始下一航程」準備，但仍等所有真人玩家按開始
-  if (g.status === 'roundEnd' && room.kind === 'manila') {
+  // 馬尼拉／瘋狂運動會結算畫面：電腦玩家自動按下準備，但仍等所有真人玩家按開始
+  if ((g.status === 'roundEnd' && room.kind === 'manila') || (g.status === 'raceEnd' && room.kind === 'magical')) {
     room.dl = null;
     const pendingBots = g.players.filter((p) => p.in && isBot(room, p.id) && !g.nextReady.includes(p.id));
     if (pendingBots.length) {
       const delay = room.settings.botDelay ?? 700;
       room.botTimer = setTimeout(() => {
-        if (room.game !== g || g.status !== 'roundEnd') return;
+        if (room.game !== g || (g.status !== 'roundEnd' && g.status !== 'raceEnd')) return;
         for (const b of pendingBots) {
-          if (g.status !== 'roundEnd') break;
-          try { M.act(g, b.id, { type: 'next' }); } catch (e) { console.error(e); }
+          if (g.status !== 'roundEnd' && g.status !== 'raceEnd') break;
+          try { K(room).eng.act(g, b.id, { type: 'next' }); } catch (e) { console.error(e); }
         }
         broadcast(room);
       }, delay);
@@ -91,10 +93,27 @@ function watch(room) {
   if (g.status !== 'play') { room.dl = null; return; }
   const no = g.turnNo, cur = g.players[g.turn].id;
 
-  // 輪到電腦玩家時自動執行 AI 決策（留出足夠閱讀其他玩家動作大通知與 3D 擲骰動畫的時間）
-  if (isBot(room, cur) && K(room).eng.botPlay) {
+  // 瘋狂運動會同時秘密選選手階段：電腦玩家自動挑選本場出戰選手，同時照常對真人倒數
+  if (room.kind === 'magical' && g.stage === 'select') {
+    const pendingBots = g.players.filter((p) => p.in && isBot(room, p.id) && !p.selected);
+    if (pendingBots.length) {
+      const delay = room.settings.botDelay ?? 650;
+      room.botTimer = setTimeout(() => {
+        if (room.game !== g || g.status !== 'play' || g.stage !== 'select') return;
+        for (const b of pendingBots) {
+          if (g.stage !== 'select') break;
+          try { MA.botPlay(g, b.id); } catch (e) { console.error(e); }
+        }
+        broadcast(room);
+      }, delay);
+      room.botTimer.unref();
+    }
+  }
+
+  // 輪到電腦玩家時自動執行 AI 決策（留出足夠閱讀其他玩家動作大通知與擲骰動畫的時間）
+  if (isBot(room, cur) && K(room).eng.botPlay && !(room.kind === 'magical' && g.stage === 'select')) {
     room.dl = null;
-    const baseDelay = room.settings.botDelay ?? (g.ev?.kind === 'roll' ? 2400 : 1350);
+    const baseDelay = room.settings.botDelay ?? (room.kind === 'magical' ? (g.ev?.kind === 'roll' ? 1500 : 1000) : (g.ev?.kind === 'roll' ? 3400 : 1350));
     room.botTimer = setTimeout(() => {
       if (room.game !== g || g.status !== 'play' || g.turnNo !== no) return;
       try { K(room).eng.botPlay(g, cur); } catch (e) { console.error(e); try { K(room).eng.autoPlay(g, cur); } catch {} }
@@ -129,19 +148,24 @@ const actions = {
     if (room.kind === 'phase10' && Number.isInteger(b.target) && b.target >= 1 && b.target <= 10) room.settings.target = b.target;
     if (room.kind === 'cats' && Number.isInteger(b.rounds) && b.rounds >= 1 && b.rounds <= 10) room.settings.rounds = b.rounds;
     if (room.kind === 'manila' && typeof b.pirateKick === 'boolean') room.settings.pirateKick = b.pirateKick;
+    if (room.kind === 'magical') {
+      if (typeof b.schedule === 'string' && Object.hasOwn(MA.SCHEDULES, b.schedule)) room.settings.schedule = b.schedule;
+      if (typeof b.double3p === 'boolean') room.settings.double3p = b.double3p;
+    }
   },
   addBot(room, p) {
-    if (room.kind !== 'manila') G.err('目前只有馬尼拉支援電腦玩家');
+    if (room.kind !== 'manila' && room.kind !== 'magical') G.err('目前只有馬尼拉與瘋狂運動會支援電腦玩家');
     if (room.host !== p.id) G.err('只有房主可以新增電腦玩家');
     if (room.game) G.err('遊戲進行中不能新增電腦玩家');
     if (room.players.length >= K(room).max) G.err(`房間已滿（最多 ${K(room).max} 人）`);
     const used = new Set(room.players.map((x) => x.name));
-    let name = BOT_NAMES.find((n) => !used.has(n));
+    const pool = room.kind === 'magical' ? MA_BOT_NAMES : BOT_NAMES;
+    let name = pool.find((n) => !used.has(n));
     if (!name) { let k = 1; while (used.has(`電腦${k}`)) k++; name = `電腦${k}`; }
     room.players.push({ id: randomUUID().slice(0, 8), token: null, name, bot: true });
   },
   removeBot(room, p, b) {
-    if (room.kind !== 'manila') G.err('目前只有馬尼拉支援電腦玩家');
+    if (room.kind !== 'manila' && room.kind !== 'magical') G.err('目前只有馬尼拉與瘋狂運動會支援電腦玩家');
     if (room.host !== p.id) G.err('只有房主可以移除電腦玩家');
     if (room.game) G.err('遊戲進行中不能移除電腦玩家');
     const idx = b.id
@@ -258,9 +282,12 @@ const server = http.createServer(async (req, res) => {
           if (!Number.isInteger(target) || target < 1 || target > 10) G.err('目標階段要在 1–10 之間');
           const rounds = b.rounds ?? C.DEFAULT_ROUNDS;
           if (kind === 'cats' && (!Number.isInteger(rounds) || rounds < 1 || rounds > 10)) G.err('遊戲輪數要在 1–10 之間');
+          const schedule = b.schedule ?? 'std';
+          if (kind === 'magical' && !Object.hasOwn(MA.SCHEDULES, schedule)) G.err('無效的賽程組合');
           const extra = kind === 'phase10' ? { target, rules: Object.fromEntries(RULES.map((k) => [k, b.rules?.[k] === true])) }
             : kind === 'cats' ? { rounds }
-            : kind === 'manila' ? { pirateKick: b.pirateKick === true } : {};
+            : kind === 'manila' ? { pirateKick: b.pirateKick === true }
+            : kind === 'magical' ? { schedule, double3p: b.double3p === true } : {};
           room = newRoom(kind, turn, extra);
         } else {
           room = rooms.get(String(b.code ?? '').toUpperCase());
@@ -294,6 +321,6 @@ setInterval(() => {
 
 if (require.main === module) {
   const port = process.env.PORT || 3000;
-  server.listen(port, '0.0.0.0', () => console.log(`Phase 10 / 富士流 / 貓貓食堂 / 馬尼拉 → http://localhost:${port}`));
+  server.listen(port, '0.0.0.0', () => console.log(`Phase 10 / 富士流 / 貓貓食堂 / 馬尼拉 / 瘋狂運動會 → http://localhost:${port}`));
 }
 module.exports = Object.assign(server, { rooms }); // rooms 只給測試改狀態用
