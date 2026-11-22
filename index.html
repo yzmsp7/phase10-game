@@ -585,6 +585,19 @@ body.magical-mode .slot{background:#161229}
 .ma-dpill{display:inline-block;padding:4px 12px;border-radius:10px;font-size:var(--s1);font-weight:600;background:#120e24;border:1.5px solid var(--accent);color:#fff;font-variant-numeric:tabular-nums}
 .ma-dpill.win{background:#185e3a;border-color:#7fe8b0;color:#e6fff2}
 .ma-dpill.bad{background:#7d1c24;border-color:#ff938b;color:#fff}
+.ma-dban{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;margin:8px 0 10px;border-radius:12px;background:linear-gradient(90deg,#2d2458,#1f193d);border:2px solid #5c4ea6;color:#fbf8f1}
+.ma-dban.now{background:linear-gradient(90deg,#4d3812,#2e2348);border-color:var(--accent);box-shadow:0 0 18px #ffd23f44}
+.ma-dban-num{flex:none;min-width:60px;padding:6px 8px;border-radius:10px;background:#120e24;border:1.5px solid var(--accent);text-align:center;line-height:1.1;font-variant-numeric:tabular-nums}
+.ma-dban-num b{display:block;font-size:var(--s3);color:var(--accent)}.ma-dban-num small{font-size:10px;color:var(--mute)}
+.ma-dban-tx{flex:1;min-width:0;line-height:1.3}.ma-dban-tx b{display:block;font-size:var(--s2)}.ma-dban-tx small{display:block;font-size:var(--s1);color:var(--mute);margin-top:2px}
+.ma-dorder{display:flex;gap:6px;overflow-x:auto;padding:2px 0 6px;margin-bottom:8px;scrollbar-width:none}.ma-dorder::-webkit-scrollbar{display:none}
+.ma-dslot{flex:0 0 auto;display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border-radius:10px;background:#17132b;border:1.5px solid #3c3466;font-size:var(--s1);color:var(--mute);white-space:nowrap;font-variant-numeric:tabular-nums}
+.ma-dslot b{font-weight:600;color:var(--ink)}
+.ma-dslot.done{opacity:.42}
+.ma-dslot.me{border-color:var(--accent);background:#2e2554;color:#fff}
+.ma-dslot.cur{border-color:#5fe094;background:#16402b;color:#e6fff2;box-shadow:0 0 10px #5fe09455}
+.ma-dslot.cur.me{border-color:var(--accent);background:#4a3712;color:#fff7d6;box-shadow:0 0 12px #ffd23f77}
+.ma-dturn{flex:0 0 auto;display:inline-flex;align-items:center;font-size:11px;color:var(--accent);opacity:.85;padding:0 2px}
 @media(max-width:600px){
 .ma-cell{min-height:56px}.ma-tok{width:28px;height:28px}.ma-tok.sm{width:24px;height:24px}
 }
@@ -2535,11 +2548,14 @@ function magical() {
   if (g.stage !== 'rollOff') { clearTimeout(maRoTimer); maRoTimer = null; ma.roState = 'idle'; }
 
   // 頂部玩家積分條
+  const fullDraftOrder = g.stage === 'draft' && g.draft ? (g.draft.fullOrder || g.draft.order || []) : [];
   const playersBar = `<div class="ma-pbar" aria-label="玩家積分">${g.players.map((p) => {
     const isMe = p.id === me, isTurn = g.status === 'play' && g.turn === p.id && g.stage !== 'select' && g.stage !== 'rollOff';
     const col = MA_PCOLORS[p.color % MA_PCOLORS.length];
-    const chips = `${p.golds.length ? `🏆×${p.golds.length} ` : ''}${p.silvers.length ? `🥈×${p.silvers.length} ` : ''}${p.bronze ? `⭐${p.bronze > 0 ? `+${p.bronze}` : p.bronze}` : ''}`.trim() || (g.stage === 'draft' ? `已選 ${p.rosterCount}` : `剩 ${p.availCount} 位`);
+    const mySlots = fullDraftOrder.map((id, i) => (id === p.id ? i + 1 : 0)).filter(Boolean);
+    const chips = `${p.golds.length ? `🏆×${p.golds.length} ` : ''}${p.silvers.length ? `🥈×${p.silvers.length} ` : ''}${p.bronze ? `⭐${p.bronze > 0 ? `+${p.bronze}` : p.bronze}` : ''}`.trim() || (g.stage === 'draft' ? `第${mySlots.join('、')}順` : `剩 ${p.availCount} 位`);
     const st = g.stage === 'rollOff' ? (g.rollOff?.ready.includes(p.id) ? '✅ 已確認' : '🎲 比骰中')
+      : g.stage === 'draft' ? `第${mySlots.join('、')}順 · ${p.rosterCount}人`
       : g.stage === 'select' ? (p.ready ? '✅ 已選好' : '💭 挑選中') : chips;
     return `<div class="ma-pl ${isMe ? 'me' : ''} ${isTurn ? 'turn' : ''} ${p.in ? '' : 'out'}" data-pid="${p.id}">
       <div class="ma-pl-top"><span class="ma-pdot" style="background:${col}"></span><span class="ma-pl-nm">${esc(p.name)}${isMe ? '(你)' : ''}</span>${online[p.id] ? '' : '💤'}</div>
@@ -2592,14 +2608,44 @@ function magical() {
         : `<button data-a="maRollOffOk">✅ 確認，開始選秀！（${readySet.size}/${activePs.length} 已確認）</button>`}</div></div>`;
   } else if (g.stage === 'draft') {
     const d = g.draft, isMyPick = d.picker === me;
-    const queuePills = d.order.map((pid, i) => `<span class="m-rchip ${i === 0 ? 'ok' : ''}">${i === 0 ? '👉 ' : ''}${esc(nm(pid))}</span>`).join('');
+    const full = d.fullOrder || d.order || [];
+    const curIdx = d.idx ?? 0;
+    const myAllPicks = full.map((pid, i) => (pid === me ? i + 1 : 0)).filter(Boolean);
+    const nextMyIdx = full.findIndex((pid, i) => i >= curIdx && pid === me);
+    const waitCnt = nextMyIdx >= 0 ? nextMyIdx - curIdx : -1;
+    const nextPickNum = nextMyIdx >= 0 ? nextMyIdx + 1 : null;
+    const myBadgeNum = isMyPick ? `第 ${curIdx + 1}` : nextPickNum ? `第 ${nextPickNum}` : '完成';
+    const myBadgeSub = isMyPick ? '現在選！' : waitCnt === 1 ? '下個換你' : waitCnt > 1 ? `再等 ${waitCnt} 位` : '本輪選完';
+    const myHeadTxt = isMyPick
+      ? `✨ 輪到你選角色！（本輪第 ${curIdx + 1} / ${full.length} 順位）`
+      : waitCnt === 1
+      ? `⚡ 下一個就是你！（本輪第 ${nextPickNum} / ${full.length} 順位）`
+      : waitCnt > 1
+      ? `⏳ 再等 ${waitCnt} 位輪到你（本輪第 ${nextPickNum} / ${full.length} 順位）`
+      : '✅ 你本輪已選完，等待本輪結束';
+    const mySubTxt = myAllPicks.length
+      ? `本輪蛇行順位：你是第 ${myAllPicks.join('、')} 順位${isMyPick ? '' : ` · 目前第 ${curIdx + 1} 順位 ${nm(d.picker)} 挑選中`}`
+      : '';
+    const orderBanner = `<div class="ma-dban ${isMyPick ? 'now' : ''}">
+      <div class="ma-dban-num"><b>${myBadgeNum}</b><small>${myBadgeSub}</small></div>
+      <div class="ma-dban-tx"><b>${esc(myHeadTxt)}</b><small>${esc(mySubTxt)}</small></div></div>`;
+    const half = full.length / 2;
+    const queuePills = full.map((pid, i) => {
+      const p = pById[pid], col = MA_PCOLORS[(p?.color ?? 0) % MA_PCOLORS.length];
+      const isDone = i < curIdx, isCur = i === curIdx, isMe = pid === me;
+      const turnSep = !g.doubleMode && i === half && i > 0 ? '<span class="ma-dturn" aria-hidden="true">↩折返</span>' : '';
+      return `${turnSep}<span class="ma-dslot ${isDone ? 'done' : ''} ${isCur ? 'cur' : ''} ${isMe ? 'me' : ''}">
+        <span class="ma-pdot" style="background:${col};width:8px;height:8px"></span>
+        <span>#${i + 1}</span><b>${esc(nm(pid))}${isMe ? '(你)' : ''}</b>${isDone ? '✓' : isCur ? '👈' : ''}</span>`;
+    }).join('');
     const myTeam = g.myRoster.length
       ? `<div class="panel" style="padding:10px 12px"><div style="font-size:var(--s1);color:var(--mute);margin-bottom:6px">你的隊伍（已招募 ${g.myRoster.length} 位）</div>
           <div class="ma-rbar">${g.myRoster.map((id) => `<button class="ma-rchip" data-a="maInspect" data-v="card:${id}"><img src="${maImg(id)}" alt=""><span>${esc(MA_MAP[id].name)}</span></button>`).join('')}</div></div>`
       : '';
     mainHTML = `<div class="panel" style="padding:12px">
-      <div class="row" style="justify-content:space-between;margin-bottom:6px"><b>📋 第 ${d.round}/${d.totalRounds} 輪蛇行選秀</b><small class="mute">${g.doubleMode ? '雙選手模式（共組 8 位）' : '每人招募 4 位選手'}</small></div>
-      <div class="row" style="gap:4px;margin-bottom:8px">${queuePills}</div>
+      <div class="row" style="justify-content:space-between;margin-bottom:4px"><b>📋 第 ${d.round}/${d.totalRounds} 輪蛇行選秀</b><small class="mute">${g.doubleMode ? '雙選手模式（共組 8 位）' : '每人招募 4 位選手'}</small></div>
+      ${orderBanner}
+      <div class="ma-dorder" aria-label="本輪選秀順位表">${queuePills}</div>
       <div class="ma-grid">${d.pool.map((id) => maCard(id, {
         cls: ma.draftSel === id ? 'sel' : '',
         full: true,
@@ -2607,10 +2653,10 @@ function magical() {
         attrs: isMyPick ? `data-a="maDraftSel" data-v="${id}" aria-pressed="${ma.draftSel === id}"` : `data-a="maInspect" data-v="card:${id}"`,
       })).join('')}</div></div>${myTeam}`;
     const chosenInfo = ma.draftSel ? MA_MAP[ma.draftSel] : null;
-    const why = !isMyPick ? `等待 ${nm(d.picker)} 挑選選手` : chosenInfo ? '' : '先點擊上方一位選手卡';
+    const why = !isMyPick ? `等待第 ${curIdx + 1} 順位 ${nm(d.picker)} 挑選${waitCnt > 0 ? `（你是第 ${nextPickNum} 順位，再等 ${waitCnt} 位）` : ''}` : chosenInfo ? '' : '先點擊上方一位選手卡';
     trayHTML = `<div class="tray"><div class="row" style="justify-content:space-between;flex-wrap:nowrap;margin-bottom:8px">
-      <b class="${isMyPick ? 'crown' : ''}">${isMyPick ? '✨ 輪到你招募選手！' : `等待 ${esc(nm(d.picker))} 選秀…`}</b><b class="cd" aria-live="off"></b></div>
-      <div class="row act"><span class="w" data-why="${esc(why)}"><button data-a="maDraftGo" ${why ? 'disabled' : ''}>${chosenInfo ? `✨ 招募：${chosenInfo.name} ${chosenInfo.en}` : '點擊上方選手卡招募'}</button></span></div></div>`;
+      <b class="${isMyPick ? 'crown' : ''}">${isMyPick ? `✨ 第 ${curIdx + 1} 順位・輪到你招募選手！` : `等待 ${esc(nm(d.picker))}（#${curIdx + 1}）${nextPickNum ? ` · 你是 #${nextPickNum}` : ''}`}</b><b class="cd" aria-live="off"></b></div>
+      <div class="row act"><span class="w" data-why="${esc(why)}"><button data-a="maDraftGo" ${why ? 'disabled' : ''}>${chosenInfo ? `✨ 招募：${chosenInfo.name} ${chosenInfo.en}` : isMyPick ? '點擊上方選手卡招募' : nextPickNum ? `等待中（你是第 ${nextPickNum} 順位）` : '等待本輪結束…'}</button></span></div></div>`;
   } else if (g.stage === 'select') {
     const need = g.doubleMode ? 2 : 1;
     const locked = g.mySelected != null;

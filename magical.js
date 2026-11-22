@@ -1840,6 +1840,8 @@ function view(g, pid) {
       round: g.draft.round, totalRounds: g.draft.totalRounds,
       pool: g.draft.pool,
       picker: g.draft.order[g.draft.idx] ?? null,
+      idx: g.draft.idx,
+      fullOrder: g.draft.order,
       order: g.draft.order.slice(g.draft.idx, g.draft.idx + 6),
     } : null,
     myRoster: me ? me.roster : [],
