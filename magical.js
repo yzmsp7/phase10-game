@@ -235,7 +235,10 @@ function syncCopycats(g) {
 function syncTurn(g) {
   if (g.status !== 'play') return;
   let pid = null;
-  if (g.stage === 'draft') {
+  if (g.stage === 'rollOff') {
+    const waiting = activePlayers(g).find((p) => !g.rollOff?.ready.includes(p.id));
+    pid = waiting ? waiting.id : g.players[g.activePlayerIdx]?.id;
+  } else if (g.stage === 'draft') {
     pid = g.draft.order[g.draft.idx];
   } else if (g.stage === 'select') {
     const waiting = activePlayers(g).find((p) => !p.selected);
@@ -261,12 +264,12 @@ function create(players, { schedule = 'std', double3p = false } = {}) {
   }));
   const deck = shuffle(RACERS.map((r) => r.id));
   const g = {
-    status: 'play', stage: 'draft', mode, doubleMode,
+    status: 'play', stage: 'rollOff', mode, doubleMode,
     scheduleKey: sched, schedule: [...SCHEDULES[sched]],
     race: 0, track: SCHEDULES[sched][0],
     turn: 0, turnNo: 1, evNo: 0, ev: null, evFeed: [], log: [],
     players: ps, deck, prevWinners: [],
-    draft: null, racers: [], finishers: [], eliminated: [], firstEliminatedOwner: null,
+    rollOff: null, draft: null, racers: [], finishers: [], eliminated: [], firstEliminatedOwner: null,
     activePlayerIdx: 0, activeRacerId: null, usedRacersThisTurn: [],
     turnCtx: null, queue: [], prompt: null, skipperNext: null,
     nextReady: [], summary: null, winners: null,
@@ -275,7 +278,7 @@ function create(players, { schedule = 'std', double3p = false } = {}) {
   return g;
 }
 
-// --- 選秀階段（Snake Draft，完全依 PDF p.12 & p.26） ---
+// --- 選秀比骰與蛇行選秀階段（Snake Draft，完全依 PDF p.12 & p.26） ---
 function startDraft(g) {
   const act = activePlayers(g);
   const ro = rollOff(act.map((p) => p.id));
@@ -284,6 +287,17 @@ function startDraft(g) {
   log(g, `🎲 選秀比骰：${roTxt} → ${playerOf(g, ro.winner).name} 先選！`);
   emit(g, { kind: 'rollOff', rolls: ro.rolls, winner: ro.winner, title: `${playerOf(g, ro.winner).name} 贏得先選權！`, sub: roTxt, tone: 'gold' });
 
+  // 等待全體玩家看完比骰結果並按下確認後，再正式進入第 1 輪蛇行選秀
+  g.stage = 'rollOff';
+  g.rollOff = { purpose: 'draft', rolls: ro.rolls, winner: ro.winner, startIdx, ready: [] };
+  syncTurn(g);
+  g.turnNo++;
+}
+
+function enterDraft(g) {
+  let startIdx = g.rollOff?.startIdx ?? 0;
+  if (!g.players[startIdx]?.in) startIdx = nextIn(g, startIdx);
+  g.rollOff = null;
   const totalRounds = g.mode === '3p2' ? 4 : 2;
   g.draft = { round: 1, totalRounds, startIdx, pool: [], order: [], idx: 0 };
   setupDraftRound(g);
@@ -1333,6 +1347,18 @@ function act(g, pid, a) {
   }
   if (g.status !== 'play') err('遊戲已結束');
 
+  if (g.stage === 'rollOff') {
+    if (a.type !== 'rollOffOk') err('請先按確認開始選秀');
+    const p = playerOf(g, pid);
+    if (!p?.in) err('玩家不在場上');
+    if (!g.rollOff.ready.includes(pid)) g.rollOff.ready.push(pid);
+    if (activePlayers(g).every((x) => g.rollOff.ready.includes(x.id))) {
+      enterDraft(g);
+    } else {
+      syncTurn(g);
+    }
+    return;
+  }
   if (g.stage === 'draft') {
     if (a.type !== 'draftPick') err('請選擇要招募的選手');
     return handleDraftPick(g, pid, a.racer);
@@ -1611,7 +1637,10 @@ function leave(g, pid) {
     if (activePlayers(g).every((x) => g.nextReady.includes(x.id))) beginRaceSelect(g, g.nextStarterIdx);
     return leftCount;
   }
-  if (g.stage === 'draft') {
+  if (g.stage === 'rollOff') {
+    if (activePlayers(g).every((x) => g.rollOff.ready.includes(x.id))) enterDraft(g);
+    else syncTurn(g);
+  } else if (g.stage === 'draft') {
     const d = g.draft;
     while (d.idx < d.order.length && !playerOf(g, d.order[d.idx])?.in) d.idx++;
     if (d.idx >= d.order.length || !d.pool.length) {
@@ -1650,6 +1679,12 @@ const DRAFT_TIER = {
 function autoPlay(g, pid) {
   if (g.status === 'raceEnd') return act(g, pid, { type: 'next' });
   if (g.status !== 'play') return;
+  if (g.stage === 'rollOff') {
+    const waiting = activePlayers(g).filter((p) => !g.rollOff.ready.includes(p.id));
+    const p = waiting.find((x) => x.id === pid) || waiting[0];
+    if (p) return act(g, p.id, { type: 'rollOffOk' });
+    return;
+  }
   if (g.stage === 'draft') {
     const pick = g.draft.pool[0];
     if (pick) return act(g, pid, { type: 'draftPick', racer: pick });
@@ -1688,6 +1723,10 @@ function botPlay(g, pid) {
   if (g.status === 'raceEnd') return act(g, pid, { type: 'next' });
   if (g.status !== 'play') return;
 
+  if (g.stage === 'rollOff') {
+    if (!g.rollOff.ready.includes(pid)) return act(g, pid, { type: 'rollOffOk' });
+    return;
+  }
   if (g.stage === 'draft') {
     // 依強度表加一點隨機擾動選最強選手
     const best = [...g.draft.pool].sort((a, b) => ((DRAFT_TIER[b] ?? 60) + randomInt(-6, 7)) - ((DRAFT_TIER[a] ?? 60) + randomInt(-6, 7)))[0];
@@ -1794,6 +1833,9 @@ function view(g, pid) {
     goldChip: GOLD_CHIPS[Math.max(0, g.race - 1)] ?? 3,
     silverChip: SILVER_CHIPS[Math.max(0, g.race - 1)] ?? 1,
     prevWinners: [...new Set(g.prevWinners)],
+    rollOff: g.stage === 'rollOff' && g.rollOff ? {
+      purpose: g.rollOff.purpose, rolls: g.rollOff.rolls, winner: g.rollOff.winner, ready: g.rollOff.ready,
+    } : null,
     draft: g.stage === 'draft' && g.draft ? {
       round: g.draft.round, totalRounds: g.draft.totalRounds,
       pool: g.draft.pool,

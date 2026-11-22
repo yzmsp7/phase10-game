@@ -93,6 +93,25 @@ function watch(room) {
   if (g.status !== 'play') { room.dl = null; return; }
   const no = g.turnNo, cur = g.players[g.turn].id;
 
+  // 瘋狂運動會選秀比骰階段：等所有真人按確認才進入選秀；電腦玩家於骰子落地後自動確認
+  if (room.kind === 'magical' && g.stage === 'rollOff') {
+    room.dl = null;
+    const pendingBots = g.players.filter((p) => p.in && isBot(room, p.id) && !g.rollOff.ready.includes(p.id));
+    if (pendingBots.length) {
+      const delay = room.settings.botDelay ?? 1300;
+      room.botTimer = setTimeout(() => {
+        if (room.game !== g || g.status !== 'play' || g.stage !== 'rollOff') return;
+        for (const b of pendingBots) {
+          if (g.stage !== 'rollOff') break;
+          try { MA.botPlay(g, b.id); } catch (e) { console.error(e); }
+        }
+        broadcast(room);
+      }, delay);
+      room.botTimer.unref();
+    }
+    return;
+  }
+
   // 瘋狂運動會同時秘密選選手階段：電腦玩家自動挑選本場出戰選手，同時照常對真人倒數
   if (room.kind === 'magical' && g.stage === 'select') {
     const pendingBots = g.players.filter((p) => p.in && isBot(room, p.id) && !p.selected);

@@ -756,9 +756,10 @@ let pick = (() => { try { const k = localStorage.getItem('p10pick'); return Obje
 let dl = null, sess = store.get(), snap = null, es = null, sel = new Set(), slots = {}, los = {}, seen = null, sheet = false, endFor = null, actSlot = null, byColor = false, rxOpen = false, rxSeq = null, histFor = null, drag = null, noClick = false, xs = { target: null, v: null, give: null }; // xs = 交換牌的三個選擇（對象／數字或顏色／要換出的牌）。 // drag = 正在拖的百搭（拖曳中不重繪，不然 DOM 重建會把它弄丟）；noClick = 剛拖完，吃掉隨後的 click。 histFor = 正在看誰的撿棄牌歷史（玩家 id）。 rxOpen = 表情選單開著；rxSeq = 已播到的表情編號（null = 還沒收到第一筆快照）。每次 render 會重建 DOM，UI 狀態要存在這：sheet = 底部資訊面板開著；endFor = 正在選「接前/接後」的順子；actSlot = 放階段時作用中的那一組
 let ms = { bidAmt: 1, spot: null, masterGoods: ['jade', 'silk', 'nutmeg'], masterPos: { jade: 3, silk: 3, nutmeg: 3, ginseng: 0 }, navMoves: {}, plunderShip: null, stockSheet: false, infoSheet: false, cashWarn: null, pendingBuy: null, holdOverlay: false, animFrom: null, sailAnim: null, stageKey: null };
 const resetMs = () => { ms = { bidAmt: 1, spot: null, masterGoods: ['jade', 'silk', 'nutmeg'], masterPos: { jade: 3, silk: 3, nutmeg: 3, ginseng: 0 }, navMoves: {}, plunderShip: null, stockSheet: false, infoSheet: false, cashWarn: null, pendingBuy: null, holdOverlay: false, animFrom: null, sailAnim: null, stageKey: null }; closeManilaDice(); clearManilaActs(); };
-let ma = { draftSel: null, pickSel: [], guess: null, inspect: null, dex: false, flipOpen: false, animPos: null, movingIds: null, trailCells: null, moveBanner: null, hopIds: null, holdOverlay: false };
+let ma = { draftSel: null, pickSel: [], guess: null, inspect: null, dex: false, flipOpen: false, animPos: null, movingIds: null, trailCells: null, moveBanner: null, hopIds: null, holdOverlay: false, roState: 'idle' };
 let maMoveTimers = [];
 let maMoveAfter = null;
+let maRoTimer = null;
 const clearMaMoves = () => {
   maMoveTimers.forEach((id) => clearTimeout(id));
   maMoveTimers = [];
@@ -769,7 +770,7 @@ const clearMaMoves = () => {
   ma.moveBanner = null;
   ma.hopIds = null;
 };
-const resetMa = () => { clearMaMoves(); ma = { draftSel: null, pickSel: [], guess: null, inspect: null, dex: false, flipOpen: false, animPos: null, movingIds: null, trailCells: null, moveBanner: null, hopIds: null, holdOverlay: false }; closeManilaDice(); };
+const resetMa = () => { clearMaMoves(); clearTimeout(maRoTimer); maRoTimer = null; ma = { draftSel: null, pickSel: [], guess: null, inspect: null, dex: false, flipOpen: false, animPos: null, movingIds: null, trailCells: null, moveBanner: null, hopIds: null, holdOverlay: false, roState: 'idle' }; closeManilaDice(); };
 if (sess && urlRoom && sess.code !== urlRoom) sess = null; // 邀請連結指向另一間房 → 先顯示加入畫面
 // 在 localhost 開頁面時，邀請連結／QR 要換成手機連得到的區網 IP（undefined = 查詢中，null = 查不到）。部署後網址不是 localhost，這段不會跑。
 const isLocal = /^(localhost|127\.|\[?::1)/.test(location.hostname);
@@ -2529,17 +2530,17 @@ function magical() {
         playFreshAlerts(alertEvs);
       }
     }
-  } else if (g.stage === 'draft' && g.ev?.kind === 'rollOff' && g.ev.rolls?.length && g.draft?.round === 1 && g.myRoster.length === 0) {
-    playMaDice(g.ev);
   }
   seen.evNo = lastNo;
+  if (g.stage !== 'rollOff') { clearTimeout(maRoTimer); maRoTimer = null; ma.roState = 'idle'; }
 
   // 頂部玩家積分條
   const playersBar = `<div class="ma-pbar" aria-label="玩家積分">${g.players.map((p) => {
-    const isMe = p.id === me, isTurn = g.status === 'play' && g.turn === p.id && g.stage !== 'select';
+    const isMe = p.id === me, isTurn = g.status === 'play' && g.turn === p.id && g.stage !== 'select' && g.stage !== 'rollOff';
     const col = MA_PCOLORS[p.color % MA_PCOLORS.length];
     const chips = `${p.golds.length ? `🏆×${p.golds.length} ` : ''}${p.silvers.length ? `🥈×${p.silvers.length} ` : ''}${p.bronze ? `⭐${p.bronze > 0 ? `+${p.bronze}` : p.bronze}` : ''}`.trim() || (g.stage === 'draft' ? `已選 ${p.rosterCount}` : `剩 ${p.availCount} 位`);
-    const st = g.stage === 'select' ? (p.ready ? '✅ 已選好' : '💭 挑選中') : chips;
+    const st = g.stage === 'rollOff' ? (g.rollOff?.ready.includes(p.id) ? '✅ 已確認' : '🎲 比骰中')
+      : g.stage === 'select' ? (p.ready ? '✅ 已選好' : '💭 挑選中') : chips;
     return `<div class="ma-pl ${isMe ? 'me' : ''} ${isTurn ? 'turn' : ''} ${p.in ? '' : 'out'}" data-pid="${p.id}">
       <div class="ma-pl-top"><span class="ma-pdot" style="background:${col}"></span><span class="ma-pl-nm">${esc(p.name)}${isMe ? '(你)' : ''}</span>${online[p.id] ? '' : '💤'}</div>
       <div class="ma-pl-pts"><b>${p.points} 分</b><span>${st}</span></div></div>`;
@@ -2551,7 +2552,45 @@ function magical() {
   let mainHTML = '';
   let trayHTML = '';
 
-  if (g.stage === 'draft') {
+  if (g.stage === 'rollOff' && g.rollOff) {
+    const ro = g.rollOff;
+    const reduced = matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+    const doSpin = !reduced && ma.roState === 'idle';
+    if (doSpin) {
+      ma.roState = 'spin';
+      clearTimeout(maRoTimer);
+      maRoTimer = setTimeout(() => {
+        ma.roState = 'landed';
+        document.querySelectorAll('#maRoStage [data-di]').forEach((el) => el.classList.add('land'));
+        document.querySelectorAll('#maRoStage [data-dr]').forEach((el) => el.classList.add('show'));
+      }, 1180);
+    } else if (reduced && ma.roState === 'idle') {
+      ma.roState = 'landed';
+    }
+    const landed = ma.roState === 'landed' || reduced;
+    const readySet = new Set(ro.ready || []);
+    const activePs = g.players.filter((p) => p.in);
+    const myReady = readySet.has(me);
+    const readyBar = `<div class="m-ready-bar" style="margin-top:16px">${activePs.map((p) => `<span class="m-rchip ${readySet.has(p.id) ? 'ok' : ''}">${esc(p.name)} ${readySet.has(p.id) ? '✓ 已確認' : '…'}</span>`).join('')}</div>`;
+    mainHTML = `<div id="maRoStage" class="m-dtray ma-dtray" style="max-width:none;margin:12px 0">
+      <div class="m-dtray-hd" style="margin-bottom:6px">🎲 選秀比骰決定先手！</div>
+      <div class="mute" style="font-size:var(--s1);margin-bottom:18px">點數最高且不重複者優先選秀（相同點數抵銷）</div>
+      <div class="ma-dro">${ro.rolls.map((x, i) => {
+        const p = pById[x.id], col = MA_PCOLORS[(p?.color ?? i) % MA_PCOLORS.length], win = x.id === ro.winner;
+        return `<div class="m-dcol">
+          <div class="m-dwrap ${doSpin ? 'throw' : landed ? 'land' : ''}" data-di="${i}" style="--dl:${(i * 0.08).toFixed(2)}s">${mDieCube(x.d, col, i)}</div>
+          <b style="font-size:var(--s1);max-width:96px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p?.name || '?')}${x.id === me ? '(你)' : ''}</b>
+          <div class="m-dres ${landed ? 'show' : ''}" data-dr="${i}"><span class="ma-dpill ${win ? 'win' : ''}">${win ? `👑 ${x.d} 先選！` : `${x.d} 點`}</span></div>
+        </div>`;
+      }).join('')}</div>
+      ${readyBar}
+      <div class="m-dtray-ft">全體玩家按確認後開始蛇行選秀</div></div>`;
+    trayHTML = `<div class="tray"><div class="row" style="justify-content:space-between;flex-wrap:nowrap;margin-bottom:8px">
+      <b class="${!myReady ? 'crown' : ''}">${myReady ? `✅ 已確認！等待其他玩家（${readySet.size}/${activePs.length}）` : `👑 ${esc(nm(ro.winner))} 贏得先選權！請按確認開始選秀`}</b></div>
+      <div class="row act">${myReady
+        ? `<button class="ghost" disabled>✅ 已確認，等待其他人（${readySet.size}/${activePs.length}）</button>`
+        : `<button data-a="maRollOffOk">✅ 確認，開始選秀！（${readySet.size}/${activePs.length} 已確認）</button>`}</div></div>`;
+  } else if (g.stage === 'draft') {
     const d = g.draft, isMyPick = d.picker === me;
     const queuePills = d.order.map((pid, i) => `<span class="m-rchip ${i === 0 ? 'ok' : ''}">${i === 0 ? '👉 ' : ''}${esc(nm(pid))}</span>`).join('');
     const myTeam = g.myRoster.length
@@ -2803,7 +2842,7 @@ function magical() {
     <button class="ghost" data-a="leave" style="width:100%;margin-top:16px">離開房間</button></div></div>` : '';
 
   return `<div class="row" style="flex-wrap:nowrap"><b style="flex:1;min-width:0">🏃 瘋狂運動會 · ${s.code}</b>
-    <span class="fmeta">${g.stage === 'draft' ? `選秀 ${g.draft.round}/${g.draft.totalRounds}` : `第 ${g.race}/4 場`}</span>
+    <span class="fmeta">${g.stage === 'rollOff' ? '比骰先手' : g.stage === 'draft' ? `選秀 ${g.draft.round}/${g.draft.totalRounds}` : `第 ${g.race}/4 場`}</span>
     <button class="ghost ic" data-a="maDex" aria-label="選手圖鑑">📖</button>
     <span class="rxw"><button class="ghost ic" data-a="rxMenu" aria-label="送表情" aria-expanded="${rxOpen}">😀</button>${rxOpen ? `<div class="rxp">${EMOJI.map((e) => `<button data-a="react" data-v="${e}" aria-label="${e}">${e}</button>`).join('')}</div>` : ''}</span>
     <button class="ghost ic" data-a="sheet" aria-label="玩法與動態">📋</button></div>
@@ -2997,6 +3036,7 @@ const A = {
     return call('act', { action: { type: 'pirateDecide', ship: +si, dest } });
   },
   // 瘋狂運動會動作
+  maRollOffOk: () => call('act', { action: { type: 'rollOffOk' } }),
   maDraftSel(v) { ma.draftSel = ma.draftSel === v ? null : v; render(); },
   maDraftGo() { const r = ma.draftSel; return call('act', { action: { type: 'draftPick', racer: r } }).then((ok) => { if (ok) ma.draftSel = null; }); },
   maPickCard(v) {

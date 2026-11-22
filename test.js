@@ -1360,9 +1360,19 @@ function randomInt(n) { return require('node:crypto').randomInt(n); }
       assert.equal(resp.headers.get('content-type'), 'image/jpeg');
     }
 
-    // 1. 蛇行選秀：4 人標準（2 輪×8 張→每人 4 位）、2 人變體（2 輪×8 張 ABBAABBA→每人 8 位）、3 人雙選手（4 輪×6 張→每人 8 位）
+    // 1. 選秀比骰確認＋蛇行選秀：4 人標準（2 輪×8 張→每人 4 位）、2 人變體（2 輪×8 張 ABBAABBA→每人 8 位）、3 人雙選手（4 輪×6 張→每人 8 位）
     const makePs = (cnt) => Array.from({ length: cnt }, (_, i) => ({ id: `p${i}`, name: `玩家${i}` }));
+    const passRollOff = (g) => {
+      assert.equal(g.stage, 'rollOff', '開局應先進入選秀比骰確認階段');
+      const act = g.players.filter((p) => p.in);
+      for (let i = 0; i < act.length; i++) {
+        MA.act(g, act[i].id, { type: 'rollOffOk' });
+        if (i < act.length - 1) assert.equal(g.stage, 'rollOff', '未全員確認前應留在比骰階段');
+      }
+      assert.equal(g.stage, 'draft', '全員確認後才進入選秀階段');
+    };
     const simDraft = (g) => {
+      if (g.stage === 'rollOff') passRollOff(g);
       let guard = 0;
       while (g.stage === 'draft' && guard++ < 50) MA.botPlay(g, g.draft.order[g.draft.idx]);
     };
@@ -1374,6 +1384,7 @@ function randomInt(n) { return require('node:crypto').randomInt(n); }
 
     const g2 = MA.create(makePs(2), { schedule: 'std' });
     assert.equal(g2.mode, '2p');
+    passRollOff(g2);
     assert.equal(g2.draft.order.join(',').split(',').length, 8);
     simDraft(g2);
     assert.equal(g2.stage, 'select');
@@ -1449,10 +1460,10 @@ function randomInt(n) { return require('node:crypto').randomInt(n); }
     }
     // 2f. 西西弗斯賽前拿 4 分 + 可愛魯蛇獨自墊底拿 1 分 + 大嘴怪淘汰對手（狂野賽道箭頭）
     {
-      const g = mkRace(['sisyphus', 'lovable_loser', 'banana']);
-      assert.equal(g.players[0].bronze, 4, '西西弗斯賽前應先拿 4 分');
+      const g = mkRace(['legs', 'lovable_loser', 'sisyphus']);
+      assert.equal(g.players[2].bronze, 4, '西西弗斯賽前應先拿 4 分');
       g.racers[0].pos = 4; g.racers[2].pos = 3; g.racers[1].pos = 0; // lovable_loser 獨自墊底
-      MA.act(g, 'p0', { type: 'roll' });
+      MA.act(g, 'p0', { type: 'legs' });
       // 輪到 p1 (lovable_loser) 時自動觸發「主要移動前獨自墊底 +1 分」
       assert.equal(g.players[1].bronze, 1, '可愛魯蛇獨自墊底應拿 1 枚銅分');
     }
@@ -1495,6 +1506,8 @@ function randomInt(n) { return require('node:crypto').randomInt(n); }
       while (sim.status !== 'over' && steps++ < 4000) {
         if (sim.status === 'raceEnd') {
           for (const p of sim.players) if (p.in && !sim.nextReady.includes(p.id)) MA.botPlay(sim, p.id);
+        } else if (sim.stage === 'rollOff') {
+          for (const p of sim.players) if (p.in && !sim.rollOff.ready.includes(p.id)) MA.botPlay(sim, p.id);
         } else if (sim.stage === 'select') {
           for (const p of sim.players) if (p.in && !p.selected) MA.botPlay(sim, p.id);
         } else {
@@ -1524,6 +1537,13 @@ function randomInt(n) { return require('node:crypto').randomInt(n); }
     const acM = new AbortController();
     const sseM = await fetch(`${base}/api/events?code=${mg.code}&token=${mg.token}`, { signal: acM.signal });
     assert.equal((await post('start', mg)).status, 200);
+    assert.equal(mgr.game.stage, 'rollOff', '開局應先停在比骰確認畫面等待所有人確認');
+    // 電腦玩家自動確認，但仍須等真人按確認才進入選秀
+    await new Promise((r) => setTimeout(r, 80));
+    assert.equal(mgr.game.stage, 'rollOff', '真人尚未確認前不應跳入選秀');
+    assert.equal(mgr.game.rollOff.ready.length, 2, '2 位電腦應已自動確認');
+    assert.equal((await post('act', { ...mg, action: { type: 'rollOffOk' } })).status, 200);
+    assert.equal(mgr.game.stage, 'draft', '真人按確認後才正式開始選秀');
     // 電腦應自動完成自己的選秀順位
     if (mgr.game.draft.order[mgr.game.draft.idx] === mgr.players[0].id) {
       await post('act', { ...mg, action: { type: 'draftPick', racer: mgr.game.draft.pool[0] } });
