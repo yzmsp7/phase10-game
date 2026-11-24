@@ -1854,6 +1854,62 @@ function randomInt(n) { return require('node:crypto').randomInt(n); }
   assert.ok(room3.game.turnNo > no0, '超時自動代打、換人');
   ac3.abort();
   void sse3;
+
+  { // 大廳與等待室進階功能：公開房間列表、房間預覽、單人補電腦、免退房換遊戲、改名、移出玩家、房內調秒數與公開狀態
+    const pubRoom = (await post('create', { name: '大廳甲', kind: 'manila', pub: true, bots: 2 })).json;
+    const privRoom = (await post('create', { name: '私密乙', kind: 'cats', pub: false })).json;
+    const prObj = server.rooms.get(pubRoom.code);
+    assert.equal(prObj.pub, true);
+    assert.equal(prObj.players.length, 3, '建房帶 bots=2 應有 1 真人 + 2 電腦');
+    // GET /api/rooms 只列公開且未開局的房間
+    const listRes = await (await fetch(`${base}/api/rooms`)).json();
+    assert.ok(listRes.rooms.some((x) => x.code === pubRoom.code && x.kind === 'manila' && x.bots === 2), '公開房間出現在大廳列表');
+    assert.ok(!listRes.rooms.some((x) => x.code === privRoom.code), '私密房間不出現在大廳列表');
+    // GET /api/room/:code 房間預覽
+    const prevOk = await fetch(`${base}/api/room/${pubRoom.code}`);
+    assert.equal(prevOk.status, 200);
+    const prevJson = await prevOk.json();
+    assert.deepEqual([prevJson.exists, prevJson.kind, prevJson.count, prevJson.playing], [true, 'manila', 3, false]);
+    assert.equal((await fetch(`${base}/api/room/ZZZZ`)).status, 404, '不存在的房間回傳 404');
+    // 房主可在等待室切換公開狀態與回合秒數
+    assert.equal((await post('settings', { ...pubRoom, pub: false, turn: 120 })).status, 200);
+    assert.equal(prObj.pub, false);
+    assert.equal(prObj.settings.turn, 120);
+    assert.equal((await post('settings', { ...pubRoom, turn: 5 })).status, 400, '等待室秒數不合法被拒');
+    // 房主免退房換遊戲：從馬尼拉切到富士流會自動清掉電腦、保留秒數與真人
+    const gJoin = (await post('join', { code: pubRoom.code, name: '大廳賓客' })).json;
+    assert.equal((await post('changeKind', { ...gJoin, kind: 'fuji' })).status, 400, '非房主不能換遊戲');
+    assert.equal((await post('changeKind', { ...pubRoom, kind: 'fuji' })).status, 200);
+    assert.equal(prObj.kind, 'fuji');
+    assert.equal(prObj.players.length, 2, '切換至不支援電腦的遊戲會自動移除電腦');
+    assert.deepEqual(Object.keys(prObj.settings), ['turn'], '換遊戲後設定應重置為該遊戲格式');
+    assert.equal(prObj.settings.turn, 120, '換遊戲應保留回合秒數');
+    // 玩家在等待室改名
+    assert.equal((await post('rename', { ...gJoin, name: '大廳甲' })).status, 400, '不能改成與房內重複的名字');
+    assert.equal((await post('rename', { ...gJoin, name: '改名客' })).status, 200);
+    assert.ok(prObj.players.some((p) => p.name === '改名客'));
+    // 房主在等待室移出玩家（並推送 closed 給被移出者）
+    const kickedId = prObj.players.find((p) => p.name === '改名客').id;
+    assert.equal((await post('kick', { ...gJoin, id: prObj.host })).status, 400, '非房主不能移出人');
+    assert.equal((await post('kick', { ...pubRoom, id: prObj.host })).status, 400, '房主不能移出自己');
+    const acK = new AbortController();
+    const sseK = await fetch(`${base}/api/events?code=${pubRoom.code}&token=${gJoin.token}`, { signal: acK.signal });
+    const rdK = sseK.body.getReader(); const decK = new TextDecoder(); let gotK = '';
+    await rdK.read();
+    assert.equal((await post('kick', { ...pubRoom, id: kickedId })).status, 200);
+    const dlK = Date.now() + 2000;
+    while (!gotK.includes('closed') && Date.now() < dlK) {
+      const r = await Promise.race([rdK.read(), new Promise((res) => setTimeout(() => res({ done: true }), 400))]);
+      if (r.done) break;
+      gotK += decK.decode(r.value, { stream: true });
+    }
+    assert.match(gotK, /"closed":".*移出/, '被移出者收到關閉通知');
+    acK.abort();
+    // 清理
+    await post('leave', pubRoom);
+    await post('leave', privRoom);
+  }
+
   server.close();
   console.log('✅ 全部測試通過');
   process.exit(0);

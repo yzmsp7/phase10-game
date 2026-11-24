@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Phase 10・富士流・貓貓食堂・馬尼拉・瘋狂運動會・忍者之夜</title>
+<title>線上桌遊大廳｜Phase 10・富士流・貓貓食堂・馬尼拉・瘋狂運動會・忍者之夜</title>
 <style>
 /* 字級只有 4 級、字重只有 400/600；間距走 4/8 格線。--mute 在 --panel2 上 4.84:1（原 #a8c7b8 只有 3.57） */
 :root{--s1:12px;--s2:16px;--s3:20px;--s4:28px;--bg:#0f3d2e;--panel:#165740;--panel2:#1d6a4f;--ink:#f6f3ea;--mute:#cfe3d8;--accent:#f6c945;--R:#d64545;--B:#3b73d4;--G:#2e9e5b;--Y:#e0b020}
@@ -116,12 +116,109 @@ input[readonly]{width:100%}
 .card.X b{font-size:var(--s3)}.card.X i{font-size:11px;line-height:1.1;text-align:center;max-width:100%}
 .trophy{display:inline-block;animation:pop .7s cubic-bezier(.2,1.4,.4,1)}
 /* 首頁選遊戲、房間、富士流牌桌（手機優先；字級只用 --s1..4，間距 4/8 格線） */
-.gsel{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}@media(min-width:640px){.gsel{grid-template-columns:repeat(5,1fr)}}.gsel button{min-height:92px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:12px 8px;line-height:1.2}.gsel .gi{font-size:var(--s4);line-height:1}.gsel small{font-weight:400}
-.how{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}.how div{background:#0c2f23;border-radius:12px;padding:12px 8px;text-align:center;font-size:var(--s1);line-height:1.3}.how span{display:block;font-size:var(--s4);line-height:1.2;margin-bottom:4px}
+.how{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}.how div{background:#00000038;border:1px solid #ffffff1a;border-radius:12px;padding:10px 8px;text-align:center;font-size:var(--s1);line-height:1.3}.how span{display:block;font-size:var(--s3);line-height:1.2;margin-bottom:4px}
 .fold{background:transparent;color:var(--mute);font-weight:400;width:100%;min-height:44px;padding:8px 0;display:flex;align-items:center;gap:8px;text-align:left}.fold::before{content:'▸'}.fold[aria-expanded=true]::before{content:'▾'}.foldb{padding-bottom:8px}
 .av{flex:none;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:600;color:#fff;background:hsl(var(--h) 45% 38%)}
-.pl{display:flex;align-items:center;gap:12px;min-height:48px}.pl .nmx{flex:1;min-width:0;overflow-wrap:anywhere}
+.pl{display:flex;align-items:center;gap:10px;min-height:48px;padding:4px 0;border-bottom:1px solid #ffffff12}.pl:last-of-type{border-bottom:0}.pl .nmx{flex:1;min-width:0;overflow-wrap:anywhere}
 .cta .row{flex-wrap:nowrap}.cta .row button{width:auto}.cta .w{flex:1;display:flex}.cta .w button,.cta .row>button:not(.ghost){flex:1}.cta .ghost{flex:none}
+.cta{border-top:1px solid #ffffff1f}.cta button:not(.ghost){box-shadow:inset 0 1px 0 #ffffff66,0 4px 12px #00000044}
+/* 大廳與等待室優化（8px 格線、行動優先、60/30/10 層級與各遊戲專屬氛圍） */
+body.fuji-mode{--bg:#0d2e3a;--panel:#144354;--panel2:#1b566b;--ink:#f2f9fb;--mute:#bfe0ea;--accent:#67d5f0;background:radial-gradient(circle at 50% 0%,#1a556a 0%,#0d2e3a 72%)}
+body.fuji-mode input,body.fuji-mode select{background:#09222b;border-color:#2a6f87}
+body.cats-mode .rule,body.manila-mode .rule,body.magical-mode .rule,body.ninja-mode .rule,body.fuji-mode .rule{background:#00000038}
+body.cats-mode .rule:has(input:checked),body.manila-mode .rule:has(input:checked),body.magical-mode .rule:has(input:checked),body.ninja-mode .rule:has(input:checked),body.fuji-mode .rule:has(input:checked){background:var(--panel2);border-color:var(--accent)}
+.lb-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:4px 0 12px}
+.lb-brand{display:flex;align-items:center;gap:10px;min-width:0}
+.lb-brand h1{margin:0;font-size:var(--s3);line-height:1.15;letter-spacing:.3px}
+.lb-brand small{display:block;font-size:var(--s1);color:var(--mute);margin-top:2px}
+.lb-prof{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:4px 12px 4px 6px;border-radius:999px;background:var(--panel);border:1px solid #ffffff24;color:var(--ink);font-size:var(--s1);font-weight:600;max-width:52vw;flex:none;box-shadow:0 2px 8px #00000033}
+.lb-prof .av{width:28px;height:28px;font-size:var(--s1)}
+.lb-prof span.pn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:110px}
+.lb-prof.empty{border-style:dashed;border-color:var(--accent);color:var(--accent);padding:4px 14px}
+.lb-namebox{background:var(--panel);border:1.5px solid var(--accent);border-radius:14px;padding:12px 16px;margin-bottom:12px;box-shadow:0 6px 16px #00000038}
+.lb-namebox .row{flex-wrap:nowrap}
+.lb-namebox input{flex:1;min-width:0}
+.lb-tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:4px;border-radius:14px;background:#0a2b20;border:1px solid #ffffff1a;margin-bottom:12px}
+.lb-tab{min-height:44px;border-radius:10px;background:transparent;color:var(--mute);font-size:var(--s2);font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 10px;transition:background .18s,color .18s}
+.lb-tab.on{background:var(--accent);color:#261e00;box-shadow:inset 0 1px 0 #ffffff66,0 3px 10px #00000044}
+.lb-cnt{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;border-radius:999px;font-size:var(--s1);font-weight:600;background:#2e9e5b;color:#fff;font-variant-numeric:tabular-nums}
+.lb-tab.on .lb-cnt{background:#261e00;color:var(--accent)}
+.lb-filts{display:flex;gap:6px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.lb-filts::-webkit-scrollbar{display:none}
+.lb-filt{flex:none;min-height:36px;padding:6px 12px;border-radius:999px;background:#0c2f23;border:1px solid #ffffff1f;color:var(--mute);font-size:var(--s1);font-weight:600;white-space:nowrap}
+.lb-filt.on{background:var(--accent);color:#261e00;border-color:var(--accent)}
+.lb-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+@media(min-width:640px){.lb-grid{grid-template-columns:repeat(3,1fr);gap:10px}}
+.lb-card{position:relative;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;gap:8px;min-height:112px;padding:12px;border-radius:14px;text-align:left;color:var(--ink);background:linear-gradient(155deg,var(--gc1,#1b6249),var(--gc2,#0f392b));border:2px solid #ffffff1a;box-shadow:0 4px 12px #00000038;transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease;overflow:hidden}
+.lb-card:active{transform:scale(.98)}
+.lb-card.on{border-color:var(--ga,var(--accent));box-shadow:0 0 0 1px var(--ga,var(--accent)),0 8px 20px #00000055}
+.lb-card-bg{position:absolute;inset:0;background-size:cover;background-position:center;opacity:.22;pointer-events:none}
+.lb-card>*:not(.lb-card-bg){position:relative;z-index:1}
+.lb-card-hd{width:100%;display:flex;align-items:center;justify-content:space-between;gap:6px}
+.lb-card-ico{font-size:var(--s4);line-height:1;display:inline-flex;align-items:center;justify-content:center}
+.lb-card-ico img{width:34px;height:34px;border-radius:10px;object-fit:cover;border:1.5px solid #ffffff55;box-shadow:0 2px 6px #00000055}
+.lb-tag{font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:#0000004d;color:#f6f3ea;border:1px solid #ffffff24;white-space:nowrap}
+.lb-card.on .lb-tag{background:var(--ga,var(--accent));color:#1e1600;border-color:transparent}
+.lb-card-nm{font-size:var(--s2);font-weight:600;line-height:1.2}
+.lb-card-meta{font-size:var(--s1);color:#e6f0ebcc;font-weight:400;font-variant-numeric:tabular-nums}
+.lb-check{position:absolute;right:8px;bottom:8px;width:22px;height:22px;border-radius:50%;background:var(--ga,var(--accent));color:#1e1600;font-size:var(--s1);font-weight:600;display:grid;place-items:center;box-shadow:0 2px 6px #00000055}
+.lb-hero{position:relative;border-radius:16px;padding:16px;margin-bottom:12px;overflow:hidden;background:linear-gradient(145deg,var(--gc1,#1b6249),var(--gc2,#0d3225));border:1.5px solid var(--ga,#f6c94588);box-shadow:0 10px 24px #00000048}
+.lb-hero-bg{position:absolute;inset:0;background-size:cover;background-position:center;opacity:.18;pointer-events:none}
+.lb-hero>*:not(.lb-hero-bg){position:relative;z-index:1}
+.lb-hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.lb-hero-ttl{display:flex;align-items:center;gap:10px;min-width:0}
+.lb-hero-ttl b{font-size:var(--s3);line-height:1.2}
+.lb-hero-sub{margin:6px 0 0;font-size:var(--s1);color:#f6f3eacc;line-height:1.45}
+.lb-hero-art{display:flex;align-items:center;gap:4px;flex:none}
+.lb-hero-art img{width:38px;height:38px;border-radius:10px;object-fit:cover;border:1.5px solid #ffffff55;box-shadow:0 3px 8px #00000066}
+.lb-pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.lb-pill{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:999px;font-size:var(--s1);font-weight:600;background:#00000044;border:1px solid #ffffff24;color:var(--ink);font-variant-numeric:tabular-nums}
+.lb-pill.ai{background:#2e9e5b38;border-color:#6be09766;color:#d6ffea}
+.lb-cfg{background:var(--panel);border-radius:14px;padding:12px 16px;margin-bottom:12px;border:1px solid #ffffff16}
+.lb-cfg-hd{width:100%;background:transparent;color:var(--ink);padding:4px 0;min-height:44px;display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:left}
+.lb-cfg-sum{font-size:var(--s1);color:var(--mute);font-weight:400;margin-top:2px;display:block}
+.lb-cfg-bd{padding-top:12px;margin-top:8px;border-top:1px solid #ffffff16}
+.lb-tchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.lb-tchip{min-height:40px;padding:6px 12px;border-radius:10px;background:#00000038;border:1px solid #ffffff22;color:var(--mute);font-size:var(--s1);font-weight:600;font-variant-numeric:tabular-nums}
+.lb-tchip.on{background:var(--accent);color:#261e00;border-color:var(--accent)}
+.lb-code-in{flex:1;min-width:0;text-transform:uppercase;text-align:center;font-size:var(--s3)!important;font-weight:600;letter-spacing:6px;min-height:48px;font-variant-numeric:tabular-nums}
+.lb-prev{margin-top:12px;padding:12px;border-radius:12px;background:#00000038;border:1.5px solid #ffffff24}
+.lb-prev.ok{border-color:#5fe08a99;background:#164a3288}
+.lb-prev.bad{border-color:#ff8a8088;background:#4a1c1c66}
+.lb-prev-top{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.lb-prev-ps{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.lb-pchip{display:inline-flex;align-items:center;gap:5px;padding:3px 9px 3px 4px;border-radius:999px;background:#ffffff14;font-size:var(--s1)}
+.lb-pchip .av{width:20px;height:20px;font-size:11px}
+.lb-rmlist{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.lb-rmcard{display:flex;align-items:center;gap:12px;padding:12px;border-radius:14px;background:linear-gradient(135deg,var(--gc1,#1b6249),var(--gc2,#113f2f));border:1.5px solid #ffffff22;box-shadow:0 4px 12px #00000033}
+.lb-rmcard-info{flex:1;min-width:0}
+.lb-rmcard-hd{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.lb-rmcard-code{font-size:var(--s1);font-weight:600;letter-spacing:2px;padding:1px 7px;border-radius:6px;background:#0000004d;color:var(--accent);font-variant-numeric:tabular-nums}
+.lb-rmcard-sub{font-size:var(--s1);color:#f6f3eacc;margin-top:4px;font-variant-numeric:tabular-nums}
+.lb-empty{text-align:center;padding:24px 12px;color:var(--mute);background:#00000024;border-radius:12px;border:1px dashed #ffffff24;margin-top:8px}
+.lb-empty-ico{font-size:var(--s4);display:block;margin-bottom:6px}
+.lb-empty p{margin:0 0 12px;font-size:var(--s1);line-height:1.5}
+.rm-hd{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:4px 0 12px}
+.rm-hd-l{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
+.rm-hd h1{margin:0;font-size:var(--s3);line-height:1.2}
+.rm-vis{min-height:32px;padding:4px 10px;border-radius:999px;font-size:var(--s1);font-weight:600;background:#00000040;border:1px solid #ffffff28;color:var(--ink)}
+.rm-vis.pub{border-color:#5fe08a88;color:#b8f7cb}
+.rm-seat{flex:none;width:24px;text-align:center;font-size:var(--s1);font-weight:600;color:var(--mute);font-variant-numeric:tabular-nums}
+.rm-sw{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:8px}
+@media(min-width:640px){.rm-sw{grid-template-columns:repeat(3,1fr)}}
+.rm-sw button{min-height:56px;padding:8px 10px;border-radius:10px;display:flex;align-items:center;gap:8px;text-align:left;background:#00000038;border:1.5px solid #ffffff1f;color:var(--ink);font-size:var(--s1)}
+.rm-sw button.on{border-color:var(--accent);background:var(--panel2);color:var(--ink)}
+.rm-sw button b{display:block;font-size:var(--s1);line-height:1.2}
+.rm-sw button small{display:block;color:var(--mute);font-weight:400}
+.rm-prog{height:6px;border-radius:999px;background:#00000044;overflow:hidden;margin:10px 0 6px}
+.rm-prog-fill{height:100%;border-radius:999px;background:var(--accent);transition:width .25s ease}
+.rm-qrwrap{margin-top:12px;padding-top:12px;border-top:1px solid #ffffff1a;display:flex;flex-direction:column;align-items:center;text-align:center}
+.rm-smbtn{min-height:36px!important;padding:4px 10px!important;font-size:var(--s1)!important}
+@media(max-width:600px){
+.lb-brand h1{font-size:var(--s3)}
+.lb-card{min-height:102px;padding:10px}
+.lb-hero{padding:14px}
+}
 .card.F{background:hsl(var(--h,210) 60% 40%);font-variant-numeric:tabular-nums}.card.md{width:44px;height:60px}.card.md b{font-size:var(--s3)}
 /* 富士流圓桌（手機優先；4 級字級、4/8 格線、零重疊幾何） */
 .fmeta{font-size:var(--s1);color:var(--mute);white-space:nowrap;font-variant-numeric:tabular-nums;background:var(--panel);padding:4px 8px;border-radius:8px;border:1px solid #2f7d5f}
@@ -668,6 +765,32 @@ const store = {
 };
 // 遊戲種類（鍵名跟 server.js 的 KINDS 同一份）。邀請連結帶 &game=，收到的人直接進該遊戲的加入畫面；舊連結沒帶 = Phase 10
 const GAMES = { phase10: { name: 'Phase 10', icon: '🃏', people: '2–6', sub: '湊齊 10 個階段' }, fuji: { name: '富士流', icon: '🌊', people: '3–8', sub: '順水流走，先出完' }, cats: { name: '貓貓食堂', icon: '🐱', people: '3–6', sub: '猜首領去哪吃，別吃得比老大好！' }, manila: { name: '馬尼拉', icon: '⚓', people: '3–5', sub: '走私、競標、股票與海盜的博弈' }, magical: { name: '瘋狂運動會', icon: '🏃', people: '2–6', sub: '36 位怪咖選手大亂鬥，擲骰觸發超荒謬連鎖！' }, ninja: { name: '忍者之夜', icon: '🥷', people: '4–11', sub: '蓮花對仙鶴，找出同伴、斬殺對手' } };
+const PHASE10_RULES = [
+  '每人發 10 張牌，依序挑戰第 1 到第 10 階段（例如 2 組 3 張同數、順子、同色牌等）。',
+  '輪到你時先抽 1 張（牌堆或棄牌堆），湊齊本階段組合即可「放下階段」，放下後還能把牌「接」到場上其他人的組合，最後棄 1 張結束回合。',
+  '只有完成當前階段的人，下一回合才能進下一階段；沒完成就繼續挑戰同一階段。',
+  '有人出完手牌即結束本回合，其餘人依剩餘手牌扣分（1–9 為 5 分、10–12 為 10 分、跳過/特殊牌 25 分、百搭 25 分）。',
+  '有人完成目標階段後，該回合結束時總分最低者獲勝！',
+];
+const phase10Rules = () => `<ul style="margin:8px 0;padding-left:20px">${PHASE10_RULES.map((t) => `<li style="margin-top:8px">${t}</li>`).join('')}</ul>`;
+const GAME_META = {
+  phase10: { min: 2, max: 6, dur: '25–40 分', tag: '經典湊牌', ai: false, c1: '#1d6a4f', c2: '#0f392b', accent: '#f6c945', how: [['🃏', '抽牌湊階段'], ['✨', '放下並接牌'], ['🏆', '衝階段比低分']] },
+  fuji: { min: 3, max: 8, dur: '10–15 分', tag: '輕快破冰', ai: false, c1: '#1a5f75', c2: '#0d313d', accent: '#67d5f0', how: [['🃏', '每次出一張牌'], ['💦', '大的沖走小的'], ['🌊', '沒被沖走就流走']] },
+  cats: { min: 3, max: 6, dur: '15–20 分', tag: '心理博弈', ai: false, c1: '#5c361e', c2: '#2d190d', accent: '#f6c453', how: [['👑', '輪流當首領'], ['🐾', '別比首領大'], ['⚡', '撞號扣首領']] },
+  manila: { min: 3, max: 5, dur: '30–45 分', tag: '🤖 策略博弈', ai: true, soloBots: 3, bg: '/assets/manila/board_bg.jpg', thumb: '/assets/manila/good_jade.jpg', arts: ['/assets/manila/good_jade.jpg', '/assets/manila/good_silk.jpg', '/assets/manila/good_nutmeg.jpg'], c1: '#4d311a', c2: '#25160b', accent: '#e8b954', how: [['⚓', '競標當船老大'], ['⛵', '派遣手下投資'], ['📈', '黑市 $30 結算']] },
+  magical: { min: 2, max: 6, dur: '20–30 分', tag: '🤖 爆笑連鎖', ai: true, soloBots: 3, thumb: '/assets/magical/rocket_scientist.jpg', arts: ['/assets/magical/rocket_scientist.jpg', '/assets/magical/banana.jpg', '/assets/magical/copycat.jpg'], c1: '#352b66', c2: '#1a1533', accent: '#ffd23f', how: [['📋', '蛇行選秀組隊'], ['🎲', '擲骰觸發連鎖'], ['🏆', '4 場總分奪冠']] },
+  ninja: { min: 4, max: 11, dur: '15–25 分', tag: '🎭 陣營推理', ai: false, c1: '#38295c', c2: '#19132b', accent: '#ff6b81', how: [['🪷', '蓮花對決仙鶴'], ['🗡️', '找同伴斬對手'], ['🏆', '先到 10 分獲勝']] },
+};
+const TURN_PRESETS = [30, 60, 120, 300];
+const LB_FILTERS = [['all', '全部'], ['small', '2–3 人'], ['mid', '4–6 人'], ['party', '7+ 人派對'], ['ai', '🤖 支援電腦']];
+const matchFilter = (k, f) => {
+  const m = GAME_META[k];
+  if (f === 'small') return m.min <= 3;
+  if (f === 'mid') return m.min <= 6 && m.max >= 4;
+  if (f === 'party') return m.max >= 7;
+  if (f === 'ai') return m.ai;
+  return true;
+};
 const MA_RACERS = [
   { id: 'alchemist', name: '煉金術師', en: 'Alchemist', color: '#e6b800', short: '骰出 1 或 2 可改走 4 格', desc: '主要移動骰出 1 或 2 時，可以改為移動 4 格。' },
   { id: 'baba_yaga', name: '芭芭雅嘎', en: 'Baba Yaga', color: '#4c73c4', short: '與我同格就絆倒對方', desc: '任何選手停在我所在格子，或我停在對方格子時，對方絆倒。' },
@@ -819,6 +942,67 @@ const folds = new Set(); // 展開中的摺疊區塊：render 會重建 DOM，<d
 const fold = (key, title, body) => `<button class="fold" data-a="fold" data-v="${key}" aria-expanded="${folds.has(key)}">${title}</button>${folds.has(key) ? `<div class="foldb">${body}</div>` : ''}`;
 const av = (n) => `<span class="av" style="--h:${Math.abs([...n].reduce((a, c) => (a * 31 + c.codePointAt(0)) | 0, 7)) % 360}" aria-hidden="true">${esc([...n][0] ?? '?')}</span>`; // 名字首字 + 依名字決定的底色
 let pick = (() => { try { const k = localStorage.getItem('p10pick'); return Object.hasOwn(GAMES, k) ? k : 'phase10'; } catch { return 'phase10'; } })(); // 首頁選的遊戲，下次進來沿用
+const savedName = () => { try { return localStorage.getItem('p10name') || ''; } catch { return ''; } };
+const saveName = (v) => { try { localStorage.setItem('p10name', v); } catch {} };
+let lb = {
+  tab: 'create', filter: 'all', name: savedName(), editingName: false, cfgOpen: false,
+  pub: true, turn: 60, target: 10, rounds: 3, pirateKick: false, maSched: 'std', maDouble3p: false,
+  p10Rules: Object.fromEntries(RULES.map(([k]) => [k, false])),
+  code: urlRoom, preview: null, previewCode: '', previewLoading: false,
+  rooms: [], roomsLoaded: false, roomsLoading: false,
+  inv: null, invLoading: !!urlRoom,
+  rmRename: false, rmSwitch: false, rmQr: false,
+};
+async function fetchRooms(silent = false) {
+  if (!silent) { lb.roomsLoading = true; if (!sess && !urlRoom) render(); }
+  try {
+    const r = await fetch('/api/rooms');
+    const j = await r.json();
+    if (r.ok && Array.isArray(j.rooms)) lb.rooms = j.rooms;
+  } catch {}
+  lb.roomsLoaded = true;
+  lb.roomsLoading = false;
+  if (!sess && !urlRoom) render();
+}
+async function fetchRoomPreview(code, forInvite = false) {
+  const c = String(code || '').trim().toUpperCase();
+  if (c.length !== 4) {
+    if (!forInvite) { lb.preview = null; lb.previewCode = ''; lb.previewLoading = false; updateCodePreviewDom(); }
+    return;
+  }
+  if (forInvite) { lb.invLoading = true; if (!sess) render(); }
+  else { lb.previewCode = c; lb.previewLoading = true; updateCodePreviewDom(); }
+  let res = null;
+  try {
+    const r = await fetch(`/api/room/${encodeURIComponent(c)}`);
+    res = await r.json();
+  } catch { res = { exists: false, error: '無法連線到伺服器' }; }
+  if (forInvite) {
+    lb.inv = res; lb.invLoading = false;
+    if (!sess) render();
+  } else if (lb.previewCode === c) {
+    lb.preview = res; lb.previewLoading = false;
+    updateCodePreviewDom();
+  }
+}
+function codePreviewHtml() {
+  if (lb.previewLoading) return '<div class="lb-prev"><span class="mute">正在查詢房間…</span></div>';
+  const p = lb.preview;
+  if (!p) return '';
+  if (!p.exists) return `<div class="lb-prev bad"><b>找不到房間 ${esc(lb.previewCode)}</b><div class="mute" style="margin-top:4px;font-size:var(--s1)">${esc(p.error || '可能已關閉或代碼輸入有誤')}</div></div>`;
+  const gm = GAMES[p.kind] || GAMES.phase10;
+  const st = p.playing ? '🔒 遊戲已開始' : p.full ? '🈵 房間已滿' : '✅ 等待加入';
+  const can = !p.playing && !p.full;
+  return `<div class="lb-prev ${can ? 'ok' : 'bad'}">
+    <div class="lb-prev-top"><b>${gm.icon} ${gm.name}</b><span class="lb-pill">${st}</span></div>
+    <div class="mute" style="margin-top:4px;font-size:var(--s1)">房主：${esc(p.host)} · 目前 ${p.count}/${p.max} 人</div>
+    ${p.players?.length ? `<div class="lb-prev-ps">${p.players.map((x) => `<span class="lb-pchip">${x.bot ? '🤖' : av(x.name)}<span>${esc(x.name)}</span></span>`).join('')}</div>` : ''}
+  </div>`;
+}
+function updateCodePreviewDom() {
+  const el = $('#lbCodePrev');
+  if (el) el.innerHTML = codePreviewHtml();
+}
 let dl = null, sess = store.get(), snap = null, es = null, sel = new Set(), slots = {}, los = {}, seen = null, sheet = false, endFor = null, actSlot = null, byColor = false, rxOpen = false, rxSeq = null, histFor = null, drag = null, noClick = false, xs = { target: null, v: null, give: null }; // xs = 交換牌的三個選擇（對象／數字或顏色／要換出的牌）。 // drag = 正在拖的百搭（拖曳中不重繪，不然 DOM 重建會把它弄丟）；noClick = 剛拖完，吃掉隨後的 click。 histFor = 正在看誰的撿棄牌歷史（玩家 id）。 rxOpen = 表情選單開著；rxSeq = 已播到的表情編號（null = 還沒收到第一筆快照）。每次 render 會重建 DOM，UI 狀態要存在這：sheet = 底部資訊面板開著；endFor = 正在選「接前/接後」的順子；actSlot = 放階段時作用中的那一組
 let ms = { bidAmt: 1, spot: null, masterGoods: ['jade', 'silk', 'nutmeg'], masterPos: { jade: 3, silk: 3, nutmeg: 3, ginseng: 0 }, navMoves: {}, plunderShip: null, stockSheet: false, infoSheet: false, cashWarn: null, pendingBuy: null, holdOverlay: false, animFrom: null, sailAnim: null, stageKey: null };
 let nj = { pick: null, decl: [], tg: [], key: null, view: 'flag', mine: null, theirs: null, dig: null }; // 忍者之夜 UI 狀態：選牌／要打出的牌／發動對象；key 變了（換階段）就清掉
@@ -891,9 +1075,14 @@ function connect() {
   // 房主正在開 <select>（iOS 滾輪）時不重繪，否則 innerHTML 重建會把選單關掉；focusout 時再補畫
   es.onmessage = (e) => {
     const d = JSON.parse(e.data);
-    if (d.closed) { exit(); return toast(d.closed); } // 房間被關（遊戲中只剩一人）→ 回首頁並說明原因
+    if (d.closed) { exit(); return toast(d.closed); } // 房間被關（遊戲中只剩一人或被移出）→ 回首頁並說明原因
+    if (d.kind && sess && sess.kind !== d.kind) {
+      sess = { ...sess, kind: d.kind };
+      store.set(sess);
+      history.replaceState(null, '', `/?room=${d.code}&game=${d.kind}`);
+    }
     snap = d; dl = d.turnLeft == null ? null : Date.now() + d.turnLeft; // 伺服器傳剩餘毫秒，用本機時鐘算期限
-    if (!document.activeElement?.matches?.('select') && !drag && !maRoDrag) render(); else tick();
+    if (!document.activeElement?.matches?.('select,#rmRenameIn') && !drag && !maRoDrag) render(); else tick();
     playRx(d.rx); // 要在 render 之後：玩家卡是剛重建的，位置才對
   };
   es.onerror = () => { if (es.readyState === EventSource.CLOSED) { toast('連線中斷或房間已過期'); exit(); } };
@@ -901,8 +1090,8 @@ function connect() {
 // 手機切去別的 App 再回來，iOS 的 EventSource 常常是死的 → 回前景一律重連
 document.addEventListener('visibilitychange', () => { if (!document.hidden && sess) connect(); });
 function exit() {
-  es?.close(); sess = snap = null; xs = { target: null, v: null, give: null }; resetMs(); resetMa(); sel.clear(); slots = {}; los = {}; rxOpen = false; histFor = null; sheet = false; folds.clear(); store.set(null);
-  history.replaceState(null, '', '/'); render();
+  es?.close(); sess = snap = null; xs = { target: null, v: null, give: null }; resetMs(); resetMa(); sel.clear(); slots = {}; los = {}; rxOpen = false; histFor = null; sheet = false; folds.clear(); lb.rmRename = false; lb.rmSwitch = false; lb.rmQr = false; store.set(null);
+  history.replaceState(null, '', '/'); render(); fetchRooms(true);
 }
 function enter(r) {
   sess = r; store.set(r); history.replaceState(null, '', `/?room=${r.code}&game=${r.kind || 'phase10'}`); connect();
@@ -1009,57 +1198,222 @@ function qrBox(link) {
     <p class="mute" style="margin:8px 0 0">面對面可以直接用手機相機掃描加入。</p>`;
 }
 
+const gameRulesHtml = (k) => (k === 'fuji' ? fujiRules() : k === 'cats' ? catsRules() : k === 'manila' ? manilaRules() : k === 'magical' ? magicalRules() : k === 'ninja' ? njRules() : phase10Rules());
+
 function lobby() {
-  const kind = urlRoom ? urlGame : pick, GM = GAMES[kind], fj = kind === 'fuji', ct = kind === 'cats', mn = kind === 'manila', mg = kind === 'magical', nj = kind === 'ninja'; // 收到邀請連結 = 直接是那個遊戲，不顯示選單
-  const rules = RULES.map(([k, t, d]) => `<label class="rule"><input type="checkbox" data-r="${k}"><i aria-hidden="true">✓</i><span><b>${t}</b><small>${d}</small></span></label>`).join('');
-  const picker = `<div class="panel"><h2>想玩哪一個？</h2><div class="gsel">${Object.entries(GAMES).map(([k, x]) => `<button class="${k === kind ? '' : 'ghost'}" data-a="pick" data-v="${k}" aria-pressed="${k === kind}"><span class="gi">${x.icon}</span><b>${x.name}</b><small>${x.people} 人</small></button>`).join('')}</div><p class="mute" style="margin:12px 0 0">${GM.sub}</p></div>`;
-  const turnFld = '<div class="fld"><label for="turn">每回合秒數</label><input id="turn" type="number" inputmode="numeric" min="10" max="600" value="60"></div>';
-  const roundsFld = `<div class="fld"><label for="rounds">遊戲輪數</label><select id="rounds">${[...Array(10)].map((_, i) => `<option value="${i + 1}" ${i === 2 ? 'selected' : ''}>${i + 1} 輪${i === 2 ? '（標準）' : ''}</option>`).join('')}</select></div>`;
-  const pirateRule = `<label class="rule" style="margin-top:12px"><input id="pirateKick" type="checkbox"><i aria-hidden="true">✓</i><span><b>🏴‍☠️ 海盜踢人變體規則</b><small>第 2 次擲骰船停在 13 格且客滿時，海盜可踢下一位其他玩家的手下強行登船（預設關閉＝僅能佔空位）</small></span></label>`;
-  const maSchedFld = `<div class="fld"><label for="maSched">四場賽道賽程</label><select id="maSched">${Object.entries(MA_SCHED_LABELS).map(([k, t]) => `<option value="${k}">${t}</option>`).join('')}</select></div>`;
-  const maDouble3p = `<label class="rule" style="margin-top:12px"><input id="maDouble3p" type="checkbox"><i aria-hidden="true">✓</i><span><b>👥 3 人雙選手變體規則</b><small>剛好 3 人遊玩時，每人招募 8 位選手、每場各派 2 位出戰（6 位選手同場大亂鬥！）</small></span></label>`;
-  const create = fj
-    ? `<div class="panel"><h2>開新房間</h2><div class="row">${turnFld}</div><p class="mute" style="margin:8px 0 0">時間到會自動代打（出最小的牌）。</p>
-      <div class="how"><div><span>🃏</span>每次出一張牌</div><div><span>💦</span>大的沖走小的</div><div><span>🌊</span>沒被沖走就流走</div></div>${fold('howto', '完整玩法', fujiRules())}</div>`
-    : ct
-    ? `<div class="panel"><h2>開新房間</h2><div class="row">${roundsFld}${turnFld}</div><p class="mute" style="margin:8px 0 0">每人一套 1–12 覓食地點卡；時間到會自動出最小的牌。</p>
-      <div class="how"><div><span>👑</span>輪流當首領</div><div><span>🐾</span>別比首領大</div><div><span>⚡</span>撞號扣首領</div></div>${fold('howto', '完整玩法', catsRules())}</div>`
-    : mn
-    ? `<div class="panel"><h2>開新房間</h2><div class="row">${turnFld}</div><p class="mute" style="margin:8px 0 0">3–5 人遊玩（最佳 4 人）；3 人局每人 4 個手下，4–5 人局每人 3 個手下。</p>
-      ${pirateRule}
-      <div class="how"><div><span>⚓</span>競標當船老大</div><div><span>⛵</span>派遣手下投資</div><div><span>📈</span>黑市漲至 $30 結算</div></div>${fold('howto', '完整玩法', manilaRules())}</div>`
-    : nj
-    ? `<div class="panel"><h2>開新房間</h2><div class="row">${turnFld}</div><p class="mute" style="margin:8px 0 0">4–11 人遊玩；選牌、出牌與發動效果各有時限，時間到會自動代打（隨機選牌、不出牌、放棄發動）。</p>
-      <div class="how"><div><span>🪷</span>分成蓮花與仙鶴</div><div><span>🗡️</span>找出同伴、斬殺對手</div><div><span>🏆</span>先到 10 分獲勝</div></div>${fold('howto', '完整玩法', njRules())}</div>`
-    : mg
-    ? `<div class="panel"><h2>開新房間</h2><div class="row">${maSchedFld}${turnFld}</div><p class="mute" style="margin:8px 0 0">2–6 人遊玩（2 人局自動啟用雙選手變體；建房後可加 AI 電腦補位）。</p>
-      ${maDouble3p}
-      <div class="how"><div><span>📋</span>蛇行選秀組隊</div><div><span>🎲</span>擲骰觸發連鎖</div><div><span>🏆</span>4 場總分奪冠</div></div>${fold('howto', '完整玩法', magicalRules())}</div>`
-    : `<div class="panel"><h2>開新房間</h2>
-      <div class="row"><div class="fld"><label for="target">目標階段</label><select id="target">${[...Array(10)].map((_, i) => `<option value="${i + 1}" ${i === 9 ? 'selected' : ''}>第 ${i + 1} 階段</option>`).join('')}</select></div>${turnFld}</div>
-      <p class="mute" style="margin:8px 0 0">時間到會自動代打（抽牌堆、棄最大張）。</p>
-      <div class="rhd" style="margin-top:24px"><h2>特殊規則</h2><button class="ghost" data-a="allRules" aria-pressed="false">全選</button></div>
-      <p class="mute" style="margin:0 0 8px">都不選就是標準 Phase 10。</p>
-      <div class="rules">${rules}</div>
-      <p class="mute" style="margin:12px 0 0">${SP_NOTE}</p></div>`;
-  const code = `<input id="code" maxlength="4" size="6" placeholder="房間代碼" value="${esc(urlRoom)}" style="text-transform:uppercase;flex:1" autocapitalize="characters" autocorrect="off" autocomplete="off" spellcheck="false">`;
-  const name = `<div class="panel"><h2>你的名字</h2><input id="name" maxlength="12" placeholder="最多 12 字" value="${esc(localStorage.getItem('p10name') || '')}" style="width:100%"></div>`;
-  // 邀請進來：先看到自己被邀請玩什麼，填名字，按底部大按鈕加入；沒被邀請：選遊戲 → 名字 → 開房（底部大按鈕）／輸入代碼加入
-  return urlRoom
-    ? `<h1>${GM.icon} ${GM.name}</h1>
-      <div class="panel"><h2>你被邀請加入房間</h2><div class="row">${code}</div><button class="ghost" data-a="home" style="min-height:44px;margin-top:8px">改為開新房間</button></div>
-      ${name}<div class="cta"><button data-a="join">加入${GM.name}</button></div>`
-    : `<h1>🎴 線上牌桌</h1>${picker}${name}${create}
-      <div class="panel"><h2>已經有房間代碼？</h2><div class="row">${code}<button data-a="join" style="min-height:44px">加入</button></div></div>
-      <div class="cta"><button data-a="create">建立${GM.name}房間</button></div>`;
+  const inv = lb.inv;
+  const kind = urlRoom ? (inv?.exists && Object.hasOwn(GAMES, inv.kind) ? inv.kind : urlGame) : pick;
+  const GM = GAMES[kind], MT = GAME_META[kind];
+  const myName = lb.name.trim();
+
+  // --- 邀請連結專屬落地頁（自動預檢房間是否存在、是否滿人／已開局） ---
+  if (urlRoom) {
+    const ok = inv?.exists && !inv.playing && !inv.full;
+    const bad = inv && !ok;
+    const stText = lb.invLoading ? '正在確認房間狀態…'
+      : !inv?.exists ? '找不到這個房間，可能已經關閉了'
+      : inv.playing ? '這間房的遊戲已經開始了，無法中途加入'
+      : inv.full ? `這間房已滿（${inv.count}/${inv.max} 人）`
+      : `等待加入 · 目前 ${inv.count}/${inv.max} 人`;
+    const art = MT.arts ? `<div class="lb-hero-art">${MT.arts.slice(0, 3).map((src) => `<img src="${src}" alt="" loading="lazy">`).join('')}</div>`
+      : kind === 'cats' ? `<div class="lb-hero-art">${catAv(0, true, true)}</div>` : '';
+    return `<div class="lb-top"><div class="lb-brand"><h1>🎴 邀請加入</h1><small>免登入 · 填名字就能開玩</small></div><button class="ghost rm-smbtn" data-a="home">回大廳</button></div>
+      <div class="lb-hero" style="--gc1:${MT.c1};--gc2:${MT.c2};--ga:${MT.accent}">
+        ${MT.bg ? `<div class="lb-hero-bg" style="background-image:url('${MT.bg}')"></div>` : ''}
+        <div class="lb-hero-top">
+          <div><div class="lb-hero-ttl"><span style="font-size:var(--s4)">${GM.icon}</span><b>${GM.name}</b></div><p class="lb-hero-sub">${GM.sub}</p></div>
+          ${art}
+        </div>
+        <div class="lb-pills">
+          <span class="lb-pill">房號 ${esc(urlRoom)}</span>
+          <span class="lb-pill">${GM.people} 人</span>
+          <span class="lb-pill">⏱ ${MT.dur}</span>
+        </div>
+        <div class="lb-prev ${lb.invLoading ? '' : ok ? 'ok' : 'bad'}" style="margin-top:12px">
+          <div class="lb-prev-top"><b>${esc(stText)}</b>${inv?.exists ? `<span class="mute" style="font-size:var(--s1)">房主：${esc(inv.host)}</span>` : ''}</div>
+          ${inv?.players?.length ? `<div class="lb-prev-ps">${inv.players.map((x) => `<span class="lb-pchip">${x.bot ? '🤖' : av(x.name)}<span>${esc(x.name)}</span></span>`).join('')}</div>` : ''}
+        </div>
+      </div>
+      ${bad ? `<div class="panel"><p style="margin:0 0 12px" class="mute">你可以直接回到大廳重新開一間新房，或加入其他公開房間。</p><button data-a="home" style="width:100%;min-height:48px">回到遊戲大廳</button></div>` : `
+      <div class="panel">
+        <h2>你的名字</h2>
+        <input id="name" maxlength="12" placeholder="輸入暱稱（最多 12 字）" value="${esc(lb.name)}" style="width:100%">
+        <input id="code" type="hidden" value="${esc(urlRoom)}">
+      </div>
+      <div class="cta"><button data-a="join" ${lb.invLoading ? 'disabled' : ''}>加入 ${GM.name} 房間</button></div>`}`;
+  }
+
+  // --- 一般大廳頁：頂部個人膠囊 + 雙分頁（開新房間 / 加入房間） ---
+  const openCount = lb.rooms.filter((r) => !r.full).length;
+  const profBtn = myName
+    ? `<button class="lb-prof" data-a="lbEditName" aria-expanded="${lb.editingName}">${av(myName)}<span class="pn">${esc(myName)}</span><span class="mute" aria-hidden="true">✎</span></button>`
+    : `<button class="lb-prof empty" data-a="lbEditName" aria-expanded="true">✨ 設定名字</button>`;
+  const nameBox = (!myName || lb.editingName)
+    ? `<div class="lb-namebox">
+        <div class="rhd" style="margin-bottom:6px"><h2>你的名字</h2>${myName ? '<button class="ghost rm-smbtn" data-a="lbSaveName">完成</button>' : '<small class="mute">開房或加入前需填寫</small>'}</div>
+        <div class="row"><input id="name" maxlength="12" placeholder="輸入暱稱（最多 12 字）" value="${esc(lb.name)}">${myName ? '' : '<button data-a="lbSaveName" style="min-height:44px">確定</button>'}</div>
+      </div>` : '';
+
+  const tabs = `<div class="lb-tabs" role="tablist">
+    <button class="lb-tab ${lb.tab === 'create' ? 'on' : ''}" data-a="lbTab" data-v="create" role="tab" aria-selected="${lb.tab === 'create'}">✨ 開新房間</button>
+    <button class="lb-tab ${lb.tab === 'join' ? 'on' : ''}" data-a="lbTab" data-v="join" role="tab" aria-selected="${lb.tab === 'join'}">🚪 加入房間${openCount ? `<span class="lb-cnt">${openCount}</span>` : ''}</button>
+  </div>`;
+
+  // --- 分頁 2：加入房間（4 碼快速加入 + 即時公開大廳列表） ---
+  if (lb.tab === 'join') {
+    const rmList = lb.rooms.length
+      ? `<div class="lb-rmlist">${lb.rooms.map((r) => {
+          const g = GAMES[r.kind] || GAMES.phase10, m = GAME_META[r.kind] || GAME_META.phase10;
+          return `<div class="lb-rmcard" style="--gc1:${m.c1};--gc2:${m.c2};--ga:${m.accent}">
+            <span style="font-size:var(--s4);flex:none">${g.icon}</span>
+            <div class="lb-rmcard-info">
+              <div class="lb-rmcard-hd"><b>${g.name}</b><span class="lb-rmcard-code">${r.code}</span></div>
+              <div class="lb-rmcard-sub">房主：${esc(r.host)} · ${r.count}/${r.max} 人${r.bots ? `（含 ${r.bots} 電腦）` : ''}</div>
+            </div>
+            <button data-a="lbJoinRoom" data-v="${r.code}" ${r.full ? 'disabled' : ''} style="min-height:44px;flex:none">${r.full ? '已滿' : '加入'}</button>
+          </div>`;
+        }).join('')}</div>`
+      : `<div class="lb-empty"><span class="lb-empty-ico">🎲</span><p>${lb.roomsLoading ? '正在尋找公開房間…' : '目前沒有公開等待中的房間。<br>輸入朋友的 4 碼代碼，或直接開一間新房吧！'}</p><button class="ghost" data-a="lbTab" data-v="create" style="min-height:44px">✨ 去開新房間</button></div>`;
+    return `<div class="lb-top"><div class="lb-brand"><h1>🎴 線上桌遊廳</h1><small>6 款派對與策略桌遊 · 免登入開玩</small></div>${profBtn}</div>
+      ${nameBox}${tabs}
+      <div class="panel">
+        <h2>輸入 4 碼房間代碼</h2>
+        <div class="row" style="flex-wrap:nowrap">
+          <input id="code" class="lb-code-in" maxlength="4" placeholder="ABCD" value="${esc(lb.code)}" autocapitalize="characters" autocorrect="off" autocomplete="off" spellcheck="false">
+          <button data-a="join" style="min-height:48px;flex:none;padding:8px 20px">加入</button>
+        </div>
+        <div id="lbCodePrev">${codePreviewHtml()}</div>
+      </div>
+      <div class="panel">
+        <div class="rhd"><h2>🌐 公開等待中房間</h2><button class="ghost rm-smbtn" data-a="lbRefresh">${lb.roomsLoading ? '更新中…' : '🔄 重新整理'}</button></div>
+        ${rmList}
+      </div>`;
+  }
+
+  // --- 分頁 1：開新房間（人數/AI 篩選 + 3×2 主題遊戲卡 + Hero 預覽 + 摺疊進階設定） ---
+  const visibleGames = Object.entries(GAMES).filter(([k]) => matchFilter(k, lb.filter));
+  const filters = `<div class="lb-filts" role="group" aria-label="遊戲篩選">${LB_FILTERS.map(([id, label]) => `<button class="lb-filt ${lb.filter === id ? 'on' : ''}" data-a="lbFilter" data-v="${id}" aria-pressed="${lb.filter === id}">${label}</button>`).join('')}</div>`;
+  const cards = `<div class="lb-grid">${visibleGames.map(([k, x]) => {
+    const m = GAME_META[k], on = k === kind;
+    const ico = m.thumb ? `<img src="${m.thumb}" alt="" loading="lazy">` : k === 'cats' ? catAv(0, false, false) : x.icon;
+    return `<button class="lb-card ${on ? 'on' : ''}" style="--gc1:${m.c1};--gc2:${m.c2};--ga:${m.accent}" data-a="pick" data-v="${k}" aria-pressed="${on}">
+      ${m.bg ? `<div class="lb-card-bg" style="background-image:url('${m.bg}')"></div>` : ''}
+      <div class="lb-card-hd"><span class="lb-card-ico">${ico}</span><span class="lb-tag">${m.tag}</span></div>
+      <div><div class="lb-card-nm">${x.name}</div><div class="lb-card-meta">${x.people} 人 · ${m.dur}</div></div>
+      ${on ? '<span class="lb-check" aria-hidden="true">✓</span>' : ''}
+    </button>`;
+  }).join('')}</div>`;
+
+  const heroArt = MT.arts ? `<div class="lb-hero-art">${MT.arts.map((src) => `<img src="${src}" alt="" loading="lazy">`).join('')}</div>`
+    : kind === 'cats' ? `<div class="lb-hero-art">${catAv(0, true, true)}${catAv(1, false, false)}</div>` : '';
+  const hero = `<div class="lb-hero" style="--gc1:${MT.c1};--gc2:${MT.c2};--ga:${MT.accent}">
+    ${MT.bg ? `<div class="lb-hero-bg" style="background-image:url('${MT.bg}')"></div>` : ''}
+    <div class="lb-hero-top">
+      <div>
+        <div class="lb-hero-ttl"><span style="font-size:var(--s4)">${GM.icon}</span><b>${GM.name}</b></div>
+        <p class="lb-hero-sub">${GM.sub}</p>
+      </div>
+      ${heroArt}
+    </div>
+    <div class="lb-pills">
+      <span class="lb-pill">👥 ${GM.people} 人</span>
+      <span class="lb-pill">⏱ ${MT.dur}</span>
+      ${MT.ai ? '<span class="lb-pill ai">🤖 支援電腦 AI</span>' : ''}
+    </div>
+    <div class="how">${MT.how.map(([ic, tx]) => `<div><span>${ic}</span>${tx}</div>`).join('')}</div>
+    <div style="margin-top:4px">${fold('howto', `查看 ${GM.name} 完整玩法`, gameRulesHtml(kind))}</div>
+  </div>`;
+
+  // 進階房規摘要與內容
+  const p10Cnt = Object.values(lb.p10Rules).filter(Boolean).length;
+  const summaryParts = [
+    kind === 'phase10' ? `目標第 ${lb.target} 階` : null,
+    kind === 'phase10' ? (p10Cnt ? `${p10Cnt} 項特殊規則` : '標準規則') : null,
+    kind === 'cats' ? `共 ${lb.rounds} 輪` : null,
+    kind === 'manila' ? (lb.pirateKick ? '海盜可踢人' : '標準海盜') : null,
+    kind === 'magical' ? (lb.maSched === 'std' ? '標準賽程' : lb.maSched === 'mild' ? '全溫和' : lb.maSched === 'wild' ? '全狂野' : '狂野先開') : null,
+    kind === 'magical' && lb.maDouble3p ? '3人雙選手' : null,
+    `${lb.turn}秒/回合`,
+    lb.pub ? '🌐 公開' : '🔒 私密',
+  ].filter(Boolean).join(' · ');
+
+  const turnPresets = `<div class="fld" style="flex:1 1 100%"><label for="turn">每回合時限（超時自動代打）</label>
+    <div class="lb-tchips">${TURN_PRESETS.map((sec) => `<button type="button" class="lb-tchip ${lb.turn === sec ? 'on' : ''}" data-a="lbTurn" data-v="${sec}">${sec}秒</button>`).join('')}
+      <input id="turn" type="number" inputmode="numeric" min="10" max="600" value="${lb.turn}" style="width:92px;min-height:40px;padding:6px 10px" aria-label="自訂每回合秒數">
+    </div></div>`;
+
+  const pubToggle = `<label class="rule" style="margin-top:12px"><input id="lbPub" type="checkbox" ${lb.pub ? 'checked' : ''}><i aria-hidden="true">✓</i><span><b>🌐 公開到大廳列表</b><small>同場朋友打開首頁就能直接看到並點入，不必輸入代碼（關閉＝僅限代碼／連結加入）</small></span></label>`;
+
+  const rulesHtml = RULES.map(([k, t, d]) => `<label class="rule"><input type="checkbox" data-r="${k}" ${lb.p10Rules[k] ? 'checked' : ''}><i aria-hidden="true">✓</i><span><b>${t}</b><small>${d}</small></span></label>`).join('');
+  const extraCfg = kind === 'phase10'
+    ? `<div class="fld" style="margin-top:12px"><label for="target">目標階段</label><select id="target">${[...Array(10)].map((_, i) => `<option value="${i + 1}" ${lb.target === i + 1 ? 'selected' : ''}>第 ${i + 1} 階段</option>`).join('')}</select></div>
+      <div class="rhd" style="margin-top:16px"><h2>特殊規則</h2><button class="ghost rm-smbtn" data-a="allRules" aria-pressed="${p10Cnt === RULES.length}">${p10Cnt === RULES.length ? '全不選' : '全選'}</button></div>
+      <div class="rules">${rulesHtml}</div><p class="mute" style="margin:8px 0 0;font-size:var(--s1)">${SP_NOTE}</p>`
+    : kind === 'cats'
+    ? `<div class="fld" style="margin-top:12px"><label for="rounds">遊戲輪數</label><select id="rounds">${[...Array(10)].map((_, i) => `<option value="${i + 1}" ${lb.rounds === i + 1 ? 'selected' : ''}>${i + 1} 輪${i === 2 ? '（標準）' : ''}</option>`).join('')}</select></div>`
+    : kind === 'manila'
+    ? `<label class="rule" style="margin-top:12px"><input id="pirateKick" type="checkbox" ${lb.pirateKick ? 'checked' : ''}><i aria-hidden="true">✓</i><span><b>🏴‍☠️ 海盜踢人變體規則</b><small>第 2 次擲骰船停在 13 格且客滿時，海盜可踢下一位其他玩家的手下強行登船</small></span></label>`
+    : kind === 'magical'
+    ? `<div class="fld" style="margin-top:12px"><label for="maSched">四場賽道賽程</label><select id="maSched">${Object.entries(MA_SCHED_LABELS).map(([k, t]) => `<option value="${k}" ${lb.maSched === k ? 'selected' : ''}>${t}</option>`).join('')}</select></div>
+      <label class="rule" style="margin-top:12px"><input id="maDouble3p" type="checkbox" ${lb.maDouble3p ? 'checked' : ''}><i aria-hidden="true">✓</i><span><b>👥 3 人雙選手變體規則</b><small>剛好 3 人時每人招募 8 位、每場各派 2 位出戰（6 位選手同場大亂鬥！）</small></span></label>`
+    : '';
+
+  const cfgPanel = `<div class="lb-cfg">
+    <button class="lb-cfg-hd" data-a="lbCfg" aria-expanded="${lb.cfgOpen}">
+      <span><b>⚙️ 房間設定</b><span class="lb-cfg-sum">${summaryParts}</span></span>
+      <span class="mute">${lb.cfgOpen ? '收起 ▴' : '自訂 ▾'}</span>
+    </button>
+    ${lb.cfgOpen ? `<div class="lb-cfg-bd">${turnPresets}${extraCfg}${pubToggle}</div>` : ''}
+  </div>`;
+
+  const cta = MT.ai
+    ? `<div class="cta"><div class="row"><button class="ghost" data-a="createSolo" style="min-height:48px">🤖 單人試玩</button><button data-a="create">建立 ${GM.name} 房間</button></div></div>`
+    : `<div class="cta"><button data-a="create">建立 ${GM.name} 房間</button></div>`;
+
+  return `<div class="lb-top"><div class="lb-brand"><h1>🎴 線上桌遊廳</h1><small>6 款派對與策略桌遊 · 免登入開玩</small></div>${profBtn}</div>
+    ${nameBox}${tabs}
+    <div class="panel" style="padding:12px">
+      ${filters}${cards}
+    </div>
+    ${hero}${cfgPanel}${cta}`;
 }
 
 function room() {
-  const s = snap, host = s.me === s.host, n = s.players.length, st = s.settings, fj = s.kind === 'fuji', ct = s.kind === 'cats', mn = s.kind === 'manila', mg = s.kind === 'magical', nj = s.kind === 'ninja', hasBot = mn || mg, GM = GAMES[s.kind];
+  const s = snap, host = s.me === s.host, n = s.players.length, st = s.settings;
+  const fj = s.kind === 'fuji', ct = s.kind === 'cats', mn = s.kind === 'manila', mg = s.kind === 'magical', nj = s.kind === 'ninja';
+  const hasBot = mn || mg, GM = GAMES[s.kind], MT = GAME_META[s.kind];
   const link = inviteLink(s.code, s.kind), need = Math.max(0, s.min - n);
+  const humans = s.players.filter((p) => !p.bot).length;
+  const myPlayer = s.players.find((p) => p.id === s.me);
+
+  // 頂部標題 + 公開狀態 + 表情選單（等朋友進房時也能互動）
+  const visPill = host
+    ? `<button class="rm-vis ${s.pub ? 'pub' : ''}" data-a="rmPub" title="切換大廳公開狀態">${s.pub ? '🌐 公開' : '🔒 私密'}</button>`
+    : `<span class="rm-vis ${s.pub ? 'pub' : ''}">${s.pub ? '🌐 公開' : '🔒 私密'}</span>`;
+  const rxBtn = `<div class="rxw"><button class="ghost ic" data-a="rxMenu" aria-label="傳送表情" aria-expanded="${rxOpen}">😀</button>${rxOpen ? `<div class="rxp">${EMOJI.map((e) => `<button data-a="react" data-v="${e}">${e}</button>`).join('')}</div>` : ''}</div>`;
+
+  // 房主免退房切換遊戲面板
+  const switchPanel = host ? `<div class="panel" style="padding:12px 16px">
+    <button class="lb-cfg-hd" data-a="rmSwitch" aria-expanded="${lb.rmSwitch}" style="min-height:40px">
+      <span><b>🔄 更換遊戲</b><span class="lb-cfg-sum">不必退房，全房同步切換並保留房號 ${s.code}</span></span>
+      <span class="mute">${lb.rmSwitch ? '收起 ▴' : '選擇 ▾'}</span>
+    </button>
+    ${lb.rmSwitch ? `<div class="rm-sw">${Object.entries(GAMES).map(([k, x]) => {
+      const m = GAME_META[k], cur = k === s.kind, over = humans > m.max;
+      return `<button class="${cur ? 'on' : ''}" data-a="rmChangeKind" data-v="${k}" ${cur || over ? 'disabled' : ''}>
+        <span style="font-size:var(--s3)">${x.icon}</span>
+        <span><b>${x.name}${cur ? '（目前）' : ''}</b><small>${over ? `上限 ${m.max} 人` : `${x.people} 人 · ${m.tag}`}</small></span>
+      </button>`;
+    }).join('')}</div>` : ''}
+  </div>` : '';
+
+  // 遊戲規則與設定
+  const turnBar = host
+    ? `<div style="margin-top:10px"><div class="mute" style="font-size:var(--s1)">每回合秒數</div><div class="lb-tchips">${TURN_PRESETS.map((sec) => `<button class="lb-tchip ${st.turn === sec ? 'on' : ''}" data-a="rmTurn" data-v="${sec}">${sec}秒</button>`).join('')}</div></div>`
+    : `<p style="margin:8px 0 0">每回合 <b>${st.turn} 秒</b>，超時自動代打。</p>`;
   const set = host
     ? `<div class="row"><select data-c="target">${[...Array(10)].map((_, i) => `<option value="${i + 1}" ${st.target === i + 1 ? 'selected' : ''}>目標：第 ${i + 1} 階段</option>`).join('')}</select></div>`
-    : `<div>先完成第 ${st.target} 階段者結束遊戲</div>`;
+    : `<div>先完成第 <b>${st.target} 階段</b>者結束遊戲</div>`;
   const catSet = host
     ? `<div class="row"><select data-c="rounds">${[...Array(10)].map((_, i) => `<option value="${i + 1}" ${st.rounds === i + 1 ? 'selected' : ''}>遊戲輪數：${i + 1} 輪${i === 2 ? '（標準）' : ''}</option>`).join('')}</select></div>`
     : `<div>共進行 <b>${st.rounds} 輪</b>，最高分者成為喵喵之王</div>`;
@@ -1070,29 +1424,52 @@ function room() {
     ? `<div class="row"><select data-c="schedule">${Object.entries(MA_SCHED_LABELS).map(([k, t]) => `<option value="${k}" ${(st.schedule || 'std') === k ? 'selected' : ''}>賽程：${t}</option>`).join('')}</select></div>
       <label class="rule"><input type="checkbox" data-c="double3p" ${st.double3p ? 'checked' : ''}><i aria-hidden="true">✓</i><span><b>👥 3 人雙選手變體規則</b><small>剛好 3 人時每人招募 8 位、每場各派 2 位出戰（共 6 位同場競速）</small></span></label>`
     : `<div>四場賽程：<b>${MA_SCHED_LABELS[st.schedule || 'std']}</b>${st.double3p ? ' · <b>3 人雙選手變體</b>' : ''}</div>`;
-  const rulesPanel = fj
-    ? `<div class="panel"><h2>規則</h2><p style="margin:0">每回合 ${st.turn} 秒，超時自動代打（出最小的牌）。3–6 人每人發 6 張，7–8 人發 5 張。</p>${fold('rules', '完整玩法', fujiRules())}</div>`
-    : ct
-    ? `<div class="panel"><h2>規則</h2>${catSet}<p style="margin:8px 0 0">每手 ${st.turn} 秒，超時自動出最小的牌。每輪結算：第一名 +2、第二名 +1、最低分 −1。</p>${fold('rules', '完整玩法', catsRules())}</div>`
-    : mn
-    ? `<div class="panel"><h2>規則</h2>${manilaSet}<p style="margin:8px 0 0">每回合 ${st.turn} 秒，超時自動跳過或擲骰。起始 30 元與 2 張秘密股票，任一貨物黑市達 30 元即結束結算。</p>${fold('rules', '完整玩法', manilaRules())}</div>`
-    : nj
-    ? `<div class="panel"><h2>規則</h2><p style="margin:0">每個步驟 ${st.turn} 秒，超時自動代打。累積 10 分以上的一輪結束後，最高分者獲勝。</p>${fold('rules', '完整玩法', njRules())}</div>`
-    : mg
-    ? `<div class="panel"><h2>規則</h2>${maSet}<p style="margin:8px 0 0">每回合 ${st.turn} 秒，共比 4 場（金盃 3/4/5/6 分，銀徽章 1/2/3/4 分）。2 人局自動啟用雙選手變體！</p>${fold('rules', '完整玩法', magicalRules())}</div>`
-    : `<div class="panel"><h2>規則</h2>${set}
-    <p>每回合 ${st.turn} 秒，超時自動代打。</p>
-    ${RULES.some(([k]) => st.rules[k]) ? `<ul style="margin:8px 0;padding-left:20px">${RULES.filter(([k]) => st.rules[k]).map(([, t, d]) => `<li style="margin-top:8px"><b>${t}</b><br><small class="mute">${d}</small></li>`).join('')}</ul>${['rv', 'sh', 'xn', 'xc'].some((k) => st.rules[k]) ? `<p class="mute" style="margin:8px 0">${SP_NOTE}</p>` : ''}` : '<p class="mute">標準規則</p>'}
-    <p class="mute">每人發 10 張牌。只有完成當前階段的人，下一回合才能進下一階段；沒完成就繼續挑戰同一階段。有人完成目標階段後，該回合結束時比總分（低者勝）。</p></div>`;
-  // 主動作（分享邀請）一顆大按鈕；連結和 QR 只有面對面才需要，收起來。開始遊戲固定在底部（拇指區）
-  return `<h1>${GM.icon} ${GM.name}</h1>
-  <div class="panel"><div class="row" style="justify-content:space-between;flex-wrap:nowrap"><div><div class="mute">房間代碼</div><div class="big">${s.code}</div></div><button data-a="copy" style="min-height:48px">${navigator.share ? '分享邀請' : '複製連結'}</button></div>
-    ${fold('qr', '面對面？用 QR code 或連結加入', `<input readonly value="${esc(link)}" onfocus="this.select()" style="width:100%">${qrBox(link)}`)}</div>
-  <div class="panel"><div class="rhd"><h2>玩家 ${n}/${s.max}</h2><div class="row" style="gap:6px">${host && hasBot && n < s.max ? '<button class="ghost" data-a="addBot">🤖 +電腦</button>' : ''}${host && n > 1 ? '<button class="ghost" data-a="shuffle">🔀 排位子</button>' : ''}</div></div>
-    ${s.players.map((p) => `<div class="pl">${p.bot ? '<span class="av" style="background:#5a3e20" aria-hidden="true">🤖</span>' : av(p.name)}<span class="nmx">${esc(p.name)}${p.id === s.me ? ' <span class="mute">（你）</span>' : ''}${p.id === s.host ? ' <span class="crown">👑</span>' : ''}</span>${host && hasBot && p.bot ? `<button class="ghost" data-a="removeBot" data-v="${p.id}" style="min-height:36px;padding:4px 10px;font-size:var(--s1)">移除</button>` : `<span class="dot ${p.online ? 'on' : ''}" role="img" aria-label="${p.online ? '在線' : '離線'}" style="margin:0"></span>`}</div>`).join('')}
-    <p class="mute" style="margin:8px 0 0">${need ? (host && hasBot ? `再邀請 ${need} 位朋友，或點「🤖 +電腦」補人就能開始（${s.min}–${s.max} 人）` : `再邀請 ${need} 位朋友就能開始（${s.min}–${s.max} 人）`) : host ? '人數夠了，可以開始！' : '人數夠了，等房主開始'}</p></div>
+  const p10RoomRules = !fj && !ct && !mn && !mg && !nj ? (host
+    ? fold('p10r', `特殊規則（已開 ${RULES.filter(([k]) => st.rules?.[k]).length} 項）`,
+        `${RULES.map(([k, t, d]) => `<label class="rule"><input type="checkbox" data-rmr="${k}" ${st.rules?.[k] ? 'checked' : ''}><i aria-hidden="true">✓</i><span><b>${t}</b><small>${d}</small></span></label>`).join('')}<p class="mute" style="margin:8px 0 0;font-size:var(--s1)">${SP_NOTE}</p>`)
+    : (RULES.some(([k]) => st.rules?.[k])
+        ? `<ul style="margin:8px 0;padding-left:20px">${RULES.filter(([k]) => st.rules[k]).map(([, t, d]) => `<li style="margin-top:6px"><b>${t}</b><br><small class="mute">${d}</small></li>`).join('')}</ul>`
+        : '<p class="mute" style="margin:8px 0 0">標準規則</p>')) : '';
+
+  const rulesPanel = `<div class="panel"><h2>規則與設定</h2>
+    ${fj ? '<p style="margin:0">3–6 人每人發 6 張，7–8 人發 5 張。</p>' : ct ? catSet : mn ? manilaSet : nj ? '<p style="margin:0">累積 10 分以上的一輪結束後，最高分者獲勝。</p>' : mg ? maSet : set}
+    ${turnBar}${p10RoomRules}
+    <div style="margin-top:4px">${fold('rules', `完整玩法（${GM.name}）`, gameRulesHtml(s.kind))}</div>
+  </div>`;
+
+  const progPct = Math.min(100, Math.round((n / s.min) * 100));
+  const renameRow = lb.rmRename
+    ? `<div class="row" style="flex-wrap:nowrap;margin-bottom:10px"><input id="rmRenameIn" maxlength="12" value="${esc(myPlayer?.name || '')}" placeholder="輸入新名字" style="flex:1"><button data-a="rmRenameGo" class="rm-smbtn">儲存</button><button class="ghost rm-smbtn" data-a="rmRenameOpen">取消</button></div>`
+    : '';
+
+  return `<div class="rm-hd"><div class="rm-hd-l"><h1>${GM.icon} ${GM.name}</h1>${visPill}</div>${rxBtn}</div>
+  <div class="panel">
+    <div class="row" style="justify-content:space-between;flex-wrap:nowrap">
+      <div><div class="mute" style="font-size:var(--s1)">房間代碼</div><div class="big">${s.code}</div></div>
+      <div class="row" style="gap:6px;flex-wrap:nowrap">
+        <button class="ghost" data-a="rmQr" style="min-height:48px;padding:8px 12px" aria-expanded="${lb.rmQr}">QR 碼</button>
+        <button data-a="copy" style="min-height:48px">${navigator.share ? '分享邀請' : '複製連結'}</button>
+      </div>
+    </div>
+    ${lb.rmQr ? `<div class="rm-qrwrap"><input readonly value="${esc(link)}" onfocus="this.select()" style="width:100%">${qrBox(link)}</div>` : ''}
+  </div>
+  ${switchPanel}
+  <div class="panel">
+    <div class="rhd"><h2>玩家 ${n}/${s.max}</h2><div class="row" style="gap:6px">${host && hasBot && n < s.max ? '<button class="ghost rm-smbtn" data-a="addBot">🤖 +電腦</button>' : ''}${host && n > 1 ? '<button class="ghost rm-smbtn" data-a="shuffle">🔀 排位子</button>' : ''}</div></div>
+    ${renameRow}
+    ${s.players.map((p, idx) => `<div class="pl" data-pid="${p.id}">
+      <span class="rm-seat" title="座位順序">#${idx + 1}</span>
+      ${p.bot ? '<span class="av" style="background:#5a3e20" aria-hidden="true">🤖</span>' : av(p.name)}
+      <span class="nmx">${esc(p.name)}${p.id === s.me ? ' <span class="mute">（你）</span>' : ''}${p.id === s.host ? ' <span class="crown">👑</span>' : ''}</span>
+      ${p.id === s.me && !lb.rmRename ? '<button class="ghost rm-smbtn" data-a="rmRenameOpen" aria-label="修改名字">✎</button>' : ''}
+      ${host && hasBot && p.bot ? `<button class="ghost rm-smbtn" data-a="removeBot" data-v="${p.id}">移除</button>`
+        : `${host && p.id !== s.me ? `<button class="ghost rm-smbtn" data-a="rmKick" data-v="${p.id}" aria-label="移出 ${esc(p.name)}">移出</button>` : ''}<span class="dot ${p.online ? 'on' : ''}" role="img" aria-label="${p.online ? '在線' : '離線'}" style="margin:0"></span>`}
+    </div>`).join('')}
+    <div class="rm-prog" aria-hidden="true"><div class="rm-prog-fill" style="width:${progPct}%"></div></div>
+    <p class="mute" style="margin:4px 0 0;font-size:var(--s1)">${need ? (host && hasBot ? `再邀請 ${need} 位朋友，或點「🤖 +電腦」補位就能開始（${s.min}–${s.max} 人）` : `再邀請 ${need} 位朋友就能開始（${s.min}–${s.max} 人）`) : host ? '人數已達標，隨時可以開始遊戲！' : '人數已達標，等待房主按下開始…'}</p>
+  </div>
   ${rulesPanel}
-  <div class="cta"><div class="row"><button class="ghost" data-a="leave" style="min-height:48px">離開</button>${host ? `<span class="w" data-why="${need ? `至少需要 ${s.min} 人` : ''}"><button data-a="start" ${need ? 'disabled' : ''}>開始遊戲</button></span>` : '<span class="mute" style="flex:1;text-align:center">等待房主開始…</span>'}</div></div>`;
+  <div class="cta"><div class="row"><button class="ghost" data-a="leave" style="min-height:48px">離開</button>${host ? `<span class="w" data-why="${need ? `至少需要 ${s.min} 人` : ''}"><button data-a="start" ${need ? 'disabled' : ''}>開始遊戲</button></span>` : '<span class="mute" style="flex:1;text-align:center">⏳ 等待房主開始…</span>'}</div></div>`;
 }
 
 function game() {
@@ -3521,16 +3898,15 @@ function magicalOverlay(g, s) {
 }
 
 function render() {
-  const form = [...document.querySelectorAll('#name,#code,#target,#rounds,#turn,#pirateKick,#maSched,#maDouble3p,[data-r]')].map((e) => [e, e.type === 'checkbox' ? e.checked : e.value]); // 建房表單：重繪不能洗掉使用者已填／已勾的
-  const keep = Object.fromEntries(form.map(([e, v]) => [e.id || e.dataset.r, v]));
   if (!snap?.game) { seen = null; resetMs(); resetMa(); } // 離開／重開一場遊戲後不要沿用舊手牌
-  document.body.classList.toggle('cats-mode', !!(snap?.game && snap.kind === 'cats'));
-  document.body.classList.toggle('manila-mode', !!(snap?.game && snap.kind === 'manila'));
-  document.body.classList.toggle('magical-mode', !!(snap?.game && snap.kind === 'magical'));
-  document.body.classList.toggle('ninja-mode', !!(snap?.game && snap.kind === 'ninja'));
+  const activeKind = snap?.kind || null;
+  document.body.classList.toggle('fuji-mode', !!(activeKind === 'fuji' && !snap.game));
+  document.body.classList.toggle('cats-mode', activeKind === 'cats');
+  document.body.classList.toggle('manila-mode', activeKind === 'manila');
+  document.body.classList.toggle('magical-mode', activeKind === 'magical');
+  document.body.classList.toggle('ninja-mode', activeKind === 'ninja');
+  document.title = snap ? `${GAMES[snap.kind].icon} ${GAMES[snap.kind].name}${snap.game ? '' : ` · 房號 ${snap.code}`}` : '線上桌遊大廳｜6 款派對與策略桌遊';
   $('#app').innerHTML = !sess ? lobby() : !snap ? '<p>連線中…</p>' : snap.game ? (snap.kind === 'fuji' ? fuji() : snap.kind === 'cats' ? cats() : snap.kind === 'manila' ? manila() : snap.kind === 'magical' ? magical() : snap.kind === 'ninja' ? ninja() : game()) : room();
-  for (const e of document.querySelectorAll('#name,#code,#target,#rounds,#turn,#pirateKick,#maSched,#maDouble3p,[data-r]')) { const v = keep[e.id || e.dataset.r]; if (v !== undefined) e.type === 'checkbox' ? (e.checked = v) : (e.value = v); }
-  const all = [...document.querySelectorAll('[data-r]')]; if (all.length && all.every((b) => b.checked)) { const b = $('[data-a="allRules"]'); if (b) b.textContent = '全不選'; }
   tick();
 }
 // 倒數只改文字，不重繪 DOM；最後 10 秒變紅
@@ -3547,22 +3923,94 @@ function tick() {
 }
 setInterval(tick, 250);
 
+const ensureLobbyName = () => {
+  const v = ($('#name')?.value ?? lb.name ?? '').trim().slice(0, 12);
+  lb.name = v;
+  if (!v) {
+    lb.editingName = true;
+    render();
+    setTimeout(() => $('#name')?.focus(), 20);
+    toast('請先輸入你的名字');
+    return null;
+  }
+  saveName(v);
+  return v;
+};
+
 const A = {
-  async create() {
-    const body = { kind: pick, name: $('#name').value, turn: +$('#turn').value };
-    if (pick === 'phase10') Object.assign(body, { target: +$('#target').value, rules: Object.fromEntries(RULES.map(([k]) => [k, !!$(`[data-r="${k}"]`)?.checked])) });
-    if (pick === 'cats') body.rounds = +$('#rounds').value;
-    if (pick === 'manila') body.pirateKick = !!$('#pirateKick')?.checked;
-    if (pick === 'magical') { body.schedule = $('#maSched')?.value || 'std'; body.double3p = !!$('#maDouble3p')?.checked; }
-    const r = await post('create', body).catch((e) => toast(e.message)); if (r) { localStorage.setItem('p10name', $('#name').value); enter(r); }
+  async create(solo = false) {
+    const name = ensureLobbyName();
+    if (!name) return;
+    const turn = Math.round(Number($('#turn')?.value ?? lb.turn) || 60);
+    const body = { kind: pick, name, turn, pub: !!lb.pub };
+    if (pick === 'phase10') Object.assign(body, { target: lb.target, rules: { ...lb.p10Rules } });
+    if (pick === 'cats') body.rounds = lb.rounds;
+    if (pick === 'manila') body.pirateKick = !!lb.pirateKick;
+    if (pick === 'magical') { body.schedule = lb.maSched || 'std'; body.double3p = !!lb.maDouble3p; }
+    if (solo === true && GAME_META[pick]?.ai) { body.bots = GAME_META[pick].soloBots || 2; body.pub = false; }
+    const r = await post('create', body).catch((e) => toast(e.message));
+    if (r) { lb.editingName = false; enter(r); }
   },
+  createSolo() { return A.create(true); },
   fold(v) { folds.has(v) ? folds.delete(v) : folds.add(v); render(); },
   pick(v) { pick = v; try { localStorage.setItem('p10pick', v); } catch {} render(); },
-  async join() { const r = await post('join', { name: $('#name').value, code: $('#code').value }).catch((e) => toast(e.message)); if (r) { localStorage.setItem('p10name', $('#name').value); enter(r); } },
+  lbTab(v) { lb.tab = v; render(); if (v === 'join') fetchRooms(true); },
+  lbFilter(v) {
+    lb.filter = v;
+    if (!matchFilter(pick, v)) {
+      const first = Object.keys(GAMES).find((k) => matchFilter(k, v));
+      if (first) { pick = first; try { localStorage.setItem('p10pick', first); } catch {} }
+    }
+    render();
+  },
+  lbEditName() { lb.editingName = !lb.editingName; render(); if (lb.editingName) setTimeout(() => $('#name')?.focus(), 20); },
+  lbSaveName() {
+    const v = ($('#name')?.value ?? lb.name).trim().slice(0, 12);
+    if (!v) return toast('請輸入名字');
+    lb.name = v; saveName(v); lb.editingName = false; render();
+  },
+  lbCfg() { lb.cfgOpen = !lb.cfgOpen; render(); },
+  lbTurn(v) { lb.turn = +v; render(); },
+  lbRefresh() { fetchRooms(false); },
+  async lbJoinRoom(v) {
+    const name = ensureLobbyName();
+    if (!name) return;
+    const r = await post('join', { name, code: v }).catch((e) => toast(e.message));
+    if (r) { lb.editingName = false; enter(r); }
+  },
+  async join() {
+    const name = ensureLobbyName();
+    if (!name) return;
+    const code = ($('#code')?.value ?? lb.code ?? '').trim().toUpperCase();
+    if (!code) { $('#code')?.focus(); return toast('請輸入 4 碼房間代碼'); }
+    const r = await post('join', { name, code }).catch((e) => toast(e.message));
+    if (r) { lb.editingName = false; enter(r); }
+  },
   home() { history.replaceState(null, '', '/'); location.reload(); },
-  allRules(v, btn) { // 一次勾選：現在全勾了就全部取消，否則全部勾起來
-    const boxes = [...document.querySelectorAll('[data-r]')], on = !boxes.every((b) => b.checked);
-    boxes.forEach((b) => (b.checked = on)); btn.textContent = on ? '全不選' : '全選'; btn.setAttribute('aria-pressed', on);
+  allRules() { // 一次勾選：現在全勾了就全部取消，否則全部勾起來
+    const on = !RULES.every(([k]) => lb.p10Rules[k]);
+    for (const [k] of RULES) lb.p10Rules[k] = on;
+    render();
+  },
+  rmPub() { call('settings', { pub: !snap?.pub }); },
+  rmTurn(v) { call('settings', { turn: +v }); },
+  rmQr() { lb.rmQr = !lb.rmQr; render(); },
+  rmSwitch() { lb.rmSwitch = !lb.rmSwitch; render(); },
+  async rmChangeKind(v) {
+    const r = await call('changeKind', { kind: v });
+    if (r) { lb.rmSwitch = false; toast(`已切換為 ${GAMES[v].name}`); }
+  },
+  rmRenameOpen() { lb.rmRename = !lb.rmRename; render(); if (lb.rmRename) setTimeout(() => $('#rmRenameIn')?.focus(), 20); },
+  async rmRenameGo() {
+    const name = ($('#rmRenameIn')?.value ?? '').trim().slice(0, 12);
+    if (!name) return toast('請輸入名字');
+    const r = await call('rename', { name });
+    if (r) { lb.name = name; saveName(name); lb.rmRename = false; render(); }
+  },
+  rmKick(v) {
+    const p = snap?.players?.find((x) => x.id === v);
+    if (!p || !confirm(`確定要將「${p.name}」移出房間？`)) return;
+    call('kick', { id: v });
   },
   async copy() {
     const l = inviteLink(snap.code, snap.kind), gn = GAMES[snap.kind].name;
@@ -3833,19 +4281,61 @@ $('#app').addEventListener('click', (e) => {
   const el = e.target.closest('[data-a]');
   if (el && !el.disabled) A[el.dataset.a]?.(el.dataset.v, el);
 });
-$('#app').addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[role=button]')) { e.preventDefault(); e.target.click(); } }); // div 型按鈕（玩家卡、組合、放階段欄）要自己補鍵盤操作
+$('#app').addEventListener('keydown', (e) => {
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[role=button]')) { e.preventDefault(); e.target.click(); return; }
+  if (e.key === 'Enter') {
+    if (e.target.id === 'code') { e.preventDefault(); A.join(); }
+    else if (e.target.id === 'rmRenameIn') { e.preventDefault(); A.rmRenameGo(); }
+    else if (e.target.id === 'name') {
+      e.preventDefault();
+      if (urlRoom) A.join();
+      else A.lbSaveName();
+    }
+  }
+}); // div 型按鈕（玩家卡、組合、放階段欄）要自己補鍵盤操作 + 表單 Enter 送出
+$('#app').addEventListener('input', (e) => {
+  if (e.target.id === 'name') { lb.name = e.target.value; saveName(lb.name.trim()); }
+  else if (e.target.id === 'code') {
+    const v = e.target.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 4);
+    if (e.target.value !== v) e.target.value = v;
+    lb.code = v;
+    fetchRoomPreview(v, false);
+  } else if (e.target.id === 'turn') {
+    const n = Math.round(Number(e.target.value));
+    if (n >= 10 && n <= 600) lb.turn = n;
+  }
+});
 $('#app').addEventListener('focusout', (e) => { if (e.target.matches?.('select') && snap) render(); }); // 補上選單開著時被略過的重繪
 $('#app').addEventListener('change', (e) => {
-  if (e.target.dataset.r !== undefined) { // 建房頁的規則勾選：全勾了按鈕顯示「全不選」
-    const boxes = [...document.querySelectorAll('[data-r]')], all = boxes.every((b) => b.checked), btn = $('[data-a="allRules"]');
-    if (btn) { btn.textContent = all ? '全不選' : '全選'; btn.setAttribute('aria-pressed', all); }
+  if (e.target.id === 'target') { lb.target = +e.target.value; render(); return; }
+  if (e.target.id === 'rounds') { lb.rounds = +e.target.value; render(); return; }
+  if (e.target.id === 'pirateKick') { lb.pirateKick = e.target.checked; render(); return; }
+  if (e.target.id === 'maSched') { lb.maSched = e.target.value; render(); return; }
+  if (e.target.id === 'maDouble3p') { lb.maDouble3p = e.target.checked; render(); return; }
+  if (e.target.id === 'lbPub') { lb.pub = e.target.checked; render(); return; }
+  if (e.target.id === 'turn') {
+    const n = Math.min(600, Math.max(10, Math.round(Number(e.target.value) || 60)));
+    lb.turn = n; render(); return;
+  }
+  if (e.target.dataset.r !== undefined) { // 建房頁的規則勾選
+    lb.p10Rules[e.target.dataset.r] = e.target.checked;
+    render();
+    return;
+  }
+  if (e.target.dataset.rmr !== undefined) { // 等待室 Phase 10 規則勾選
+    call('settings', { rules: { [e.target.dataset.rmr]: e.target.checked } });
     return;
   }
   const k = e.target.dataset.c;
   if (k) e.target.blur(); // 選完就放開焦點，不然「焦點在 select 時略過重繪」會讓房主一直看不到新加入的玩家
   if (k) call('settings', { [k]: e.target.type === 'checkbox' ? e.target.checked : (k === 'target' || k === 'rounds' ? +e.target.value : e.target.value) });
 });
-if (sess) connect(); else render();
+if (sess) connect();
+else {
+  render();
+  if (urlRoom) fetchRoomPreview(urlRoom, true);
+  else fetchRooms(true);
+}
 </script>
 </body>
 </html>

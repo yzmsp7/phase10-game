@@ -22,10 +22,39 @@ const MA_BOT_NAMES = ['閃電豹(電腦)', '火箭龜(電腦)', '香蕉俠(電�
 const rooms = new Map();
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
 
-function newRoom(kind, turn, extra) {
+function defaultExtra(kind, b = {}) {
+  if (kind === 'phase10') {
+    const target = b.target ?? 10;
+    if (!Number.isInteger(target) || target < 1 || target > 10) G.err('目標階段要在 1–10 之間');
+    if (b.rules != null && (typeof b.rules !== 'object' || Array.isArray(b.rules))) G.err('規則格式不對');
+    return { target, rules: Object.fromEntries(RULES.map((k) => [k, b.rules?.[k] === true])) };
+  }
+  if (kind === 'cats') {
+    const rounds = b.rounds ?? C.DEFAULT_ROUNDS;
+    if (!Number.isInteger(rounds) || rounds < 1 || rounds > 10) G.err('遊戲輪數要在 1–10 之間');
+    return { rounds };
+  }
+  if (kind === 'manila') return { pirateKick: b.pirateKick === true };
+  if (kind === 'magical') {
+    const schedule = b.schedule ?? 'std';
+    if (!Object.hasOwn(MA.SCHEDULES, schedule)) G.err('無效的賽程組合');
+    return { schedule, double3p: b.double3p === true };
+  }
+  return {};
+}
+
+function pushBot(room) {
+  const used = new Set(room.players.map((x) => x.name));
+  const pool = room.kind === 'magical' ? MA_BOT_NAMES : BOT_NAMES;
+  let name = pool.find((n) => !used.has(n));
+  if (!name) { let k = 1; while (used.has(`電腦${k}`)) k++; name = `電腦${k}`; }
+  room.players.push({ id: randomUUID().slice(0, 8), token: null, name, bot: true });
+}
+
+function newRoom(kind, turn, extra, pub = false) {
   let code;
   do { code = Array.from({ length: 4 }, () => CODE_CHARS[randomInt(CODE_CHARS.length)]).join(''); } while (rooms.has(code));
-  const r = { code, kind, players: [], host: null, settings: { turn, ...extra }, // extra：phase10 才有 target、rules；富士流沒有額外設定
+  const r = { code, kind, pub: !!pub, players: [], host: null, settings: { turn, ...extra }, // extra：phase10 才有 target、rules；富士流沒有額外設定
      game: null, rx: [], clients: new Map(), touched: Date.now(), timer: null, botTimer: null, dl: null };
   rooms.set(code, r);
   return r;
@@ -46,11 +75,23 @@ const isBot = (room, id) => room.players.some((p) => p.id === id && p.bot);
 
 function snapshot(room, pid) {
   return {
-    code: room.code, kind: room.kind, min: K(room).min, max: K(room).max, me: pid, host: room.host, settings: room.settings,
+    code: room.code, kind: room.kind, pub: !!room.pub, min: K(room).min, max: K(room).max, me: pid, host: room.host, settings: room.settings,
     turnLeft: room.dl && Math.max(0, room.dl.at - Date.now()), // 剩餘毫秒（不傳絕對時間，免得被手機時鐘誤差影響）
     players: room.players.map((p) => ({ id: p.id, name: p.name, bot: !!p.bot, online: online(room, p.id) })),
     rx: room.rx, // 最近 5 筆表情；seq 遞增，前端只播自己沒看過的
     game: room.game ? K(room).eng.view(room.game, pid) : null,
+  };
+}
+
+function roomPreview(room) {
+  const hostName = room.players.find((p) => p.id === room.host)?.name ?? room.players[0]?.name ?? '';
+  const bots = room.players.filter((p) => p.bot).length;
+  return {
+    code: room.code, kind: room.kind, pub: !!room.pub, host: hostName,
+    count: room.players.length, humans: room.players.length - bots, bots,
+    min: K(room).min, max: K(room).max, playing: !!room.game, full: room.players.length >= K(room).max,
+    players: room.players.map((p) => ({ name: p.name, bot: !!p.bot, online: online(room, p.id) })),
+    touched: room.touched,
   };
 }
 
@@ -166,7 +207,15 @@ const actions = {
   settings(room, p, b) {
     if (room.host !== p.id) G.err('只有房主可以改設定');
     if (room.game) G.err('遊戲進行中不能改設定');
+    if (b.turn !== undefined) {
+      if (!Number.isInteger(b.turn) || b.turn < 10 || b.turn > 600) G.err('每回合秒數要在 10–600 之間');
+      room.settings.turn = b.turn;
+    }
+    if (typeof b.pub === 'boolean') room.pub = b.pub;
     if (room.kind === 'phase10' && Number.isInteger(b.target) && b.target >= 1 && b.target <= 10) room.settings.target = b.target;
+    if (room.kind === 'phase10' && b.rules && typeof b.rules === 'object' && !Array.isArray(b.rules)) {
+      for (const k of RULES) if (typeof b.rules[k] === 'boolean') room.settings.rules[k] = b.rules[k];
+    }
     if (room.kind === 'cats' && Number.isInteger(b.rounds) && b.rounds >= 1 && b.rounds <= 10) room.settings.rounds = b.rounds;
     if (room.kind === 'manila' && typeof b.pirateKick === 'boolean') room.settings.pirateKick = b.pirateKick;
     if (room.kind === 'magical') {
@@ -174,16 +223,52 @@ const actions = {
       if (typeof b.double3p === 'boolean') room.settings.double3p = b.double3p;
     }
   },
+  changeKind(room, p, b) {
+    if (room.host !== p.id) G.err('只有房主可以更換遊戲');
+    if (room.game) G.err('遊戲進行中不能更換遊戲');
+    const kind = b.kind;
+    if (!Object.hasOwn(KINDS, kind)) G.err('不支援的遊戲');
+    if (kind === room.kind) return;
+    const humans = room.players.filter((x) => !x.bot);
+    if (humans.length > KINDS[kind].max) G.err(`目前有 ${humans.length} 位玩家，超過該遊戲上限（${KINDS[kind].max} 人）`);
+    const supportsBot = kind === 'manila' || kind === 'magical';
+    if (!supportsBot) {
+      room.players = humans;
+    } else if (room.players.length > KINDS[kind].max) {
+      // 保留所有真人，必要時裁減多餘的電腦玩家
+      const bots = room.players.filter((x) => x.bot).slice(0, KINDS[kind].max - humans.length);
+      room.players = [...humans, ...bots];
+    }
+    room.kind = kind;
+    room.settings = { turn: room.settings.turn, ...defaultExtra(kind) };
+  },
+  rename(room, p, b) {
+    if (room.game) G.err('遊戲進行中不能改名字');
+    const name = String(b.name ?? '').trim().slice(0, 12);
+    if (!name) G.err('請輸入名字');
+    if (room.players.some((x) => x !== p && x.name === name)) G.err('房間裡已經有人用這個名字');
+    p.name = name;
+  },
+  kick(room, p, b) {
+    if (room.host !== p.id) G.err('只有房主可以移出玩家');
+    if (room.game) G.err('遊戲進行中不能移出玩家');
+    const idx = room.players.findIndex((x) => x.id === b.id);
+    if (idx < 0) G.err('找不到該玩家');
+    const target = room.players[idx];
+    if (target.id === p.id) G.err('不能移出自己');
+    room.players.splice(idx, 1);
+    const set = room.clients.get(target.id);
+    if (set) {
+      for (const res of set) { res.write(`data: ${JSON.stringify({ closed: '你已被房主移出房間' })}\n\n`); res.end(); }
+      room.clients.delete(target.id);
+    }
+  },
   addBot(room, p) {
     if (room.kind !== 'manila' && room.kind !== 'magical') G.err('目前只有馬尼拉與瘋狂運動會支援電腦玩家');
     if (room.host !== p.id) G.err('只有房主可以新增電腦玩家');
     if (room.game) G.err('遊戲進行中不能新增電腦玩家');
     if (room.players.length >= K(room).max) G.err(`房間已滿（最多 ${K(room).max} 人）`);
-    const used = new Set(room.players.map((x) => x.name));
-    const pool = room.kind === 'magical' ? MA_BOT_NAMES : BOT_NAMES;
-    let name = pool.find((n) => !used.has(n));
-    if (!name) { let k = 1; while (used.has(`電腦${k}`)) k++; name = `電腦${k}`; }
-    room.players.push({ id: randomUUID().slice(0, 8), token: null, name, bot: true });
+    pushBot(room);
   },
   removeBot(room, p, b) {
     if (room.kind !== 'manila' && room.kind !== 'magical') G.err('目前只有馬尼拉與瘋狂運動會支援電腦玩家');
@@ -274,6 +359,20 @@ const server = http.createServer(async (req, res) => {
       const ips = local ? Object.values(os.networkInterfaces()).flat().filter((i) => i.family === 'IPv4' && !i.internal).map((i) => i.address) : [];
       return json(res, 200, { ip: ips.find((a) => /^(192\.168|10)\./.test(a)) ?? ips[0] ?? null }); // 優先一般家用網段，避開 docker／VPN 的位址
     }
+    if (req.method === 'GET' && url.pathname === '/api/rooms') { // 公開等待中的房間列表（不含已開局或久未互動的房間）
+      const now = Date.now();
+      const list = [...rooms.values()]
+        .filter((r) => r.pub && !r.game && r.players.some((p) => !p.bot) && ([...r.clients.values()].some((s) => s.size) || now - r.touched < 900_000))
+        .sort((a, b) => b.touched - a.touched)
+        .map(roomPreview);
+      return json(res, 200, { rooms: list });
+    }
+    if (req.method === 'GET' && url.pathname.startsWith('/api/room/')) { // 邀請連結或輸入代碼時的只讀房間預覽
+      const code = url.pathname.slice('/api/room/'.length).toUpperCase();
+      const r = rooms.get(code);
+      if (!r) return json(res, 404, { exists: false, error: '找不到這個房間，可能已關閉或代碼有誤' });
+      return json(res, 200, { exists: true, ...roomPreview(r) });
+    }
     if (req.method === 'GET' && url.pathname === '/api/events') {
       const a = findAuth(url.searchParams.get('code'), url.searchParams.get('token'));
       if (!a) return json(res, 404, { error: '房間不存在或已過期' });
@@ -298,18 +397,8 @@ const server = http.createServer(async (req, res) => {
           if (!Object.hasOwn(KINDS, kind)) G.err('不支援的遊戲');
           const turn = b.turn ?? TURN_SEC;
           if (!Number.isInteger(turn) || turn < 10 || turn > 600) G.err('每回合秒數要在 10–600 之間');
-          if (b.rules != null && (typeof b.rules !== 'object' || Array.isArray(b.rules))) G.err('規則格式不對');
-          const target = b.target ?? 10;
-          if (!Number.isInteger(target) || target < 1 || target > 10) G.err('目標階段要在 1–10 之間');
-          const rounds = b.rounds ?? C.DEFAULT_ROUNDS;
-          if (kind === 'cats' && (!Number.isInteger(rounds) || rounds < 1 || rounds > 10)) G.err('遊戲輪數要在 1–10 之間');
-          const schedule = b.schedule ?? 'std';
-          if (kind === 'magical' && !Object.hasOwn(MA.SCHEDULES, schedule)) G.err('無效的賽程組合');
-          const extra = kind === 'phase10' ? { target, rules: Object.fromEntries(RULES.map((k) => [k, b.rules?.[k] === true])) }
-            : kind === 'cats' ? { rounds }
-            : kind === 'manila' ? { pirateKick: b.pirateKick === true }
-            : kind === 'magical' ? { schedule, double3p: b.double3p === true } : {};
-          room = newRoom(kind, turn, extra);
+          const extra = defaultExtra(kind, b);
+          room = newRoom(kind, turn, extra, b.pub === true);
         } else {
           room = rooms.get(String(b.code ?? '').toUpperCase());
           if (!room) G.err('找不到這個房間');
@@ -318,6 +407,10 @@ const server = http.createServer(async (req, res) => {
         }
         let p;
         try { p = addPlayer(room, b.name); } catch (e) { if (!room.players.length) rooms.delete(room.code); throw e; }
+        if (name === 'create' && Number.isInteger(b.bots) && b.bots > 0 && (room.kind === 'manila' || room.kind === 'magical')) {
+          const cnt = Math.min(b.bots, K(room).max - room.players.length);
+          for (let i = 0; i < cnt; i++) pushBot(room);
+        }
         return json(res, 200, { code: room.code, token: p.token, kind: room.kind });
       }
       const a = findAuth(b.code, b.token);
