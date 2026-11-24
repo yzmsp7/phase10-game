@@ -828,6 +828,213 @@ for (let np = 2; np <= 6; np++) {
   }
 }
 
+// --- 忍者之夜 ---
+{
+  const N = require('./ninja');
+  const ppl = (k) => Array.from({ length: k }, (_, i) => ({ id: 'p' + i, name: 'P' + i }));
+  let uid = 9000;
+  const card = (k, n = 0) => ({ k, n, id: uid++ });
+  const L = (n) => ({ s: 'lotus', n }), C = (n) => ({ s: 'crane', n }), R = { s: 'ronin', n: 0 };
+  // 直接把牌桌擺成指定局面（流派、手牌、標記），跳過輪抽，停在第一個出牌階段
+  const setup = (flags, hands = [], tokens = []) => {
+    const g = N.create(ppl(flags.length));
+    g.players.forEach((p, i) => { p.f = { ...flags[i] }; p.hand = hands[i] ?? []; p.pick = null; p.tokens = tokens[i] ?? []; });
+    g.stage = 'declare'; N.startPhase(g, 0); N.settle(g);
+    return g;
+  };
+  const press = (g, who = {}) => { for (const p of g.players) if (g.stage === 'declare' && p.in && p.alive && p.decl === null) N.act(g, p.id, { type: 'declare', cards: who[p.id] ?? [] }); };
+  const toPhase = (g, ph) => { while (g.stage === 'declare' && g.phase < ph) press(g); }; // 沒人出牌地推進到第 ph 個階段
+  const play = (g, ph, id, c) => { toPhase(g, ph); N.act(g, id, { type: 'declare', cards: [c.id] }); press(g); }; // 讓 id 在第 ph 階段打出 c，其餘人不打
+  const spec = (g, id) => N.view(g, id).cur.spec;
+
+  // 牌組與發牌：33 張；4–11 人流派數正確、奇數多浪人
+  assert.equal(N.DECK.length, 33); assert.equal(new Set(N.DECK.map((c) => c.id)).size, 33);
+  assert.deepEqual(['monk', 'martyr', 'head'].map((k) => N.DECK.filter((c) => c.k === k).length), [1, 1, 1]);
+  for (let np = 4; np <= 11; np++) {
+    const g = N.create(ppl(np)), fs = g.players.map((p) => p.f);
+    assert.equal(fs.filter((f) => f.s === 'ronin').length, np % 2);
+    assert.equal(fs.filter((f) => f.s === 'lotus').length, np >> 1); assert.equal(fs.filter((f) => f.s === 'crane').length, np >> 1);
+    assert.equal(new Set(g.players.flatMap((p) => p.hand.map((c) => c.id))).size, np * 3, '發出去的牌不重複');
+  }
+  // 輪抽：選 1、其餘傳給下一位；第二輪沒選的進棄牌堆；最後每人 2 張
+  {
+    const g = N.create(ppl(4)), first = g.players.map((p) => p.hand.map((c) => c.id));
+    for (const p of g.players) N.act(g, p.id, { type: 'pick', card: p.hand[0].id });
+    g.players.forEach((p, i) => assert.deepEqual(p.hand.map((c) => c.id).sort(), first[(i + 3) % 4].slice(1).sort(), '其餘兩張傳給下一位'));
+    assert.throws(() => N.act(g, 'p0', { type: 'pick', card: -1 }), /沒有這張牌/);
+    for (const p of g.players) N.act(g, p.id, { type: 'pick', card: p.hand[0].id });
+    assert.ok(g.players.every((p) => p.hand.length === 2) && g.stage === 'declare');
+    assert.equal(g.disc.length, 4, '第二輪沒選的 4 張進棄牌堆');
+  }
+  { // 上忍：先看流派再決定殺不殺；看了誰只有本人知道
+    const g = setup([L(1), C(1), L(2), C(2)], [[], [], [], []]), j = card('jonin', 3);
+    g.players[0].hand = [j]; play(g, 4, 'p0', j);
+    assert.deepEqual(spec(g, 'p0').ids, ['p1', 'p2', 'p3'], '只能選活著的其他人');
+    N.act(g, 'p0', { type: 'exec', targets: ['p3'] });
+    const v0 = N.view(g, 'p0').cur, v1 = N.view(g, 'p1').cur;
+    assert.deepEqual(v0.peek.flags, [{ id: 'p3', f: { s: 'crane', n: 2 } }]);
+    assert.equal(v1.peek, null); assert.equal(v1.spec, null); assert.equal(v1.then, 'kill', '旁人只知道在等上忍決定');
+    assert.ok(!g.log.some((l) => l.includes('P3') && l.includes('發動')), '紀錄不洩漏對象');
+    assert.throws(() => N.act(g, 'p1', { type: 'then', yes: true }), /現在不用決定/);
+    N.act(g, 'p0', { type: 'then', yes: false });
+    assert.ok(g.players.every((p) => p.alive), '選擇不殺');
+  }
+  { // 盲眼刺客 + 還施僧：被殺的人一律要被問（就算沒反制，才不洩漏）；揭示還施僧反殺
+    const g = setup([L(1), C(1), L(2), C(2)], [[], [], [], []]), a = card('assassin', 1);
+    g.players[0].hand = [a]; g.players[1].hand = [card('monk')];
+    play(g, 3, 'p0', a); N.act(g, 'p0', { type: 'exec', targets: ['p1'] });
+    assert.equal(g.stage, 'react'); assert.equal(g.players[1].alive, false);
+    assert.equal(N.view(g, 'p2').turn, null, '旁人不用動'); assert.equal(N.view(g, 'p1').turn, 'p1');
+    assert.equal(g.players[g.turn].id, 'p1', 'react 時 g.turn 指向被殺的人（server 倒數與代打依它）');
+    { const no = g.turnNo, c = structuredClone(g); N.autoPlay(c); assert.equal(c.stage, 'declare', '超時代打 = 不反制並繼續'); assert.equal(c.players[0].alive, true); void no; }
+    assert.throws(() => N.act(g, 'p1', { type: 'react', cards: [-1] }), /不能反制/);
+    N.act(g, 'p1', { type: 'react', cards: [g.players[1].hand[0].id] });
+    assert.deepEqual([g.players[0].alive, g.players[1].alive], [false, false], '還施僧：兇手一起倒下');
+  }
+  { // 沒有反制牌的人被殺：照樣要按一下「繼續」（時間點跟有牌時一樣）；殉道者拿標記但不反殺
+    const g = setup([L(1), C(1), L(2), C(2)], [[], [], [], []]), a = card('assassin', 1);
+    g.players[0].hand = [a]; g.players[1].hand = [card('martyr')];
+    play(g, 3, 'p0', a); N.act(g, 'p0', { type: 'exec', targets: ['p1'] });
+    N.act(g, 'p1', { type: 'react', cards: [g.players[1].hand[0].id] });
+    assert.equal(g.players[0].alive, true, '殉道者不反殺'); assert.equal(g.players[1].tokens.length, 1, '殉道者 +1 標記');
+    const h = setup([L(1), C(1), L(2), C(2)], [[], [], [], []]), b = card('assassin', 1);
+    h.players[0].hand = [b]; play(h, 3, 'p0', b); N.act(h, 'p0', { type: 'exec', targets: ['p2'] });
+    assert.equal(h.stage, 'react', '就算沒有反制牌也要問');
+    N.act(h, 'p2', { type: 'react', cards: [] }); assert.equal(h.players[2].alive, false);
+  }
+  { // 倒下的人排在後面的牌失效（反制除外）
+    const g = setup([L(1), C(1), L(2), C(2)], [[], [], [], []]), a = card('assassin', 1), j = card('jonin', 1);
+    g.players[0].hand = [a]; g.players[1].hand = [j];
+    play(g, 3, 'p0', a); N.act(g, 'p0', { type: 'exec', targets: ['p1'] }); N.act(g, 'p1', { type: 'react', cards: [] });
+    press(g); // 上忍階段：p1 已倒下，不用按
+    assert.equal(g.status, 'roundEnd'); assert.equal(g.summary.win, 'lotus', '仙鶴 1 倒下：蓮花 [1,2] 對 仙鶴 [2]');
+  }
+  { // 百變者：看兩人流派、可選自己、交換後兩人都不能再看；不換就什麼都不變
+    const g = setup([L(1), C(1), L(2), C(2)], [[card('trick', 1)], [], [], []]);
+    play(g, 2, 'p0', g.players[0].hand[0]);
+    assert.deepEqual(spec(g, 'p0').ids, ['p0', 'p1', 'p2', 'p3'], '可選自己');
+    assert.throws(() => N.act(g, 'p0', { type: 'exec', targets: ['p1'] }), /對象不合法/, '一定要 2 位');
+    N.act(g, 'p0', { type: 'exec', targets: ['p0', 'p1'] });
+    assert.deepEqual(N.view(g, 'p0').cur.peek.flags.map((x) => x.f), [{ s: 'lotus', n: 1 }, { s: 'crane', n: 1 }]);
+    N.act(g, 'p0', { type: 'then', yes: true });
+    assert.deepEqual([g.players[0].f.s, g.players[1].f.s], ['crane', 'lotus'], '交換');
+    assert.equal(N.view(g, 'p0').players[0].f, null, '被換的人自己也看不到新牌'); assert.ok(N.view(g, 'p2').players[2].f, '沒被換的人仍看得到自己的');
+    assert.ok(g.players[0].memo.some((m) => m.includes('不能再查看')));
+    const h = setup([L(1), C(1), L(2), C(2)], [[card('trick', 1)], [], [], []]);
+    play(h, 2, 'p0', h.players[0].hand[0]); N.act(h, 'p0', { type: 'exec', targets: ['p2', 'p3'] }); N.act(h, 'p0', { type: 'then', yes: false });
+    assert.deepEqual([h.players[2].f.s, h.players[3].f.s], ['lotus', 'crane'], '不換 = 不變'); assert.ok(N.view(h, 'p2').players[2].f, '沒換就還看得到');
+  }
+  { // 掘墓人：看棄牌堆 2 張、拿 1 張；可立即使用（接著發動）或放進手牌；反制／首腦直接進手牌
+    const g = setup([L(1), C(1), L(2), C(2)], [[card('trick', 2)], [], [], []]);
+    g.disc = [card('spy', 5), card('monk')];
+    play(g, 2, 'p0', g.players[0].hand[0]);
+    assert.equal(spec(g, 'p0').n, 0, '掘墓人不選人'); N.act(g, 'p0', { type: 'exec', targets: [] });
+    const pk = N.view(g, 'p0').cur.peek.cards; assert.equal(pk.length, 2);
+    assert.throws(() => N.act(g, 'p0', { type: 'then', card: -5 }), /請選一張/);
+    const spy = pk.find((c) => c.k === 'spy'); N.act(g, 'p0', { type: 'then', card: spy.id });
+    assert.equal(N.view(g, 'p0').cur.then, 'use'); assert.equal(g.disc.length, 1, '拿走的牌離開棄牌堆');
+    N.act(g, 'p0', { type: 'then', yes: true });
+    assert.equal(N.view(g, 'p0').cur.k, 'spy', '立即使用：接著發動密探'); assert.deepEqual(spec(g, 'p0').ids, ['p1', 'p2', 'p3']);
+    N.act(g, 'p0', { type: 'exec', targets: ['p1'] }); assert.ok(g.players[0].memo.some((m) => m.includes('P1 的流派牌')));
+    const h = setup([L(1), C(1), L(2), C(2)], [[card('trick', 2)], [], [], []]); h.disc = [card('assassin', 4)];
+    play(h, 2, 'p0', h.players[0].hand[0]); N.act(h, 'p0', { type: 'exec', targets: [] });
+    N.act(h, 'p0', { type: 'then', card: h.disc[0].id }); N.act(h, 'p0', { type: 'then', yes: false });
+    assert.ok(h.players[0].hand.some((c) => c.k === 'assassin'), '之後再用：進手牌');
+    const k = setup([L(1), C(1), L(2), C(2)], [[card('trick', 2)], [], [], []]); k.disc = [card('martyr')];
+    play(k, 2, 'p0', k.players[0].hand[0]); N.act(k, 'p0', { type: 'exec', targets: [] }); N.act(k, 'p0', { type: 'then', card: k.disc[0].id });
+    assert.ok(k.players[0].hand.some((c) => c.k === 'martyr') && k.phase >= 3, '反制牌直接進手牌、流程繼續');
+  }
+  { // 搗蛋鬼：看一人、可揭示（公開，且跟著牌走）
+    const g = setup([L(1), C(1), L(2), C(2)], [[card('trick', 3)], [], [], []]);
+    play(g, 2, 'p0', g.players[0].hand[0]); assert.deepEqual(spec(g, 'p0').ids, ['p1', 'p2', 'p3'], '不能選自己');
+    N.act(g, 'p0', { type: 'exec', targets: ['p1'] }); assert.equal(N.view(g, 'p2').players[1].f, null, '還沒揭示');
+    N.act(g, 'p0', { type: 'then', yes: true });
+    assert.deepEqual(N.view(g, 'p2').players[1].f, { s: 'crane', n: 1, open: true }, '揭示後大家看得到');
+  }
+  { // 靈魂商販：看標記可指定換哪個；看流派牌則盲換；有一方沒標記就不能換
+    const mk = () => setup([L(1), C(1), L(2), C(2)], [[card('trick', 4)], [], [], []], [[2], [3, 4], [], []]);
+    let g = mk(); play(g, 2, 'p0', g.players[0].hand[0]);
+    assert.throws(() => N.act(g, 'p0', { type: 'exec', targets: ['p1'] }), /請選擇要看/, '要先選看標記或流派');
+    N.act(g, 'p0', { type: 'exec', targets: ['p1'], view: 'tokens' });
+    assert.deepEqual(N.view(g, 'p0').cur.peek, { view: 'tokens', tokens: [3, 4] });
+    assert.throws(() => N.act(g, 'p0', { type: 'then', yes: true, mine: 0 }), /請選擇要交換/, '看標記時要指定對方的');
+    N.act(g, 'p0', { type: 'then', yes: true, mine: 0, theirs: 1 });
+    assert.deepEqual([g.players[0].tokens, g.players[1].tokens], [[4], [3, 2]], '指定交換');
+    g = mk(); play(g, 2, 'p0', g.players[0].hand[0]); N.act(g, 'p0', { type: 'exec', targets: ['p1'], view: 'flag' });
+    assert.equal(N.view(g, 'p0').cur.peek.view, 'flag'); N.act(g, 'p0', { type: 'then', yes: true, mine: 0 });
+    assert.equal(g.players[0].tokens.length, 1); assert.ok([3, 4].includes(g.players[0].tokens[0]), '盲換：換到對方其中一個');
+    g = setup([L(1), C(1), L(2), C(2)], [[card('trick', 4)], [], [], []], [[], [3], [], []]);
+    play(g, 2, 'p0', g.players[0].hand[0]); N.act(g, 'p0', { type: 'exec', targets: ['p1'], view: 'tokens' });
+    assert.equal(N.view(g, 'p0').cur, null, '我沒標記 → 沒得換，直接結束'); // 已進下個階段
+  }
+  { // 竊賊：揭示自己；只能從標記比我多的人偷；可以不偷
+    const mk = () => setup([L(1), C(1), L(2), C(2)], [[card('trick', 5)], [], [], []], [[2], [3, 4], [5], [2]]);
+    let g = mk(); play(g, 2, 'p0', g.players[0].hand[0]);
+    assert.deepEqual(spec(g, 'p0').ids, ['p1'], '只有標記比我多的人'); assert.equal(spec(g, 'p0').min, 0, '可以不偷');
+    assert.throws(() => N.act(g, 'p0', { type: 'exec', targets: ['p2'] }), /對象不合法/);
+    N.act(g, 'p0', { type: 'exec', targets: ['p1'] });
+    assert.equal(g.players[0].tokens.length, 2); assert.equal(g.players[1].tokens.length, 1, '偷了一個');
+    assert.deepEqual(N.view(g, 'p2').players[0].f, { s: 'lotus', n: 1, open: true }, '竊賊揭示自己的流派牌');
+    g = mk(); play(g, 2, 'p0', g.players[0].hand[0]); N.act(g, 'p0', { type: 'exec', targets: [] });
+    assert.equal(g.players[0].tokens.length, 1); assert.equal(N.view(g, 'p2').players[0].f.open, true, '不偷也要揭示');
+    g = setup([L(1), C(1), L(2), C(2)], [[card('trick', 5)], [], [], []], [[9], [1], [], []]); play(g, 2, 'p0', g.players[0].hand[0]);
+    assert.deepEqual(spec(g, 'p0'), { n: 1, min: 0, ids: [] }, '沒有任何人標記比我多 → 沒人可偷，但牌仍有效（還是能揭示自己）');
+    N.act(g, 'p0', { type: 'exec', targets: [] }); assert.equal(N.view(g, 'p2').players[0].f.open, true); assert.equal(g.phase, 3);
+    // 對照：必須選人的牌（搗蛋鬼）遇到沒有合法對象時才會失效
+    const z = setup([L(1), C(1), L(2), C(2)], [[card('trick', 6)], [], [], []]); z.players.forEach((p, i) => { if (i) { p.alive = false; p.decl = []; } }); // 倒下的人不用按（跟 startPhase 設的一致）
+    N.settle(z); toPhase(z, 2); N.act(z, 'p0', { type: 'declare', cards: [z.players[0].hand[0].id] });
+    assert.ok(z.log.some((l) => l.includes('沒有可選對象')), '裁判在場上沒有活人可殺 → 失效');
+  }
+  { // 裁判：揭示自己、擊殺一人、不給反制機會
+    const g = setup([L(1), C(1), L(2), C(2)], [[card('trick', 6)], [card('monk')], [], []]);
+    play(g, 2, 'p0', g.players[0].hand[0]); N.act(g, 'p0', { type: 'exec', targets: ['p1'] });
+    assert.equal(g.stage, 'declare', '沒有 react 階段'); assert.equal(g.players[1].alive, false); assert.equal(g.players[0].alive, true, '還施僧無效');
+    assert.equal(N.view(g, 'p2').players[0].f.open, true, '裁判揭示自己的流派牌');
+  }
+  { // 勝負：首腦、逐位比較、平手、浪人
+    const rv = (flags, hands) => { const g = setup(flags, hands); while (g.status === 'play') press(g); return g; };
+    assert.equal(rv([L(1), C(1), L(2), C(2)], [[], [], [], []]).summary.win, 'tie', '兩派完全相同 → 平手');
+    let g = rv([L(2), C(1), L(3), C(2), L(1)], [[], [], [], [], []]);
+    assert.equal(g.summary.win, 'lotus', '蓮花 [1,2,3] 對 仙鶴 [1,2]：1=1、2=2，仙鶴沒人了 → 蓮花勝');
+    g = rv([L(1), C(1), L(2), C(2)], [[], [], [], [card('head')]]);
+    assert.equal(g.summary.win, 'crane', '首腦存活 → 該陣營直接贏（雖然蓮花數字較小）');
+    g = rv([L(1), C(1), R, L(2), C(2)], [[], [], [card('head')], [], []]);
+    assert.equal(g.summary.win, 'ronin', '浪人持有首腦 → 沒有流派獲勝，只有他'); assert.deepEqual(g.summary.rows.filter((r) => r.won).map((r) => r.id), ['p2']);
+    g = rv([L(1), C(1), R, L(2), C(2)], [[], [], [], [], []]);
+    assert.ok(g.summary.rows.find((r) => r.id === 'p2').won, '浪人活著也能抽標記'); assert.ok(g.players.every((p) => p.tokens.every((t) => t >= 2 && t <= 4)), '榮譽標記 2–4 分');
+  }
+  { // 隱藏資訊：別人的流派牌、手牌、情報、標記內容都不在 view 裡
+    const g = N.create(ppl(5)); g.players[0].memo.push('秘密'); g.players[0].tokens = [3];
+    const v = N.view(g, 'p1');
+    assert.ok(v.players.filter((p) => p.id !== 'p1').every((p) => p.f === null), '流派牌隱藏');
+    assert.deepEqual(v.memo, []); assert.ok(!JSON.stringify(v).includes('秘密'));
+    assert.ok(v.players.every((p) => !('hand' in p) && typeof p.tokens === 'number'), '別人只看得到標記「個數」');
+    assert.deepEqual(N.view(g, 'p0').myTokens, [3]);
+  }
+  // 整局模擬：4–11 人、必定結束、有人達 10 分；中途離開不卡死；每個新機制都被走過
+  for (let np = 4; np <= 11; np++) for (let t = 0; t < 8; t++) {
+    const g = N.create(ppl(np)); let steps = 0;
+    const bye = np > 4 ? randomInt(np) : -1;
+    while (g.status !== 'over') {
+      assert.ok(++steps < 4000, `忍者之夜不應卡死（${np} 人）`);
+      if (steps === 40 && bye >= 0) N.leave(g, 'p' + bye);
+      if (g.status === 'roundEnd') { for (const p of g.players) if (p.in) N.act(g, p.id, { type: 'next' }); continue; }
+      N.autoPlay(g);
+    }
+    assert.ok(g.winners.length >= 1);
+    assert.ok(Math.max(...g.players.filter((p) => p.in).map((p) => p.tokens.reduce((a, b) => a + b, 0))) >= 10);
+  }
+  { // 離開：離開的人不擋住等待；被殺等反制時離開不會卡住
+    const g = N.create(ppl(4));
+    assert.equal(N.leave(g, 'p0'), 3); assert.equal(N.leave(g, 'p0'), 3, '重複離開不重複扣');
+    for (const p of g.players.filter((x) => x.in)) N.act(g, p.id, { type: 'pick', card: p.hand[0].id });
+    assert.equal(g.step, 2, '離開的人不再被等待');
+    const h = setup([L(1), C(1), L(2), C(2)], [[], [], [], []]), a = card('assassin', 1);
+    h.players[0].hand = [a]; play(h, 3, 'p0', a); N.act(h, 'p0', { type: 'exec', targets: ['p1'] });
+    assert.equal(h.stage, 'react'); N.leave(h, 'p1'); assert.notEqual(h.stage, 'react', '被殺的人離開 → 不再等他反制');
+  }
+}
+
 // --- 馬尼拉（Manila）規則引擎 ---
 {
   const M = require('./manila');
@@ -1254,7 +1461,7 @@ function randomInt(n) { return require('node:crypto').randomInt(n); }
     assert.ok(fr.game.turnNo >= 2, '出牌後換人');
     assert.equal((await post('start', f)).status, 400, '已開始');
     const wl = (f2) => [...read(f2).matchAll(/^(?:const KINDS = \{| *const GAMES = \{)(.*)$/gm)].map((m) => [...m[1].matchAll(/\b(\w+): \{/g)].map((x) => x[1]).filter((k) => k !== 'eng').join());
-    assert.equal(wl('server.js')[0], 'phase10,fuji,cats,manila,magical'); assert.equal(wl('index.html')[0], 'phase10,fuji,cats,manila,magical', '伺服器與前端的遊戲鍵名要一致');
+    assert.equal(wl('server.js')[0], 'phase10,fuji,cats,manila,magical,ninja'); assert.equal(wl('index.html')[0], 'phase10,fuji,cats,manila,magical,ninja', '伺服器與前端的遊戲鍵名要一致');
   }
   { // 貓貓食堂：人數 3–6、輪數預設 3 且可自訂（1–10）、房主可在等待室修改輪數、同時蓋牌同步與隱藏
     for (const bad of [0, 11, 2.5, '3']) assert.equal((await post('create', { name: 'c', kind: 'cats', rounds: bad })).status, 400, `輪數 ${bad} 不合法`);
@@ -1285,6 +1492,34 @@ function randomInt(n) { return require('node:crypto').randomInt(n); }
     assert.equal(cr.game.trick, 2, '全員蓋牌後翻牌進第 2 手');
     assert.ok(cr.game.last && cr.game.last.picks.length === 6);
     void c2;
+  }
+  { // 忍者之夜：人數 4–11、不吃其他遊戲的設定、開局後別人的流派牌與手牌不外洩、輪抽能走完
+    const nj = (await post('create', { name: 'N0', kind: 'ninja', rounds: 9, target: 2 })).json, nr = server.rooms.get(nj.code);
+    assert.equal(nj.kind, 'ninja'); assert.deepEqual(Object.keys(nr.settings), ['turn'], '忍者之夜只有回合秒數');
+    assert.deepEqual([(await sseOnce(nj)).min, (await sseOnce(nj)).max], [4, 11]);
+    const ns = [nj];
+    for (let i = 1; i < 3; i++) ns.push((await post('join', { code: nj.code, name: 'N' + i })).json);
+    assert.equal((await post('start', nj)).status, 400, '忍者之夜 3 人不能開');
+    for (let i = 3; i < 11; i++) ns.push((await post('join', { code: nj.code, name: 'N' + i })).json);
+    assert.equal((await post('join', { code: nj.code, name: '第十二人' })).status, 400, '忍者之夜滿 11 人');
+    assert.equal((await post('start', nj)).status, 200);
+    const nv = await sseOnce(ns[1]);
+    assert.equal(nv.game.stage, 'draft'); assert.equal(nv.game.hand.length, 3);
+    assert.equal(nv.game.players.filter((p) => p.f).length, 1, '只看得到自己的流派牌');
+    const mineIds = new Set(nv.game.hand.map((c) => c.id)), othersCards = new Set(nr.game.players.filter((p) => p.id !== nv.me).flatMap((p) => p.hand.map((c) => c.id)));
+    const ids = []; JSON.stringify(nv.game, (k, v) => { if (k === 'id' && typeof v === 'number') ids.push(v); return v; }); // 快照裡出現過的所有「牌 id」（玩家 id 是字串，不會混進來）
+    assert.ok(ids.every((id) => mineIds.has(id)), '快照裡只會有自己手上的牌');
+    assert.ok(!ids.some((id) => othersCards.has(id)), '別人的手牌不在快照裡');
+    assert.equal((await post('act', { ...ns[1], action: { type: 'pick', card: nv.game.hand[0].id } })).status, 200);
+    assert.equal((await post('act', { ...ns[1], action: { type: 'hack' } })).status, 400, '未知動作');
+    // 其餘人選完 → 進入第二輪選牌 → 再選完 → 出牌階段
+    for (let step = 1; step <= 2; step++) for (const a of ns) {
+      const p = nr.players.find((x) => x.token === a.token), me = nr.game.players.find((x) => x.id === p.id);
+      if (me.pick === null) assert.equal((await post('act', { ...a, action: { type: 'pick', card: me.hand[0].id } })).status, 200);
+    }
+    assert.equal(nr.game.stage, 'declare', '兩輪輪抽後進入出牌階段');
+    assert.ok(nr.game.players.every((p) => p.hand.length === 2));
+    assert.equal((await post('back', nj)).status, 400, '遊戲沒結束不能回房間');
   }
   { // 馬尼拉：人數 3–5、海盜踢人變體預設關且可切換、起始秘密股票不外洩
     const mDef = (await post('create', { name: 'M0', kind: 'manila' })).json;

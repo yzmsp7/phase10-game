@@ -10,9 +10,10 @@ const F = require('./fuji');
 const C = require('./cats');
 const M = require('./manila');
 const MA = require('./magical');
+const NJ = require('./ninja');
 
 const TURN_SEC = 60; // 每回合預設秒數；建房時可改（10–600），手機切去 LINE 回訊息再回來要來得及，所以下限不能太短
-const KINDS = { phase10: { eng: G, min: 2, max: 6 }, fuji: { eng: F, min: 3, max: 8 }, cats: { eng: C, min: 3, max: 6 }, manila: { eng: M, min: 3, max: 5 }, magical: { eng: MA, min: 2, max: 6 } }; // 遊戲種類：規則引擎（同一組介面 create/act/leave/autoPlay/view）與人數；新增遊戲在這裡加一行
+const KINDS = { phase10: { eng: G, min: 2, max: 6 }, fuji: { eng: F, min: 3, max: 8 }, cats: { eng: C, min: 3, max: 6 }, manila: { eng: M, min: 3, max: 5 }, magical: { eng: MA, min: 2, max: 6 }, ninja: { eng: NJ, min: 4, max: 11 } }; // 遊戲種類：規則引擎（同一組介面 create/act/leave/autoPlay/view）與人數；新增遊戲在這裡加一行
 const K = (room) => KINDS[room.kind];
 const EMOJI = ['😮', '😡', '😂', '👏', '😭', '😎', '🙏', '😴']; // 白名單；index.html 有同一份，改的時候兩邊一起改
 const RULES = ['catchUp', 'first', 'rv', 'sh', 'xn', 'xc']; // 建房時可開的特殊規則（見 game.js），全部預設關 = 標準 Phase 10；index.html 有同一份鍵名，test.js 會比對
@@ -341,6 +342,6 @@ setInterval(() => {
 
 if (require.main === module) {
   const port = process.env.PORT || 3000;
-  server.listen(port, '0.0.0.0', () => console.log(`Phase 10 / 富士流 / 貓貓食堂 / 馬尼拉 / 瘋狂運動會 → http://localhost:${port}`));
+  server.listen(port, '0.0.0.0', () => console.log(`Phase 10 / 富士流 / 貓貓食堂 / 馬尼拉 / 瘋狂運動會 / 忍者之夜 →http://localhost:${port}`));
 }
 module.exports = Object.assign(server, { rooms }); // rooms 只給測試改狀態用

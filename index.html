@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Phase 10・富士流・貓貓食堂・馬尼拉・瘋狂運動會</title>
+<title>Phase 10・富士流・貓貓食堂・馬尼拉・瘋狂運動會・忍者之夜</title>
 <style>
 /* 字級只有 4 級、字重只有 400/600；間距走 4/8 格線。--mute 在 --panel2 上 4.84:1（原 #a8c7b8 只有 3.57） */
 :root{--s1:12px;--s2:16px;--s3:20px;--s4:28px;--bg:#0f3d2e;--panel:#165740;--panel2:#1d6a4f;--ink:#f6f3ea;--mute:#cfe3d8;--accent:#f6c945;--R:#d64545;--B:#3b73d4;--G:#2e9e5b;--Y:#e0b020}
@@ -618,6 +618,24 @@ body.magical-mode .slot{background:#161229}
 @media(max-width:600px){
 .ma-cell{min-height:56px}.ma-tok{width:28px;height:28px}.ma-tok.sm{width:24px;height:24px}
 }
+
+body.ninja-mode{--bg:#14121f;--panel:#201c33;--panel2:#2c2745;--ink:#f4f1fb;--mute:#cdc6e4;--accent:#ff6b81;background:radial-gradient(circle at 50% 0%,#2a2145 0%,#14121f 70%)}
+body.ninja-mode .tray{border-top-color:#3d3563;box-shadow:0 -8px 20px #0a0813cc}
+body.ninja-mode .fmeta,body.ninja-mode .fticker{border-color:#3d3563}
+body.ninja-mode .rxp{border-color:#3d3563;box-shadow:0 8px 20px #0a0813cc}
+.njc{position:relative;width:78px;min-height:104px;border-radius:10px;border:2px solid #8e84c4;background:linear-gradient(180deg,#2f2a4d,#1d1a33);color:#f4f1fb;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:6px 4px;font-weight:600;text-align:center;flex:none}
+.njc i{font-style:normal;font-size:var(--s4);line-height:1}.njc b{font-size:var(--s1);line-height:1.2}.njc small{font-size:11px;color:var(--accent)}
+.njc.spy{border-color:#5fb2ff}.njc.hermit{border-color:#7ad9a6}.njc.trick{border-color:#e0b020}.njc.assassin{border-color:#ff6b81}.njc.jonin{border-color:#c38bff}
+.njc.monk,.njc.martyr{border-color:#ff9f5a}.njc.head{border-color:#ffd84d;background:linear-gradient(180deg,#4d3d12,#2a210a)}
+.njc.sel{transform:translateY(-10px);outline:3px solid var(--accent)}.njc.dim{opacity:.4}.njc.mini{width:52px;min-height:62px;padding:3px}.njc.mini i{font-size:var(--s3)}.njc.mini b{font-size:10px}.njc.mini small{display:none}
+.njhand{display:flex;flex-wrap:wrap;gap:8px;padding:12px 0 8px}
+.njp{display:flex;align-items:center;gap:8px;min-height:44px;padding:6px 10px;border-radius:10px;background:var(--panel2);border:2px solid transparent;width:100%;text-align:left;color:var(--ink);font-weight:400}
+.njp.dead{opacity:.5}.njp.dead .nmx{text-decoration:line-through}.njp.me{border-color:#8e84c4}.njp.on{border-color:var(--accent);background:#3a2740}.njp.act{border-color:var(--accent)}
+.njp .nmx{flex:1;min-width:0;overflow-wrap:anywhere}.njp .st{font-size:var(--s1);color:var(--mute);white-space:nowrap}
+.njgrid{display:grid;gap:6px;margin-top:8px}
+.njtok{min-width:40px;height:40px;border-radius:50%;background:#3a2740;color:var(--ink);border:2px solid #8e84c4;font-weight:600;display:inline-flex;align-items:center;justify-content:center;padding:0}.njtok.sel{border-color:var(--accent);background:var(--accent);color:#2a0a10}
+.njmemo{background:#1a1730;border:1px dashed #6f65a8;border-radius:10px;padding:8px 12px;margin-top:8px;font-size:var(--s1)}.njmemo div{margin-top:4px}
+.njphase{display:flex;gap:4px;margin-top:8px}.njphase span{flex:1;text-align:center;font-size:11px;padding:4px 0;border-radius:6px;background:#1a1730;color:var(--mute);border:1px solid #3d3563}.njphase span.on{background:var(--accent);color:#2a0a10;border-color:var(--accent);font-weight:600}.njphase span.done{opacity:.5}
 </style>
 </head>
 <body>
@@ -649,7 +667,7 @@ const store = {
   set(v) { try { v ? localStorage.setItem('p10', JSON.stringify(v)) : localStorage.removeItem('p10'); } catch {} },
 };
 // 遊戲種類（鍵名跟 server.js 的 KINDS 同一份）。邀請連結帶 &game=，收到的人直接進該遊戲的加入畫面；舊連結沒帶 = Phase 10
-const GAMES = { phase10: { name: 'Phase 10', icon: '🃏', people: '2–6', sub: '湊齊 10 個階段' }, fuji: { name: '富士流', icon: '🌊', people: '3–8', sub: '順水流走，先出完' }, cats: { name: '貓貓食堂', icon: '🐱', people: '3–6', sub: '猜首領去哪吃，別吃得比老大好！' }, manila: { name: '馬尼拉', icon: '⚓', people: '3–5', sub: '走私、競標、股票與海盜的博弈' }, magical: { name: '瘋狂運動會', icon: '🏃', people: '2–6', sub: '36 位怪咖選手大亂鬥，擲骰觸發超荒謬連鎖！' } };
+const GAMES = { phase10: { name: 'Phase 10', icon: '🃏', people: '2–6', sub: '湊齊 10 個階段' }, fuji: { name: '富士流', icon: '🌊', people: '3–8', sub: '順水流走，先出完' }, cats: { name: '貓貓食堂', icon: '🐱', people: '3–6', sub: '猜首領去哪吃，別吃得比老大好！' }, manila: { name: '馬尼拉', icon: '⚓', people: '3–5', sub: '走私、競標、股票與海盜的博弈' }, magical: { name: '瘋狂運動會', icon: '🏃', people: '2–6', sub: '36 位怪咖選手大亂鬥，擲骰觸發超荒謬連鎖！' }, ninja: { name: '忍者之夜', icon: '🥷', people: '4–11', sub: '蓮花對仙鶴，找出同伴、斬殺對手' } };
 const MA_RACERS = [
   { id: 'alchemist', name: '煉金術師', en: 'Alchemist', color: '#e6b800', short: '骰出 1 或 2 可改走 4 格', desc: '主要移動骰出 1 或 2 時，可以改為移動 4 格。' },
   { id: 'baba_yaga', name: '芭芭雅嘎', en: 'Baba Yaga', color: '#4c73c4', short: '與我同格就絆倒對方', desc: '任何選手停在我所在格子，或我停在對方格子時，對方絆倒。' },
@@ -727,6 +745,24 @@ const MANILA_RULES = [
   '結算與股票：超過 13 格進港口平分貨物利潤並讓該貨物黑市漲 1 格；沒過 13 格進修船廠。隨時可抵押股票拿 12 元、花 15 元贖回。當任一貨物黑市達 30 元時遊戲結束，強制以 15 元贖回抵押股票後，現金＋股票總值最高者勝！',
 ];
 const manilaRules = () => `<ul style="margin:8px 0;padding-left:20px">${MANILA_RULES.map((t) => `<li style="margin-top:8px">${t}</li>`).join('')}</ul>`;
+const NJ_RULES = [
+  '人數 N 時取蓮花、仙鶴各 1～N/2 號流派牌；奇數人多一張浪人。每人暗抽 1 張流派牌（不能給人看）與 3 張忍者牌。',
+  '輪抽：3 張留 1 張，其餘傳給下一位；再從收到的 2 張留 1 張，剩下的丟進棄牌堆。最後每人手上 2 張。',
+  '行動階段可自由討論，但禁止展示流派牌與手牌。依序進行：密探 → 隱士 → 騙徒 → 盲眼刺客 → 上忍；每階段先決定要不要打出該類牌，再依號碼由小到大執行。',
+  '密探看一人流派；隱士看一人流派與一張隨機忍者牌；盲眼刺客擊殺一人；上忍先看一人流派，再決定要不要擊殺。倒下的人不能再發動效果（反制例外）。',
+  '騙徒 1 百變者：看 2 位玩家的流派牌，可交換（兩人不能再看新牌）。2 掘墓人：看棄牌堆 2 張牌，拿 1 張，可立即使用或之後再用。3 搗蛋鬼：看 1 位其他玩家的流派牌，可揭示。4 靈魂商販：看 1 位其他玩家的榮譽標記或流派牌，可交換 1 個榮譽標記。5 竊賊：揭示自己的流派牌，可從標記比你多的玩家那裡拿 1 個榮譽標記。6 裁判：揭示自己的流派牌並擊殺 1 位玩家（不受反制影響）。',
+  '反制：被上忍或盲眼刺客擊殺時，還施僧可揭示並反殺對方；殉道者可揭示並獲得 1 個榮譽標記。首腦：揭示階段存活，所屬流派直接獲勝（浪人持有則沒有流派獲勝）。',
+  '揭示：兩派存活者由小到大比號碼，較小者勝；相同就比下一個，沒人可比的一方輸；完全相同則存活者獲勝。勝方整派各抽 1 枚榮譽標記（2～4 分），浪人存活也能抽。',
+  '一輪結束有人累積 10 分以上，遊戲結束，分數最高者獲勝。',
+];
+const njRules = () => `<ul style="margin:8px 0;padding-left:20px">${NJ_RULES.map((t) => `<li style="margin-top:8px">${t}</li>`).join('')}</ul>`;
+const NJ_K = { spy: ['🔍', '密探'], hermit: ['🧘', '隱士'], trick: ['🃏', '騙徒'], assassin: ['🗡️', '盲眼刺客'], jonin: ['🥷', '上忍'], monk: ['🙏', '還施僧'], martyr: ['🕯️', '殉道者'], head: ['👑', '首腦'] };
+const NJ_TRICK = [null, '百變者', '掘墓人', '搗蛋鬼', '靈魂商販', '竊賊', '裁判'];
+const NJ_PH = ['spy', 'hermit', 'trick', 'assassin', 'jonin'];
+const NJ_ASK = { spy: '看誰的流派牌？', hermit: '看誰的流派牌與一張忍者牌？', assassin: '擊殺誰？', jonin: '先看誰的流派牌？' };
+const NJ_TASK = [null, '選 2 位玩家（可含自己）來看流派牌', '', '選 1 位其他玩家來看流派牌', '選 1 位其他玩家', '選 1 位標記比你多的玩家（也可以不偷）', '選 1 位要擊殺的玩家'];
+const njFl = (f) => (!f ? '？' : f.s === 'ronin' ? '🌊 浪人' : f.s === 'lotus' ? `🪷 蓮花 ${f.n}` : `🕊️ 仙鶴 ${f.n}`);
+const njCard = (c, o = {}) => { const [i, t] = NJ_K[c.k]; return `<${o.tag || 'div'} class="njc ${c.k} ${o.cls || ''}" ${o.attrs || ''}><i>${i}</i><b>${t}${c.n ? ` ${c.n}` : ''}</b>${c.k === 'trick' ? `<small>${NJ_TRICK[c.n]}</small>` : ''}</${o.tag || 'div'}>`; };
 const FUJI_RULES = [
   '每次輪到自己就打出一張牌，放在面前。',
   '輪回自己時，面前的牌如果還在，就順水流走：棄掉，不用抽牌。',
@@ -785,7 +821,8 @@ const av = (n) => `<span class="av" style="--h:${Math.abs([...n].reduce((a, c) =
 let pick = (() => { try { const k = localStorage.getItem('p10pick'); return Object.hasOwn(GAMES, k) ? k : 'phase10'; } catch { return 'phase10'; } })(); // 首頁選的遊戲，下次進來沿用
 let dl = null, sess = store.get(), snap = null, es = null, sel = new Set(), slots = {}, los = {}, seen = null, sheet = false, endFor = null, actSlot = null, byColor = false, rxOpen = false, rxSeq = null, histFor = null, drag = null, noClick = false, xs = { target: null, v: null, give: null }; // xs = 交換牌的三個選擇（對象／數字或顏色／要換出的牌）。 // drag = 正在拖的百搭（拖曳中不重繪，不然 DOM 重建會把它弄丟）；noClick = 剛拖完，吃掉隨後的 click。 histFor = 正在看誰的撿棄牌歷史（玩家 id）。 rxOpen = 表情選單開著；rxSeq = 已播到的表情編號（null = 還沒收到第一筆快照）。每次 render 會重建 DOM，UI 狀態要存在這：sheet = 底部資訊面板開著；endFor = 正在選「接前/接後」的順子；actSlot = 放階段時作用中的那一組
 let ms = { bidAmt: 1, spot: null, masterGoods: ['jade', 'silk', 'nutmeg'], masterPos: { jade: 3, silk: 3, nutmeg: 3, ginseng: 0 }, navMoves: {}, plunderShip: null, stockSheet: false, infoSheet: false, cashWarn: null, pendingBuy: null, holdOverlay: false, animFrom: null, sailAnim: null, stageKey: null };
-const resetMs = () => { ms = { bidAmt: 1, spot: null, masterGoods: ['jade', 'silk', 'nutmeg'], masterPos: { jade: 3, silk: 3, nutmeg: 3, ginseng: 0 }, navMoves: {}, plunderShip: null, stockSheet: false, infoSheet: false, cashWarn: null, pendingBuy: null, holdOverlay: false, animFrom: null, sailAnim: null, stageKey: null }; closeManilaDice(); clearManilaActs(); };
+let nj = { pick: null, decl: [], tg: [], key: null, view: 'flag', mine: null, theirs: null, dig: null }; // 忍者之夜 UI 狀態：選牌／要打出的牌／發動對象；key 變了（換階段）就清掉
+const resetMs = () => { nj = { pick: null, decl: [], tg: [], key: null, view: 'flag', mine: null, theirs: null, dig: null }; ms = { bidAmt: 1, spot: null, masterGoods: ['jade', 'silk', 'nutmeg'], masterPos: { jade: 3, silk: 3, nutmeg: 3, ginseng: 0 }, navMoves: {}, plunderShip: null, stockSheet: false, infoSheet: false, cashWarn: null, pendingBuy: null, holdOverlay: false, animFrom: null, sailAnim: null, stageKey: null }; closeManilaDice(); clearManilaActs(); };
 let ma = { draftSel: null, pickSel: [], guess: null, inspect: null, dex: false, flipOpen: false, animPos: null, movingIds: null, trailCells: null, moveBanner: null, hopIds: null, holdOverlay: false, roState: 'ready' };
 let maMoveTimers = [];
 let maMoveAfter = null;
@@ -973,7 +1010,7 @@ function qrBox(link) {
 }
 
 function lobby() {
-  const kind = urlRoom ? urlGame : pick, GM = GAMES[kind], fj = kind === 'fuji', ct = kind === 'cats', mn = kind === 'manila', mg = kind === 'magical'; // 收到邀請連結 = 直接是那個遊戲，不顯示選單
+  const kind = urlRoom ? urlGame : pick, GM = GAMES[kind], fj = kind === 'fuji', ct = kind === 'cats', mn = kind === 'manila', mg = kind === 'magical', nj = kind === 'ninja'; // 收到邀請連結 = 直接是那個遊戲，不顯示選單
   const rules = RULES.map(([k, t, d]) => `<label class="rule"><input type="checkbox" data-r="${k}"><i aria-hidden="true">✓</i><span><b>${t}</b><small>${d}</small></span></label>`).join('');
   const picker = `<div class="panel"><h2>想玩哪一個？</h2><div class="gsel">${Object.entries(GAMES).map(([k, x]) => `<button class="${k === kind ? '' : 'ghost'}" data-a="pick" data-v="${k}" aria-pressed="${k === kind}"><span class="gi">${x.icon}</span><b>${x.name}</b><small>${x.people} 人</small></button>`).join('')}</div><p class="mute" style="margin:12px 0 0">${GM.sub}</p></div>`;
   const turnFld = '<div class="fld"><label for="turn">每回合秒數</label><input id="turn" type="number" inputmode="numeric" min="10" max="600" value="60"></div>';
@@ -991,6 +1028,9 @@ function lobby() {
     ? `<div class="panel"><h2>開新房間</h2><div class="row">${turnFld}</div><p class="mute" style="margin:8px 0 0">3–5 人遊玩（最佳 4 人）；3 人局每人 4 個手下，4–5 人局每人 3 個手下。</p>
       ${pirateRule}
       <div class="how"><div><span>⚓</span>競標當船老大</div><div><span>⛵</span>派遣手下投資</div><div><span>📈</span>黑市漲至 $30 結算</div></div>${fold('howto', '完整玩法', manilaRules())}</div>`
+    : nj
+    ? `<div class="panel"><h2>開新房間</h2><div class="row">${turnFld}</div><p class="mute" style="margin:8px 0 0">4–11 人遊玩；選牌、出牌與發動效果各有時限，時間到會自動代打（隨機選牌、不出牌、放棄發動）。</p>
+      <div class="how"><div><span>🪷</span>分成蓮花與仙鶴</div><div><span>🗡️</span>找出同伴、斬殺對手</div><div><span>🏆</span>先到 10 分獲勝</div></div>${fold('howto', '完整玩法', njRules())}</div>`
     : mg
     ? `<div class="panel"><h2>開新房間</h2><div class="row">${maSchedFld}${turnFld}</div><p class="mute" style="margin:8px 0 0">2–6 人遊玩（2 人局自動啟用雙選手變體；建房後可加 AI 電腦補位）。</p>
       ${maDouble3p}
@@ -1015,7 +1055,7 @@ function lobby() {
 }
 
 function room() {
-  const s = snap, host = s.me === s.host, n = s.players.length, st = s.settings, fj = s.kind === 'fuji', ct = s.kind === 'cats', mn = s.kind === 'manila', mg = s.kind === 'magical', hasBot = mn || mg, GM = GAMES[s.kind];
+  const s = snap, host = s.me === s.host, n = s.players.length, st = s.settings, fj = s.kind === 'fuji', ct = s.kind === 'cats', mn = s.kind === 'manila', mg = s.kind === 'magical', nj = s.kind === 'ninja', hasBot = mn || mg, GM = GAMES[s.kind];
   const link = inviteLink(s.code, s.kind), need = Math.max(0, s.min - n);
   const set = host
     ? `<div class="row"><select data-c="target">${[...Array(10)].map((_, i) => `<option value="${i + 1}" ${st.target === i + 1 ? 'selected' : ''}>目標：第 ${i + 1} 階段</option>`).join('')}</select></div>`
@@ -1036,6 +1076,8 @@ function room() {
     ? `<div class="panel"><h2>規則</h2>${catSet}<p style="margin:8px 0 0">每手 ${st.turn} 秒，超時自動出最小的牌。每輪結算：第一名 +2、第二名 +1、最低分 −1。</p>${fold('rules', '完整玩法', catsRules())}</div>`
     : mn
     ? `<div class="panel"><h2>規則</h2>${manilaSet}<p style="margin:8px 0 0">每回合 ${st.turn} 秒，超時自動跳過或擲骰。起始 30 元與 2 張秘密股票，任一貨物黑市達 30 元即結束結算。</p>${fold('rules', '完整玩法', manilaRules())}</div>`
+    : nj
+    ? `<div class="panel"><h2>規則</h2><p style="margin:0">每個步驟 ${st.turn} 秒，超時自動代打。累積 10 分以上的一輪結束後，最高分者獲勝。</p>${fold('rules', '完整玩法', njRules())}</div>`
     : mg
     ? `<div class="panel"><h2>規則</h2>${maSet}<p style="margin:8px 0 0">每回合 ${st.turn} 秒，共比 4 場（金盃 3/4/5/6 分，銀徽章 1/2/3/4 分）。2 人局自動啟用雙選手變體！</p>${fold('rules', '完整玩法', magicalRules())}</div>`
     : `<div class="panel"><h2>規則</h2>${set}
@@ -1550,6 +1592,107 @@ function catsOverlay(g, s, seatIdx) {
     <div class="hd">${head}</div>${over ? '<div class="mute" style="margin-bottom:8px">🍣 享受貓貓食堂的豪華美食吧！</div>' : ''}
     ${over ? board : rows}${sm.note ? `<p class="mute">${esc(sm.note)}</p>` : ''}</div>
     <div class="row act foot">${foot}</div></div></div>`;
+}
+
+
+// --- 忍者之夜（Night of Ninga）---
+function ninja() {
+  const s = snap, g = s.game, me = s.me, mine = g.players.find((p) => p.id === me);
+  const nm = (id) => (id === me ? '你' : esc(g.players.find((p) => p.id === id)?.name ?? '?'));
+  if (g.status !== 'play') sheet = false;
+  const key = [g.round, g.stage, g.step, g.phase, g.cur?.pid, g.cur?.k, g.cur?.n, g.cur?.then, g.react?.vid].join();
+  if (nj.key !== key) nj = { pick: null, decl: [], tg: [], key, view: 'flag', mine: null, theirs: null, dig: null }; // 換了步驟，舊的選擇作廢
+  const handIds = new Set(g.hand.map((c) => c.id));
+  if (nj.pick != null && !handIds.has(nj.pick)) nj.pick = null;
+  if (g.pick != null) nj.pick = g.pick;
+  const cur = g.cur, myExec = cur?.pid === me && g.stage === 'exec', ph = g.phase;
+  const sp = myExec && !cur.then ? cur.spec : null;
+
+  const seats = g.players.map((p) => {
+    const ok = !!sp && sp.ids.includes(p.id), on = ok && nj.tg.includes(p.id);
+    const tag = p.left ? '已離開' : !p.alive ? '💀 倒下' : cur?.pid === p.id ? '⚡ 發動中' : g.stage === 'draft' ? (p.picked ? '✅ 已選' : '💭 選牌中') : '';
+    const fl = p.f && p.id !== me && p.f.open ? ` · ${njFl(p.f)}` : p.f && p.id !== me && g.status !== 'play' ? ` · ${njFl(p.f)}` : ''; // 別人的牌：伺服器只在結算後或被揭示才給
+    return `<${ok ? 'button' : 'div'} class="njp ${p.alive ? '' : 'dead'} ${p.id === me ? 'me' : ''} ${on ? 'on' : ''} ${cur?.pid === p.id ? 'act' : ''}" ${ok ? `data-a="njTarget" data-v="${p.id}" aria-pressed="${on}"` : ''}>${av(p.name)}<span class="nmx">${esc(p.name)}${p.id === me ? '（你）' : ''}${fl}</span><span class="st">${tag}${p.tokens ? ` 🏅${p.tokens}` : ''}</span></${ok ? 'button' : 'div'}>`;
+  }).join('');
+
+  const phaseBar = g.phase != null && g.stage && g.stage !== 'draft' ? `<div class="njphase">${NJ_PH.map((k, i) => `<span class="${i === ph ? 'on' : i < ph ? 'done' : ''}">${NJ_K[k][0]} ${NJ_K[k][1]}</span>`).join('')}</div>` : '';
+  const memo = g.memo.length ? `<div class="njmemo"><b>🔒 只有你知道的情報</b>${g.memo.map((m) => `<div>${esc(m)}</div>`).join('')}</div>` : '';
+  const toks = g.myTokens.length ? `<div class="njmemo"><b>🏅 你的榮譽標記</b><div class="row" style="gap:6px;margin-top:4px">${g.myTokens.map((t) => `<span class="njtok">${t}</span>`).join('')}</div></div>` : '';
+  const played = g.players.filter((p) => p.played.length).map((p) => `<div style="margin-top:6px"><small class="mute">${nm(p.id)} 已打出</small><div class="row" style="gap:4px">${p.played.map((c) => njCard(c, { cls: 'mini' })).join('')}</div></div>`).join('');
+  const peekFlags = (pk) => (pk?.flags ?? []).map((x) => `<div><b>${nm(x.id)}</b>：${njFl(x.f)}</div>`).join('');
+  const yn = (act, yes, no) => `<div class="row act"><button data-a="${act}" data-v="1">${yes}</button><button class="ghost" data-a="${act}" data-v="0">${no}</button></div>`;
+  const tokPick = (arr, key) => `<div class="row" style="gap:6px;margin-top:4px">${arr.map((t, i) => `<button class="njtok ${nj[key] === i ? 'sel' : ''}" data-a="njTok" data-v="${key}:${i}" aria-pressed="${nj[key] === i}">${t == null ? '?' : t}</button>`).join('')}</div>`;
+
+  let role = '', body = '';
+  if (!mine?.in) role = '你已離開這局';
+  else if (g.stage === 'draft') {
+    role = g.pick != null ? `✅ 已選好 · 等 ${g.players.filter((p) => p.in && !p.picked).length} 人` : g.step === 1 ? '🥷 從 3 張留 1 張，其餘傳給左手邊' : '🥷 從收到的 2 張留 1 張，另一張丟進棄牌堆';
+    body = `<div class="njhand">${g.hand.map((c) => njCard(c, { tag: 'button', cls: nj.pick === c.id ? 'sel' : '', attrs: `data-a="njPick" data-v="${c.id}" aria-pressed="${nj.pick === c.id}"` })).join('')}</div>
+      <div class="row act"><span class="w" data-why="${nj.pick == null ? '先點一張要留下的牌' : ''}"><button data-a="njPickGo" ${nj.pick == null ? 'disabled' : ''}>${g.pick != null && nj.pick === g.pick ? '改選這張' : '留下這張'}</button></span></div>`;
+  } else if (g.stage === 'declare') {
+    const k = g.phase, mineK = g.hand.filter((c) => c.k === k), done = g.turn !== me; // turn === me 代表還在等我按；其餘（已按、已倒下）都唯讀
+    role = !mine.alive ? '💀 你已倒下' : done ? '✅ 已決定 · 等其他人' : `${NJ_K[k][0]} 【${NJ_K[k][1]}】階段：要打出嗎？（同時公開）`;
+    body = `<div class="njhand">${g.hand.map((c) => njCard(c, { tag: c.k === k ? 'button' : 'div', cls: `${c.k === k ? '' : 'dim'} ${nj.decl.includes(c.id) ? 'sel' : ''}`, attrs: c.k === k && !done ? `data-a="njTog" data-v="${c.id}" aria-pressed="${nj.decl.includes(c.id)}"` : 'disabled' })).join('')}</div>
+      ${done ? '' : `<div class="row act"><button data-a="njDecl">${nj.decl.length ? `打出 ${nj.decl.length} 張` : mineK.length ? '這階段不打' : '沒有這類牌 · 繼續'}</button></div>`}`;
+  } else if (g.stage === 'react') {
+    const vic = g.react.vid === me, mons = g.hand.filter((c) => c.k === 'monk' || c.k === 'martyr');
+    role = vic ? `💀 你被 ${nm(g.react.kid)} 擊殺了！要反制嗎？` : `💀 ${nm(g.react.vid)} 被擊殺，等他決定是否反制…`;
+    if (vic) body = `<div class="njhand">${g.hand.map((c) => njCard(c, { tag: mons.includes(c) ? 'button' : 'div', cls: `${mons.includes(c) ? '' : 'dim'} ${nj.decl.includes(c.id) ? 'sel' : ''}`, attrs: mons.includes(c) ? `data-a="njTog" data-v="${c.id}" aria-pressed="${nj.decl.includes(c.id)}"` : 'disabled' })).join('')}</div>
+      <div class="row act"><button data-a="njReact">${nj.decl.length ? `揭示 ${nj.decl.length} 張反制` : mons.length ? '不反制' : '沒有反制牌 · 繼續'}</button></div>`;
+  } else if (g.stage === 'exec') {
+    const [ic, t] = NJ_K[cur.k], who = nm(cur.pid), tn = cur.k === 'trick' ? `「${NJ_TRICK[cur.n]}」` : '';
+    if (!myExec) role = `${ic} 輪到 ${who} 發動 ${t}${tn}…`;
+    else if (!cur.then) {
+      const left = sp.min - nj.tg.length, tr4 = cur.k === 'trick' && cur.n === 4;
+      role = `${ic} ${t}${tn}：${cur.k === 'trick' ? (NJ_TASK[cur.n] || '直接發動') : NJ_ASK[cur.k]}`;
+      body = `${tr4 ? `<div class="row act" style="margin-bottom:8px"><button class="${nj.view === 'flag' ? '' : 'ghost'}" data-a="njView" data-v="flag">看流派牌</button><button class="${nj.view === 'tokens' ? '' : 'ghost'}" data-a="njView" data-v="tokens">看榮譽標記</button></div>` : ''}
+        <div class="row act"><span class="w" data-why="${left > 0 ? `還要選 ${left} 位` : ''}"><button data-a="njExec" ${left > 0 ? 'disabled' : ''}>${cur.k === 'trick' && cur.n === 5 && !nj.tg.length ? '只揭示不偷' : '發動'}</button></span><button class="ghost" data-a="njSkip">放棄</button></div>`;
+    } else {
+      const pk = cur.peek, T = cur.then;
+      if (T === 'kill') { role = `🥷 你看到結果了，要擊殺嗎？`; body = `<div class="njmemo">${peekFlags(pk)}</div>${yn('njThen', '🗡️ 擊殺', '放過他')}`; }
+      else if (T === 'swap') { role = '🃏 百變者：要交換這兩張流派牌嗎？'; body = `<div class="njmemo">${peekFlags(pk)}<div class="mute">交換後，兩位玩家都不能再查看新的流派牌</div></div>${yn('njThen', '🔄 交換', '不換')}`; }
+      else if (T === 'reveal') { role = '🃏 搗蛋鬼：要揭示他的流派牌嗎？'; body = `<div class="njmemo">${peekFlags(pk)}</div>${yn('njThen', '📣 揭示給大家', '不揭示')}`; }
+      else if (T === 'trade') {
+        const t = g.players.find((p) => p.id === cur.t?.[0]);
+        role = '🃏 靈魂商販：要交換 1 個榮譽標記嗎？';
+        body = `<div class="njmemo">${pk?.view === 'tokens' ? `<div><b>對方的標記（選一個換過來）</b></div>${tokPick(pk.tokens, 'theirs')}` : peekFlags(pk)}<div style="margin-top:8px"><b>你的標記（選一個換出去）</b></div>${tokPick(g.myTokens, 'mine')}</div>
+          <div class="row act"><span class="w" data-why="${nj.mine == null ? '先選你要換出去的標記' : pk?.view === 'tokens' && nj.theirs == null ? '先選對方的哪一個標記' : ''}"><button data-a="njTrade" ${nj.mine == null || (pk?.view === 'tokens' && nj.theirs == null) ? 'disabled' : ''}>🔄 交換</button></span><button class="ghost" data-a="njThen" data-v="0">不換</button></div>${pk?.view !== 'tokens' ? '<div class="mute" style="font-size:var(--s1);margin-top:4px">你看的是流派牌，所以對方換出哪個標記由系統隨機決定</div>' : ''}`;
+        void t;
+      } else if (T === 'dig') {
+        role = '🃏 掘墓人：從棄牌堆拿 1 張';
+        body = `<div class="njhand">${pk.cards.map((c) => njCard(c, { tag: 'button', cls: nj.dig === c.id ? 'sel' : '', attrs: `data-a="njDig" data-v="${c.id}" aria-pressed="${nj.dig === c.id}"` })).join('')}</div>
+          <div class="row act"><span class="w" data-why="${nj.dig == null ? '先點一張要拿的牌' : ''}"><button data-a="njDigGo" ${nj.dig == null ? 'disabled' : ''}>拿這張</button></span></div>`;
+      } else if (T === 'use') { role = `🃏 掘墓人：要立即使用 ${NJ_K[pk.cards[0].k][1]} 嗎？`; body = `<div class="njhand">${njCard(pk.cards[0])}</div>${yn('njThen', '⚡ 立即使用', '放進手牌，之後再用')}`; }
+    }
+  }
+  const lastLog = g.log.at(-1) || '準備開始！';
+  const sheetUI = sheet && g.status === 'play' ? `<div class="overlay sheet"><div class="bd" data-a="sheet"></div><div class="modal" role="dialog" aria-label="玩法與動態">
+    <div class="row" style="justify-content:space-between"><h2 style="margin:0">🥷 忍者之夜（第 ${g.round} 輪）</h2><button class="ghost ic" data-a="sheet" aria-label="關閉">✕</button></div>
+    <h2 style="margin-top:16px">完整玩法</h2>${njRules()}<h2 style="margin-top:16px">最近動態</h2><div class="log">${g.log.map(esc).join('<br>')}</div>
+    <button class="ghost" data-a="leave" style="width:100%;margin-top:16px">離開房間</button></div></div>` : '';
+  const tray = g.status !== 'play' ? ninjaOver(g, s) : `<div class="tray"><div class="row" style="justify-content:space-between;flex-wrap:nowrap"><b style="min-width:0">${role}</b><b class="cd" aria-live="off"></b></div>${body}</div>`;
+  return `<div class="row" style="flex-wrap:nowrap"><b style="flex:1;min-width:0">🥷 忍者之夜 · ${s.code}</b><span class="fmeta">第 ${g.round} 輪 · 目標 ${g.win} 分</span>
+    <span class="rxw"><button class="ghost ic" data-a="rxMenu" aria-label="送表情" aria-expanded="${rxOpen}">😀</button>${rxOpen ? `<div class="rxp">${EMOJI.map((e) => `<button data-a="react" data-v="${e}" aria-label="${e}">${e}</button>`).join('')}</div>` : ''}</span>
+    <button class="ghost ic" data-a="sheet" aria-label="玩法、動態、離開">📋</button></div>
+    <button class="fticker" data-a="sheet" aria-label="查看玩法與動態"><span>${esc(lastLog)}</span><i aria-hidden="true">›</i></button>
+    ${phaseBar}
+    <div class="panel" style="margin-top:8px"><div class="rhd"><h2 style="margin:0">你的流派牌</h2><b>${mine?.f ? njFl(mine.f) : mine?.in ? '❓ 被換過，不能看' : ''}</b></div><small class="mute">不能給別人看！累計 🏅 ${g.myScore} 分</small>${toks}${memo}</div>
+    <div class="njgrid">${seats}</div>${played ? `<div class="panel" style="margin-top:8px"><h2>本輪已打出</h2>${played}</div>` : ''}${tray}${sheetUI}`;
+}
+
+function ninjaOver(g, s) {
+  const sm = g.summary, over = g.status === 'over', me = s.me, host = me === s.host;
+  const nm = (id) => esc(g.players.find((p) => p.id === id)?.name ?? '?');
+  const head = over ? (g.winners.includes(me) ? '<span class="trophy">🏆</span> 你是最強忍者！' : `🏆 ${g.winners.map(nm).join('、')} 獲勝！`) : `🌙 第 ${sm.round} 輪結算`;
+  const side = { lotus: '🪷 蓮花派獲勝', crane: '🕊️ 仙鶴派獲勝', ronin: '🌊 浪人獨贏', tie: '🤝 平手，存活者獲勝' }[sm.win];
+  const rows = sm.rows.map((r) => `<div class="res ${r.id === me ? 'me' : ''}"><div class="row" style="justify-content:space-between;flex-wrap:nowrap"><b>${r.won ? '🏅 ' : ''}${esc(r.name)}${r.id === me ? '（你）' : ''}${r.head ? ' 👑首腦' : ''}</b><span>${njFl(r.f)} ${r.alive ? '' : '💀'}</span></div></div>`).join('');
+  const board = over ? `<h2 style="margin-top:12px">最終分數</h2>${[...g.players].filter((p) => !p.left).sort((a, b) => b.score - a.score).map((p) => `<div class="res ${p.id === me ? 'me' : ''}"><div class="row" style="justify-content:space-between"><b>${g.winners.includes(p.id) ? '👑 ' : ''}${esc(p.name)}</b><b>${p.score} 分</b></div></div>`).join('')}` : '';
+  const ready = new Set(g.ready), act = g.players.filter((p) => p.in);
+  const foot = over
+    ? (host ? '<button data-a="back">回到房間再來一局</button><button class="ghost" data-a="leave">離開房間</button>' : `<span class="mute">等 ${nm(s.host)} 開新局…</span><button class="ghost" data-a="leave">離開房間</button>`)
+    : ready.has(me) ? `<button class="ghost" disabled>✅ 已準備（${ready.size}/${act.length}）</button>` : `<button data-a="next">下一輪（${ready.size}/${act.length} 已準備）</button>`;
+  return `<div class="overlay"><div class="modal res-m"><div class="body"><div class="hd">${head}</div>
+    <p style="margin:0 0 8px"><b>${side}</b><br><small class="mute">${esc(sm.why)}</small></p>${rows}${board}</div><div class="row act foot">${foot}</div></div></div>`;
 }
 
 // --- 馬尼拉（Manila）：A+C 羊皮紙古航海圖典藏版 ---
@@ -3384,7 +3527,8 @@ function render() {
   document.body.classList.toggle('cats-mode', !!(snap?.game && snap.kind === 'cats'));
   document.body.classList.toggle('manila-mode', !!(snap?.game && snap.kind === 'manila'));
   document.body.classList.toggle('magical-mode', !!(snap?.game && snap.kind === 'magical'));
-  $('#app').innerHTML = !sess ? lobby() : !snap ? '<p>連線中…</p>' : snap.game ? (snap.kind === 'fuji' ? fuji() : snap.kind === 'cats' ? cats() : snap.kind === 'manila' ? manila() : snap.kind === 'magical' ? magical() : game()) : room();
+  document.body.classList.toggle('ninja-mode', !!(snap?.game && snap.kind === 'ninja'));
+  $('#app').innerHTML = !sess ? lobby() : !snap ? '<p>連線中…</p>' : snap.game ? (snap.kind === 'fuji' ? fuji() : snap.kind === 'cats' ? cats() : snap.kind === 'manila' ? manila() : snap.kind === 'magical' ? magical() : snap.kind === 'ninja' ? ninja() : game()) : room();
   for (const e of document.querySelectorAll('#name,#code,#target,#rounds,#turn,#pirateKick,#maSched,#maDouble3p,[data-r]')) { const v = keep[e.id || e.dataset.r]; if (v !== undefined) e.type === 'checkbox' ? (e.checked = v) : (e.value = v); }
   const all = [...document.querySelectorAll('[data-r]')]; if (all.length && all.every((b) => b.checked)) { const b = $('[data-a="allRules"]'); if (b) b.textContent = '全不選'; }
   tick();
@@ -3446,6 +3590,25 @@ const A = {
   ccard(v) { if (snap?.game?.myPick != null) return toast('已蓋牌，點下方「收回重選」即可換牌'); sel = new Set(sel.has(+v) ? [] : [+v]); render(); }, // 貓貓食堂一次選一張蓋牌
   cpick: () => call('act', { action: { type: 'pick', card: [...sel][0] } }).then((r) => r && sel.clear()),
   cunpick: () => call('act', { action: { type: 'unpick' } }),
+  // 忍者之夜動作
+  njPick(v) { nj.pick = +v; render(); },
+  njPickGo: () => call('act', { action: { type: 'pick', card: nj.pick } }).then((r) => r && (nj.pick = null)),
+  njTog(v) { nj.decl = nj.decl.includes(+v) ? nj.decl.filter((x) => x !== +v) : [...nj.decl, +v]; render(); },
+  njDecl: () => call('act', { action: { type: 'declare', cards: nj.decl } }).then((r) => r && (nj.decl = [])),
+  njTarget(v) {
+    const n = snap.game.cur.spec.n;
+    nj.tg = nj.tg.includes(v) ? nj.tg.filter((x) => x !== v) : [...nj.tg, v].slice(-n);
+    render();
+  },
+  njView(v) { nj.view = v; render(); },
+  njExec: () => call('act', { action: { type: 'exec', targets: nj.tg, view: nj.view } }).then((r) => r && (nj.tg = [])),
+  njSkip: () => call('act', { action: { type: 'skip' } }),
+  njThen: (v) => call('act', { action: { type: 'then', yes: v === '1' } }),
+  njTok(v) { const [k, i] = v.split(':'); nj[k] = nj[k] === +i ? null : +i; render(); },
+  njTrade: () => call('act', { action: { type: 'then', yes: true, mine: nj.mine, theirs: nj.theirs } }),
+  njDig(v) { nj.dig = nj.dig === +v ? null : +v; render(); },
+  njDigGo: () => call('act', { action: { type: 'then', card: nj.dig } }),
+  njReact: () => call('act', { action: { type: 'react', cards: nj.decl } }).then((r) => r && (nj.decl = [])),
   // 馬尼拉動作
   mStockSheet() { ms.stockSheet = !ms.stockSheet; if (!ms.stockSheet) ms.pendingBuy = null; render(); },
   mInfoSheet() { ms.infoSheet = !ms.infoSheet; render(); },
