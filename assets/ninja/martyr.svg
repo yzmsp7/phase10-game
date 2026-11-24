@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 320" width="240" height="320">
+  <defs>
+    <linearGradient id="martyr_bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1d122e"/><stop offset="48%" stop-color="#3f1e2e"/><stop offset="100%" stop-color="#1a0c12"/>
+    </linearGradient>
+    <linearGradient id="martyr_vig" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#090714" stop-opacity="0.15"/>
+      <stop offset="58%" stop-color="#090714" stop-opacity="0.05"/>
+      <stop offset="86%" stop-color="#0a0816" stop-opacity="0.72"/>
+      <stop offset="100%" stop-color="#090713" stop-opacity="0.94"/>
+    </linearGradient>
+    <radialGradient id="martyr_glow" cx="50%" cy="34%" r="48%">
+      <stop offset="0%" stop-color="#ffb36b" stop-opacity="0.48"/>
+      <stop offset="60%" stop-color="#ffb36b" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#ffb36b" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="martyr_pat" width="32" height="16" patternUnits="userSpaceOnUse">
+      <path d="M0 16 A16 16 0 0 1 32 16 M-16 16 A16 16 0 0 1 16 16 M16 16 A16 16 0 0 1 48 16" fill="none" stroke="#ffb36b" stroke-opacity="0.08" stroke-width="1"/>
+      <path d="M4 16 A12 12 0 0 1 28 16 M8 16 A8 8 0 0 1 24 16" fill="none" stroke="#ffb36b" stroke-opacity="0.06" stroke-width="0.9"/>
+    </pattern>
+    <filter id="martyr_blur" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="5"/>
+    </filter>
+    <radialGradient id="mar_flame" cx="50%" cy="55%" r="48%">
+    <stop offset="0%" stop-color="#fffbe6"/><stop offset="40%" stop-color="#ffbe4f"/><stop offset="75%" stop-color="#ff5e3a" stop-opacity="0.5"/><stop offset="100%" stop-color="#ff5e3a" stop-opacity="0"/>
+  </radialGradient>
+  </defs>
+  <rect width="240" height="320" fill="url(#martyr_bg)"/>
+  <rect width="240" height="320" fill="url(#martyr_pat)"/>
+  <rect width="240" height="320" fill="url(#martyr_glow)"/>
+  
+  <!-- Floating sky lanterns -->
+  <g opacity="0.78">
+    <rect x="34" y="42" width="18" height="24" rx="5" fill="#ffb84d"/><circle cx="43" cy="56" r="14" fill="#ffb84d" opacity="0.22"/>
+    <rect x="184" y="34" width="22" height="28" rx="6" fill="#ff9e44"/><circle cx="195" cy="50" r="18" fill="#ff9e44" opacity="0.22"/>
+    <rect x="196" y="106" width="14" height="19" rx="4" fill="#ffc46b"/>
+  </g>
+  <!-- Halo behind Martyr -->
+  <circle cx="120" cy="126" r="56" fill="none" stroke="#ffbe5c" stroke-width="2" opacity="0.5"/>
+  <circle cx="120" cy="126" r="46" fill="#ff9e44" opacity="0.16"/>
+  <!-- Shrouded Noble Shinobi -->
+  <g>
+    <path d="M46 278 Q64 184 120 174 Q176 184 194 278 Z" fill="#1b1121" stroke="#ffb36b" stroke-width="1.6"/>
+    <!-- Hooded head bowed serenely -->
+    <path d="M84 146 Q84 90 120 86 Q156 90 156 146 Q152 172 120 176 Q88 172 84 146 Z" fill="#211429" stroke="#ffbe5c" stroke-width="1.5"/>
+    <path d="M102 134 Q110 139 116 134 M124 134 Q130 139 138 134" fill="none" stroke="#ffd89e" stroke-width="2" stroke-linecap="round"/>
+    <!-- Radiant Sacred Flame cradled at chest -->
+    <circle cx="120" cy="206" r="48" fill="url(#mar_flame)"/>
+    <path d="M120 166 Q142 194 134 218 Q120 232 106 218 Q98 194 120 166 Z" fill="#ff8f3a"/>
+    <path d="M120 180 Q132 198 127 214 Q120 222 113 214 Q108 198 120 180 Z" fill="#fff6cc"/>
+  </g>
+  <!-- Rising embers -->
+  <g fill="#ffd27d" opacity="0.88">
+    <circle cx="96" cy="162" r="2.2"/><circle cx="146" cy="154" r="2.5"/><circle cx="112" cy="72" r="2"/>
+    <circle cx="158" cy="88" r="1.8"/><circle cx="72" cy="116" r="2.2"/><circle cx="132" cy="48" r="1.6"/>
+  </g>
+  <rect width="240" height="320" fill="url(#martyr_vig)"/>
+  <!-- Subtle gold-leaf dust -->
+  <g fill="#f6d887" opacity="0.55">
+    <circle cx="26" cy="34" r="1.3"/><circle cx="212" cy="48" r="1.6"/><circle cx="195" cy="24" r="1"/>
+    <circle cx="44" cy="96" r="1.1"/><circle cx="218" cy="142" r="1.2"/><circle cx="18" cy="176" r="1"/>
+  </g>
+</svg>

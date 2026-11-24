@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <defs>
+    <radialGradient id="cr_bg" cx="50%" cy="45%" r="60%">
+      <stop offset="0%" stop-color="#183842"/><stop offset="100%" stop-color="#09151a"/>
+    </radialGradient>
+    <filter id="cr_gl" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="5"/>
+    </filter>
+  </defs>
+  <rect width="240" height="240" fill="url(#cr_bg)"/>
+  <circle cx="120" cy="120" r="100" fill="none" stroke="#b8e0dc" stroke-width="3" opacity="0.55"/>
+  <circle cx="120" cy="120" r="92" fill="none" stroke="#b8e0dc" stroke-width="1.2" stroke-dasharray="6 5" opacity="0.45"/>
+  
+  <!-- Cold Moon -->
+  <circle cx="154" cy="76" r="34" fill="#e6f7f5" opacity="0.88"/>
+  <!-- Lone Katana Silhouette -->
+  <line x1="66" y1="184" x2="178" y2="62" stroke="#e6f7f5" stroke-width="4" stroke-linecap="round"/>
+  <ellipse cx="90" cy="158" rx="14" ry="4" transform="rotate(-48 90 158)" fill="#f6c945"/>
+  <!-- Hokusai Great Wave -->
+  <path d="M24 176 C40 114 96 86 134 112 C110 112 94 130 108 146 C128 166 174 148 214 166 C190 200 156 212 120 212 C78 212 42 198 24 176 Z" fill="#1e5966" stroke="#c7f2ed" stroke-width="2"/>
+  <path d="M56 174 C66 138 96 124 118 134" fill="none" stroke="#c7f2ed" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Sea spray dots -->
+  <g fill="#e6f7f5">
+    <circle cx="136" cy="108" r="4"/><circle cx="146" cy="118" r="3"/><circle cx="122" cy="96" r="3"/>
+    <circle cx="106" cy="94" r="2.5"/><circle cx="152" cy="104" r="2.2"/>
+  </g>
+
+</svg>

@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <defs>
+    <radialGradient id="cc_bg" cx="50%" cy="45%" r="60%">
+      <stop offset="0%" stop-color="#153a5e"/><stop offset="100%" stop-color="#091529"/>
+    </radialGradient>
+    <filter id="cc_gl" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="5"/>
+    </filter>
+  </defs>
+  <rect width="240" height="240" fill="url(#cc_bg)"/>
+  <circle cx="120" cy="120" r="100" fill="none" stroke="#e6f4ff" stroke-width="3" opacity="0.55"/>
+  <circle cx="120" cy="120" r="92" fill="none" stroke="#e6f4ff" stroke-width="1.2" stroke-dasharray="6 5" opacity="0.45"/>
+  
+  <!-- Glowing Crescent Moon behind Crane -->
+  <circle cx="124" cy="112" r="58" fill="#d9f0ff" opacity="0.22"/>
+  <circle cx="120" cy="110" r="46" fill="#bfe3ff" opacity="0.9"/>
+  <circle cx="136" cy="100" r="38" fill="#133354"/>
+  <!-- Soaring Japanese Red-Crowned Crane -->
+  <g>
+    <!-- Upper & Lower Sweeping Wings -->
+    <path d="M112 124 C74 102 42 78 36 56 C64 68 92 84 124 110 Z" fill="#f5fbff" stroke="#5fb2ff" stroke-width="1.6"/>
+    <path d="M128 118 C164 98 194 82 206 66 C188 102 164 124 128 136 Z" fill="#e3f3ff" stroke="#5fb2ff" stroke-width="1.6"/>
+    <!-- Wingtip dark feathers -->
+    <path d="M36 56 L54 78 L66 72 Z M206 66 L184 94 L172 86 Z" fill="#102138"/>
+    <!-- Graceful Neck & Body -->
+    <path d="M98 164 C106 144 114 124 124 108 C134 92 146 84 156 84 C146 96 140 112 136 132 C132 150 118 168 98 164 Z" fill="#ffffff" stroke="#5fb2ff" stroke-width="1.5"/>
+    <!-- Dark neck stripe & red crown -->
+    <circle cx="152" cy="83" r="5" fill="#e63956"/>
+    <polygon points="156,82 174,80 158,88" fill="#f6c945"/>
+    <!-- Tail feathers -->
+    <path d="M100 162 L76 184 L96 176 L88 192 L110 168 Z" fill="#102138" stroke="#8cc8ff" stroke-width="1"/>
+  </g>
+
+</svg>

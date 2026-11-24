@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 320" width="240" height="320">
+  <defs>
+    <linearGradient id="head_bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a1407"/><stop offset="48%" stop-color="#3d2c0b"/><stop offset="100%" stop-color="#120d05"/>
+    </linearGradient>
+    <linearGradient id="head_vig" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#090714" stop-opacity="0.15"/>
+      <stop offset="58%" stop-color="#090714" stop-opacity="0.05"/>
+      <stop offset="86%" stop-color="#0a0816" stop-opacity="0.72"/>
+      <stop offset="100%" stop-color="#090713" stop-opacity="0.94"/>
+    </linearGradient>
+    <radialGradient id="head_glow" cx="50%" cy="34%" r="48%">
+      <stop offset="0%" stop-color="#ffd84d" stop-opacity="0.48"/>
+      <stop offset="60%" stop-color="#ffd84d" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#ffd84d" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="head_pat" width="32" height="16" patternUnits="userSpaceOnUse">
+      <path d="M0 16 A16 16 0 0 1 32 16 M-16 16 A16 16 0 0 1 16 16 M16 16 A16 16 0 0 1 48 16" fill="none" stroke="#ffd84d" stroke-opacity="0.08" stroke-width="1"/>
+      <path d="M4 16 A12 12 0 0 1 28 16 M8 16 A8 8 0 0 1 24 16" fill="none" stroke="#ffd84d" stroke-opacity="0.06" stroke-width="0.9"/>
+    </pattern>
+    <filter id="head_blur" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="5"/>
+    </filter>
+    <linearGradient id="hd_fan" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#fff2b2"/><stop offset="45%" stop-color="#f6c945"/><stop offset="100%" stop-color="#a87616"/>
+  </linearGradient>
+  </defs>
+  <rect width="240" height="320" fill="url(#head_bg)"/>
+  <rect width="240" height="320" fill="url(#head_pat)"/>
+  <rect width="240" height="320" fill="url(#head_glow)"/>
+  
+  <!-- Imperial Sunburst Rays -->
+  <g stroke="#ffd84d" stroke-opacity="0.16" stroke-width="6">
+    <line x1="120" y1="140" x2="120" y2="0"/><line x1="120" y1="140" x2="20" y2="10"/>
+    <line x1="120" y1="140" x2="220" y2="10"/><line x1="120" y1="140" x2="0" y2="96"/>
+    <line x1="120" y1="140" x2="240" y2="96"/>
+  </g>
+  <!-- Shadowed Feudal Warlord Head & Crown -->
+  <g>
+    <path d="M44 276 Q62 184 120 176 Q178 184 196 276 Z" fill="#140f08" stroke="#ffd84d" stroke-width="1.8"/>
+    <path d="M82 142 Q82 88 120 82 Q158 88 158 142 L152 174 L88 174 Z" fill="#120d06" stroke="#f6c945" stroke-width="1.6"/>
+    <!-- Imperial Gold Crown Ornament -->
+    <polygon points="94,96 108,74 120,90 132,74 146,96" fill="#ffd84d" stroke="#523704" stroke-width="1.5"/>
+    <circle cx="120" cy="70" r="6" fill="#ff546e" stroke="#ffd84d" stroke-width="1.6"/>
+    <!-- Piercing golden eyes peering above fan -->
+    <path d="M97 125 Q107 120 115 126 Q107 130 97 125 Z" fill="#ffe169"/>
+    <path d="M143 125 Q133 120 125 126 Q133 130 143 125 Z" fill="#ffe169"/>
+    <!-- Giant Ornate Open Golden Folding Fan (Sensu) -->
+    <path d="M120 226 L36 160 A106 106 0 0 1 204 160 Z" fill="url(#hd_fan)" stroke="#fff2b2" stroke-width="2"/>
+    <!-- Crimson sun & ink waves on fan -->
+    <circle cx="120" cy="166" r="20" fill="#c92a3e"/>
+    <g stroke="#6b4607" stroke-width="1.3" opacity="0.65">
+      <line x1="120" y1="226" x2="58" y2="146"/><line x1="120" y1="226" x2="88" y2="136"/>
+      <line x1="120" y1="226" x2="120" y2="132"/><line x1="120" y1="226" x2="152" y2="136"/>
+      <line x1="120" y1="226" x2="182" y2="146"/>
+    </g>
+    <circle cx="120" cy="226" r="6" fill="#422a04" stroke="#ffd84d" stroke-width="2"/>
+  </g>
+  <rect width="240" height="320" fill="url(#head_vig)"/>
+  <!-- Subtle gold-leaf dust -->
+  <g fill="#f6d887" opacity="0.55">
+    <circle cx="26" cy="34" r="1.3"/><circle cx="212" cy="48" r="1.6"/><circle cx="195" cy="24" r="1"/>
+    <circle cx="44" cy="96" r="1.1"/><circle cx="218" cy="142" r="1.2"/><circle cx="18" cy="176" r="1"/>
+  </g>
+</svg>

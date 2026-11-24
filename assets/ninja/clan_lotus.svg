@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <defs>
+    <radialGradient id="cl_bg" cx="50%" cy="45%" r="60%">
+      <stop offset="0%" stop-color="#4a122b"/><stop offset="100%" stop-color="#140814"/>
+    </radialGradient>
+    <filter id="cl_gl" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="5"/>
+    </filter>
+  </defs>
+  <rect width="240" height="240" fill="url(#cl_bg)"/>
+  <circle cx="120" cy="120" r="100" fill="none" stroke="#f6c945" stroke-width="3" opacity="0.55"/>
+  <circle cx="120" cy="120" r="92" fill="none" stroke="#f6c945" stroke-width="1.2" stroke-dasharray="6 5" opacity="0.45"/>
+  
+  <!-- Water ripples -->
+  <ellipse cx="120" cy="176" rx="76" ry="14" fill="none" stroke="#ff7a98" stroke-width="1.5" opacity="0.4"/>
+  <ellipse cx="120" cy="176" rx="52" ry="9" fill="none" stroke="#f6c945" stroke-width="1.2" opacity="0.5"/>
+  <circle cx="120" cy="118" r="56" fill="#ff5478" opacity="0.24" filter="url(#cl_gl)"/>
+  <!-- Outer Lotus Petals -->
+  <g stroke="#ffd887" stroke-width="1.6">
+    <path d="M120 162 C64 162 42 126 52 94 C78 104 102 126 120 162 Z" fill="#b81d45"/>
+    <path d="M120 162 C176 162 198 126 188 94 C162 104 138 126 120 162 Z" fill="#b81d45"/>
+    <path d="M120 164 C76 146 66 98 86 64 C104 88 114 122 120 164 Z" fill="#e63962"/>
+    <path d="M120 164 C164 146 174 98 154 64 C136 88 126 122 120 164 Z" fill="#e63962"/>
+    <!-- Center Tall Petal -->
+    <path d="M120 44 C146 78 148 134 120 166 C92 134 94 78 120 44 Z" fill="#ff7092"/>
+    <path d="M120 68 C134 96 134 132 120 156 C106 132 106 96 120 68 Z" fill="#ffc2d1" opacity="0.7"/>
+  </g>
+  <circle cx="120" cy="154" r="8" fill="#f6c945"/>
+
+</svg>

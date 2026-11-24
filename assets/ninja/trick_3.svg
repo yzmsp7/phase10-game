@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 320" width="240" height="320">
+  <defs>
+    <linearGradient id="t3_bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#280f33"/><stop offset="50%" stop-color="#541e4d"/><stop offset="100%" stop-color="#1c0b21"/>
+    </linearGradient>
+    <linearGradient id="t3_vig" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#090714" stop-opacity="0.15"/>
+      <stop offset="58%" stop-color="#090714" stop-opacity="0.05"/>
+      <stop offset="86%" stop-color="#0a0816" stop-opacity="0.72"/>
+      <stop offset="100%" stop-color="#090713" stop-opacity="0.94"/>
+    </linearGradient>
+    <radialGradient id="t3_glow" cx="50%" cy="34%" r="48%">
+      <stop offset="0%" stop-color="#ffae42" stop-opacity="0.48"/>
+      <stop offset="60%" stop-color="#ffae42" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#ffae42" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="t3_pat" width="32" height="16" patternUnits="userSpaceOnUse">
+      <path d="M0 16 A16 16 0 0 1 32 16 M-16 16 A16 16 0 0 1 16 16 M16 16 A16 16 0 0 1 48 16" fill="none" stroke="#ffae42" stroke-opacity="0.08" stroke-width="1"/>
+      <path d="M4 16 A12 12 0 0 1 28 16 M8 16 A8 8 0 0 1 24 16" fill="none" stroke="#ffae42" stroke-opacity="0.06" stroke-width="0.9"/>
+    </pattern>
+    <filter id="t3_blur" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="5"/>
+    </filter>
+    
+  </defs>
+  <rect width="240" height="320" fill="url(#t3_bg)"/>
+  <rect width="240" height="320" fill="url(#t3_pat)"/>
+  <rect width="240" height="320" fill="url(#t3_glow)"/>
+  
+  <!-- Explosive Smoke Bomb Clouds -->
+  <g fill="#a349a4" opacity="0.32">
+    <circle cx="54" cy="166" r="42"/><circle cx="186" cy="154" r="46"/><circle cx="120" cy="198" r="54"/>
+  </g>
+  <g fill="#ffbe55" opacity="0.18">
+    <circle cx="78" cy="146" r="30"/><circle cx="164" cy="138" r="34"/>
+  </g>
+  <!-- Mischievous Leaping Kunoichi -->
+  <g>
+    <!-- Flowing energetic scarf -->
+    <path d="M138 142 Q196 124 226 154 Q188 158 146 158 Z" fill="#ff5478"/>
+    <!-- Body in dynamic crouch/leap -->
+    <path d="M68 258 Q76 176 120 166 Q164 176 174 258 Z" fill="#1b0d24" stroke="#ffbe55" stroke-width="1.6"/>
+    <!-- Head & high ninja ponytail -->
+    <path d="M136 86 Q178 62 194 94 Q166 96 144 106 Z" fill="#170a21" stroke="#ff7aa2" stroke-width="1.4"/>
+    <circle cx="118" cy="120" r="30" fill="#1b0d24" stroke="#ffbe55" stroke-width="1.6"/>
+    <!-- Playful winking/gleaming eyes -->
+    <path d="M100 119 Q108 113 115 120" fill="none" stroke="#ffd86b" stroke-width="2.6" stroke-linecap="round"/>
+    <path d="M124 119 L136 116 L133 123 Z" fill="#ffd86b"/>
+    <!-- Smoke bomb orb in hand -->
+    <circle cx="72" cy="196" r="14" fill="#2e183d" stroke="#ffbe55" stroke-width="2"/>
+    <path d="M72 182 Q76 170 86 168" fill="none" stroke="#ffd86b" stroke-width="2"/>
+    <circle cx="88" cy="168" r="5" fill="#fff2a6"/>
+    <!-- Fluttering Glowing Paper Talismans (Ofuda) -->
+    <g fill="#fff0c4" stroke="#ff546e" stroke-width="1.6">
+      <rect x="26" y="64" width="22" height="36" rx="2" transform="rotate(-22 26 64)"/>
+      <rect x="184" y="60" width="22" height="36" rx="2" transform="rotate(18 184 60)"/>
+      <rect x="166" y="182" width="20" height="32" rx="2" transform="rotate(26 166 182)"/>
+    </g>
+    <!-- Shuriken star -->
+    <polygon points="56,126 62,136 72,142 62,148 56,158 50,148 40,142 50,136" fill="#ffd86b" stroke="#280f33" stroke-width="1.2"/>
+  </g>
+  <rect width="240" height="320" fill="url(#t3_vig)"/>
+  <!-- Subtle gold-leaf dust -->
+  <g fill="#f6d887" opacity="0.55">
+    <circle cx="26" cy="34" r="1.3"/><circle cx="212" cy="48" r="1.6"/><circle cx="195" cy="24" r="1"/>
+    <circle cx="44" cy="96" r="1.1"/><circle cx="218" cy="142" r="1.2"/><circle cx="18" cy="176" r="1"/>
+  </g>
+</svg>

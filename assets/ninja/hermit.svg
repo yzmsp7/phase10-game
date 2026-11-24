@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 320" width="240" height="320">
+  <defs>
+    <linearGradient id="hermit_bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#07221d"/><stop offset="52%" stop-color="#113f36"/><stop offset="100%" stop-color="#091815"/>
+    </linearGradient>
+    <linearGradient id="hermit_vig" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#090714" stop-opacity="0.15"/>
+      <stop offset="58%" stop-color="#090714" stop-opacity="0.05"/>
+      <stop offset="86%" stop-color="#0a0816" stop-opacity="0.72"/>
+      <stop offset="100%" stop-color="#090713" stop-opacity="0.94"/>
+    </linearGradient>
+    <radialGradient id="hermit_glow" cx="50%" cy="34%" r="48%">
+      <stop offset="0%" stop-color="#6ee0a8" stop-opacity="0.48"/>
+      <stop offset="60%" stop-color="#6ee0a8" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#6ee0a8" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="hermit_pat" width="32" height="16" patternUnits="userSpaceOnUse">
+      <path d="M0 16 A16 16 0 0 1 32 16 M-16 16 A16 16 0 0 1 16 16 M16 16 A16 16 0 0 1 48 16" fill="none" stroke="#6ee0a8" stroke-opacity="0.08" stroke-width="1"/>
+      <path d="M4 16 A12 12 0 0 1 28 16 M8 16 A8 8 0 0 1 24 16" fill="none" stroke="#6ee0a8" stroke-opacity="0.06" stroke-width="0.9"/>
+    </pattern>
+    <filter id="hermit_blur" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="5"/>
+    </filter>
+    <radialGradient id="her_orb" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#e8fff5"/><stop offset="45%" stop-color="#6ee0a8"/><stop offset="100%" stop-color="#1d8f62" stop-opacity="0"/>
+  </radialGradient>
+  </defs>
+  <rect width="240" height="320" fill="url(#hermit_bg)"/>
+  <rect width="240" height="320" fill="url(#hermit_pat)"/>
+  <rect width="240" height="320" fill="url(#hermit_glow)"/>
+  
+  <!-- Distant misty mountains -->
+  <path d="M-10 210 L54 128 L108 188 L172 108 L250 198 L250 320 L-10 320 Z" fill="#0b2b24" opacity="0.85"/>
+  <!-- Gnarled pine branch top-left -->
+  <path d="M-5 44 Q55 38 96 62 Q72 58 46 66 Q24 54 -5 60 Z" fill="#081c17"/>
+  <g fill="#195948" stroke="#6ee0a8" stroke-opacity="0.35" stroke-width="0.8">
+    <ellipse cx="32" cy="40" rx="28" ry="11"/><ellipse cx="68" cy="52" rx="24" ry="10"/><ellipse cx="94" cy="64" rx="18" ry="8"/>
+  </g>
+  <!-- Hanging stone lantern right -->
+  <g transform="translate(182, 46)">
+    <line x1="16" y1="-46" x2="16" y2="6" stroke="#4f8f7a" stroke-width="2"/>
+    <path d="M0 16 L16 4 L32 16 Z" fill="#1b3a32" stroke="#6ee0a8" stroke-width="1"/>
+    <rect x="6" y="16" width="20" height="22" rx="2" fill="#f7e49e" opacity="0.9"/>
+    <circle cx="16" cy="27" r="22" fill="#f7e49e" opacity="0.22" filter="url(#hermit_blur)"/>
+    <rect x="4" y="38" width="24" height="5" rx="2" fill="#1b3a32"/>
+  </g>
+  
+  <g fill="#236b57" opacity="0.3">
+    <path d="M-10 175 Q30 155 68 168 Q95 152 135 166 Q165 158 200 170 L250 170 L250 205 L-10 205 Z"/>
+    <path d="M-10 218 Q48 196 98 212 Q146 194 205 210 Q228 205 250 212 L250 250 L-10 250 Z"/>
+  </g>
+  <!-- Meditating Hermit with Sedge Hat (Kasa) -->
+  <g>
+    <!-- Robes seated -->
+    <path d="M46 276 Q62 184 120 176 Q178 184 194 276 Z" fill="#0e2621" stroke="#6ee0a8" stroke-width="1.6"/>
+    <path d="M78 182 L120 228 L162 182" fill="none" stroke="#3aa87c" stroke-width="2.6"/>
+    <!-- Prayer beads necklace -->
+    <g fill="#d8a84e" stroke="#0c1c18" stroke-width="0.8">
+      <circle cx="94" cy="186" r="4.5"/><circle cx="102" cy="196" r="4.8"/><circle cx="111" cy="203" r="5"/>
+      <circle cx="120" cy="206" r="5.2"/><circle cx="129" cy="203" r="5"/><circle cx="138" cy="196" r="4.8"/><circle cx="146" cy="186" r="4.5"/>
+    </g>
+    <!-- Shadowed face beneath hat -->
+    <ellipse cx="120" cy="150" rx="24" ry="26" fill="#0a1916" stroke="#4ec995" stroke-width="1.2"/>
+    <!-- Calm glowing jade eyes -->
+    <path d="M106 150 Q112 146 117 150" fill="none" stroke="#8cffca" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M123 150 Q128 146 134 150" fill="none" stroke="#8cffca" stroke-width="2.4" stroke-linecap="round"/>
+    <!-- Wide conical straw hat (Kasa) -->
+    <path d="M42 138 Q120 82 198 138 Q120 154 42 138 Z" fill="#2c3e32" stroke="#d8b86b" stroke-width="2"/>
+    <path d="M120 96 L64 138 M120 96 L88 142 M120 96 L120 144 M120 96 L152 142 M120 96 L176 138" stroke="#d8b86b" stroke-opacity="0.45" stroke-width="1"/>
+    <!-- Floating glowing Jade Mystic Orb -->
+    <circle cx="120" cy="232" r="32" fill="url(#her_orb)"/>
+    <circle cx="120" cy="232" r="12" fill="#e6fff4" opacity="0.95"/>
+    <circle cx="120" cy="232" r="19" fill="none" stroke="#8cffca" stroke-width="1.2" stroke-dasharray="4 4"/>
+  </g>
+  <rect width="240" height="320" fill="url(#hermit_vig)"/>
+  <!-- Subtle gold-leaf dust -->
+  <g fill="#f6d887" opacity="0.55">
+    <circle cx="26" cy="34" r="1.3"/><circle cx="212" cy="48" r="1.6"/><circle cx="195" cy="24" r="1"/>
+    <circle cx="44" cy="96" r="1.1"/><circle cx="218" cy="142" r="1.2"/><circle cx="18" cy="176" r="1"/>
+  </g>
+</svg>

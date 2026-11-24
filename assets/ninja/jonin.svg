@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 320" width="240" height="320">
+  <defs>
+    <linearGradient id="jonin_bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#180d33"/><stop offset="50%" stop-color="#321b5e"/><stop offset="100%" stop-color="#120a24"/>
+    </linearGradient>
+    <linearGradient id="jonin_vig" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#090714" stop-opacity="0.15"/>
+      <stop offset="58%" stop-color="#090714" stop-opacity="0.05"/>
+      <stop offset="86%" stop-color="#0a0816" stop-opacity="0.72"/>
+      <stop offset="100%" stop-color="#090713" stop-opacity="0.94"/>
+    </linearGradient>
+    <radialGradient id="jonin_glow" cx="50%" cy="34%" r="48%">
+      <stop offset="0%" stop-color="#c38bff" stop-opacity="0.48"/>
+      <stop offset="60%" stop-color="#c38bff" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#c38bff" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="jonin_pat" width="32" height="16" patternUnits="userSpaceOnUse">
+      <path d="M0 16 A16 16 0 0 1 32 16 M-16 16 A16 16 0 0 1 16 16 M16 16 A16 16 0 0 1 48 16" fill="none" stroke="#c38bff" stroke-opacity="0.08" stroke-width="1"/>
+      <path d="M4 16 A12 12 0 0 1 28 16 M8 16 A8 8 0 0 1 24 16" fill="none" stroke="#c38bff" stroke-opacity="0.06" stroke-width="0.9"/>
+    </pattern>
+    <filter id="jonin_blur" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="5"/>
+    </filter>
+    <radialGradient id="jon_moon" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#fff4d6"/><stop offset="65%" stop-color="#f6c945"/><stop offset="100%" stop-color="#c38bff" stop-opacity="0"/>
+  </radialGradient>
+  </defs>
+  <rect width="240" height="320" fill="url(#jonin_bg)"/>
+  <rect width="240" height="320" fill="url(#jonin_pat)"/>
+  <rect width="240" height="320" fill="url(#jonin_glow)"/>
+  
+  <!-- Enormous Full Golden-Violet Moon -->
+  <circle cx="120" cy="108" r="82" fill="url(#jon_moon)" opacity="0.34"/>
+  <circle cx="120" cy="108" r="58" fill="#f7e2a6" opacity="0.92"/>
+  <path d="M62 122 Q120 106 184 124" fill="none" stroke="#321b5e" stroke-width="6" opacity="0.35"/>
+  <!-- Japanese Castle Curved Roof Eave -->
+  <path d="M-10 246 Q120 222 250 246 L250 320 L-10 320 Z" fill="#0e081c" stroke="#c38bff" stroke-width="1.6"/>
+  <path d="M8 236 Q120 214 232 236" fill="none" stroke="#f6c945" stroke-width="2" opacity="0.75"/>
+  <!-- Flowing Grandmaster Cape -->
+  <path d="M66 156 Q22 188 18 258 L82 252 Z" fill="#241145" stroke="#c38bff" stroke-width="1.2"/>
+  <path d="M174 156 Q218 184 224 252 L158 252 Z" fill="#241145" stroke="#c38bff" stroke-width="1.2"/>
+  <!-- Ornate Armored Jonin -->
+  <g>
+    <!-- Shoulder armor (Sode) -->
+    <path d="M52 178 Q72 154 96 164 L88 214 Q62 216 48 198 Z" fill="#1c0e38" stroke="#f6c945" stroke-width="1.8"/>
+    <path d="M188 178 Q168 154 144 164 L152 214 Q178 216 192 198 Z" fill="#1c0e38" stroke="#f6c945" stroke-width="1.8"/>
+    <!-- Torso armor -->
+    <path d="M78 164 L162 164 L172 258 L68 258 Z" fill="#130926" stroke="#c38bff" stroke-width="1.6"/>
+    <path d="M86 184 H154 M84 202 H156 M82 220 H158" stroke="#f6c945" stroke-width="2" opacity="0.7"/>
+    <!-- Kabuto-hooded Head -->
+    <path d="M82 140 Q82 88 120 84 Q158 88 158 140 Q154 168 120 172 Q86 168 82 140 Z" fill="#140929" stroke="#f6c945" stroke-width="1.6"/>
+    <!-- Golden Crescent Helmet Crest (Maedate) -->
+    <path d="M82 96 Q120 116 158 96 Q132 106 120 80 Q108 106 82 96 Z" fill="#f6c945" stroke="#fff3c4" stroke-width="1"/>
+    <!-- Glowing violet-gold eyes -->
+    <path d="M98 128 L114 132 L100 135 Z" fill="#ffd86b"/>
+    <path d="M142 128 L126 132 L140 135 Z" fill="#ffd86b"/>
+    <!-- Crossed katana hilts behind shoulders -->
+    <line x1="58" y1="112" x2="86" y2="152" stroke="#f6c945" stroke-width="5" stroke-linecap="round"/>
+    <line x1="182" y1="112" x2="154" y2="152" stroke="#f6c945" stroke-width="5" stroke-linecap="round"/>
+  </g>
+  <rect width="240" height="320" fill="url(#jonin_vig)"/>
+  <!-- Subtle gold-leaf dust -->
+  <g fill="#f6d887" opacity="0.55">
+    <circle cx="26" cy="34" r="1.3"/><circle cx="212" cy="48" r="1.6"/><circle cx="195" cy="24" r="1"/>
+    <circle cx="44" cy="96" r="1.1"/><circle cx="218" cy="142" r="1.2"/><circle cx="18" cy="176" r="1"/>
+  </g>
+</svg>

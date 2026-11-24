@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 320" width="240" height="320">
+  <defs>
+    <linearGradient id="t2_bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0a1f24"/><stop offset="55%" stop-color="#16393d"/><stop offset="100%" stop-color="#091417"/>
+    </linearGradient>
+    <linearGradient id="t2_vig" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#090714" stop-opacity="0.15"/>
+      <stop offset="58%" stop-color="#090714" stop-opacity="0.05"/>
+      <stop offset="86%" stop-color="#0a0816" stop-opacity="0.72"/>
+      <stop offset="100%" stop-color="#090713" stop-opacity="0.94"/>
+    </linearGradient>
+    <radialGradient id="t2_glow" cx="50%" cy="34%" r="48%">
+      <stop offset="0%" stop-color="#f0c040" stop-opacity="0.48"/>
+      <stop offset="60%" stop-color="#f0c040" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#f0c040" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="t2_pat" width="32" height="16" patternUnits="userSpaceOnUse">
+      <path d="M0 16 A16 16 0 0 1 32 16 M-16 16 A16 16 0 0 1 16 16 M16 16 A16 16 0 0 1 48 16" fill="none" stroke="#f0c040" stroke-opacity="0.08" stroke-width="1"/>
+      <path d="M4 16 A12 12 0 0 1 28 16 M8 16 A8 8 0 0 1 24 16" fill="none" stroke="#f0c040" stroke-opacity="0.06" stroke-width="0.9"/>
+    </pattern>
+    <filter id="t2_blur" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="5"/>
+    </filter>
+    
+  </defs>
+  <rect width="240" height="320" fill="url(#t2_bg)"/>
+  <rect width="240" height="320" fill="url(#t2_pat)"/>
+  <rect width="240" height="320" fill="url(#t2_glow)"/>
+  
+  <!-- Eerie Moon & Stone Lantern -->
+  <circle cx="62" cy="68" r="30" fill="#d9f2e6" opacity="0.82"/>
+  <!-- Mossy stone grave lantern on left -->
+  <g transform="translate(18, 128)">
+    <path d="M2 22 L22 6 L42 22 Z" fill="#234245" stroke="#6ec9b8" stroke-width="1"/>
+    <rect x="10" y="22" width="24" height="24" fill="#172d30" stroke="#6ec9b8" stroke-width="1"/>
+    <circle cx="22" cy="34" r="6" fill="#ffd86b" opacity="0.9"/>
+    <rect x="14" y="46" width="16" height="46" fill="#1e383b"/>
+  </g>
+  <!-- Floating Will-o-wisps -->
+  <g>
+    <circle cx="192" cy="78" r="14" fill="#63f5d0" opacity="0.22" filter="url(#t2_blur)"/>
+    <circle cx="192" cy="78" r="5" fill="#c7fff0"/>
+    <circle cx="48" cy="112" r="10" fill="#63f5d0" opacity="0.22" filter="url(#t2_blur)"/>
+    <circle cx="48" cy="112" r="3.5" fill="#c7fff0"/>
+  </g>
+  <!-- Cloaked Gravedigger Ninja -->
+  <g>
+    <path d="M64 264 Q78 164 128 156 Q178 164 196 264 Z" fill="#111d24" stroke="#e0b020" stroke-width="1.5"/>
+    <path d="M94 134 Q94 86 128 82 Q162 86 162 134 Q158 158 128 162 Q98 158 94 134 Z" fill="#122129" stroke="#6ec9b8" stroke-width="1.4"/>
+    <circle cx="116" cy="122" r="3" fill="#ffd86b"/><circle cx="140" cy="122" r="3" fill="#ffd86b"/>
+    <!-- Iron Spade diagonal -->
+    <line x1="176" y1="88" x2="120" y2="236" stroke="#8a6236" stroke-width="5.5" stroke-linecap="round"/>
+    <path d="M108 228 L136 238 L120 264 L100 250 Z" fill="#708991" stroke="#c8e0e6" stroke-width="1.5"/>
+    <!-- Unearthed Glowing Golden Scroll -->
+    <g transform="translate(132, 186) rotate(16)">
+      <circle cx="24" cy="18" r="28" fill="#ffd84d" opacity="0.32" filter="url(#t2_blur)"/>
+      <rect x="4" y="6" width="44" height="24" rx="4" fill="#fff2c2" stroke="#e0b020" stroke-width="2"/>
+      <rect x="0" y="3" width="6" height="30" rx="3" fill="#b87d1c"/>
+      <rect x="46" y="3" width="6" height="30" rx="3" fill="#b87d1c"/>
+    </g>
+  </g>
+  <rect width="240" height="320" fill="url(#t2_vig)"/>
+  <!-- Subtle gold-leaf dust -->
+  <g fill="#f6d887" opacity="0.55">
+    <circle cx="26" cy="34" r="1.3"/><circle cx="212" cy="48" r="1.6"/><circle cx="195" cy="24" r="1"/>
+    <circle cx="44" cy="96" r="1.1"/><circle cx="218" cy="142" r="1.2"/><circle cx="18" cy="176" r="1"/>
+  </g>
+</svg>
