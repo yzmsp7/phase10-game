@@ -613,36 +613,114 @@ body.magical-mode .slot{background:#161229}
 .ma-rcard-nm small{font-size:11px;font-weight:400;color:var(--mute)}
 .ma-rcard-tx{font-size:var(--s1);color:#e5e1f7;line-height:1.35;font-weight:400}
 .ma-rtag{position:absolute;top:6px;right:6px;padding:2px 7px;border-radius:8px;font-size:11px;font-weight:600;background:#141024e8;color:var(--accent);border:1px solid var(--accent)}
-.ma-board{background:#120f21;border:3px solid #090710;border-radius:16px;padding:10px;margin:8px 0 12px;box-shadow:inset 0 0 0 2px #3c3466,0 10px 24px #06040dcc}
-.ma-board.wild{background:linear-gradient(180deg,#23122c 0%,#160e26 100%);box-shadow:inset 0 0 0 2px #a145c4,0 10px 24px #06040dcc}
-.ma-bhd{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;font-size:var(--s1)}
-.ma-start{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-height:46px;padding:6px 10px;margin-bottom:8px;border-radius:12px;background:linear-gradient(90deg,#2c7be5,#3b9ae8);border:2px solid #090710;color:#fff;box-shadow:inset 0 2px 0 #ffffff44}
-.ma-start-lb{font-weight:600;font-size:var(--s1);letter-spacing:1px;background:#0b0914aa;padding:2px 8px;border-radius:8px;flex:none}
-.ma-track{display:flex;flex-direction:column;gap:6px}
-.ma-trow{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;position:relative}
-.ma-cell{position:relative;min-height:66px;border-radius:10px;border:2px solid #090710;padding:3px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;box-shadow:inset 0 1.5px 0 #ffffff44;overflow:visible}
-.ma-cell.c1{background:#e874a8;color:#1b0812}
-.ma-cell.c2{background:#f5c83d;color:#211700}
-.ma-cell.c3{background:#3bb56b;color:#052110}
-.ma-cell.c4{background:#4794e6;color:#05182e}
-.ma-cell.c5{background:#eb5a3c;color:#fff}
-.ma-cell.corner{box-shadow:inset 0 0 0 2px #fff,0 0 10px #ffd23f66}
-.ma-cell.finish{background:repeating-conic-gradient(#141222 0 25%,#f9f6ee 0 50%) 50% / 14px 14px;border-color:var(--accent);box-shadow:0 0 14px #ffd23f88}
-.ma-cnum{position:absolute;top:2px;left:4px;font-size:10px;font-weight:600;line-height:1;opacity:.85;font-variant-numeric:tabular-nums;background:#00000033;color:#fff;padding:1px 4px;border-radius:5px}
-.ma-cdir{position:absolute;bottom:2px;right:3px;font-size:10px;opacity:.55;pointer-events:none;font-weight:600}
-.ma-csp{font-size:10px;font-weight:600;line-height:1.1;padding:1px 4px;border-radius:6px;background:#120d22dd;color:#fff;border:1px solid #ffffff55;white-space:nowrap;z-index:1}
-.ma-csp.star{color:#ffd23f;border-color:#ffd23f}
-.ma-csp.trip{color:#ff938b;border-color:#ff7266}
-.ma-csp.arr{color:#8df2b8;border-color:#5fe094}
-.ma-csp.back{color:#ffb4a8;border-color:#ff7b6b}
-.ma-toks{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:2px;z-index:2;max-width:100%}
-.ma-tok{position:relative;width:34px;height:34px;border-radius:50%;padding:0;border:2.5px solid var(--pc,#fff);background:#120f21;box-shadow:0 3px 8px #000b;cursor:pointer;flex:none;transition:transform .2s ease}
+/* 🏟️ 瘋狂運動會：田徑操場連續跑道（紅土/火山跑道、4條跑道線、180°彎道圓弧、起跑區與衝線區） */
+.ma-board{
+  --ma-h:68px;--ma-g:17px;--ma-turn:36px;
+  --tr-edge:#ad3828;--tr-mid:#c94935;--tr-hi:#d95740;
+  --tr-line:rgba(255,255,255,.9);--tr-lane:rgba(255,255,255,.34);
+  --tr-curb-a:#f8fafc;--tr-curb-b:#c82828;
+  position:relative;border-radius:18px;padding:10px 10px 12px;margin:8px 0 12px;
+  border:3px solid #163d24;
+  background:
+    radial-gradient(ellipse at 50% -10%,rgba(255,248,196,.2),transparent 58%),
+    radial-gradient(ellipse at 50% 50%,transparent 52%,rgba(5,20,10,.5) 100%),
+    repeating-linear-gradient(90deg,#1d6b3b 0 28px,#237a45 28px 56px);
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,.18),0 10px 26px #06040dcc;
+  overflow:hidden;
+}
+.ma-board.wild{
+  --tr-edge:#5b203c;--tr-mid:#752c4d;--tr-hi:#8b375c;
+  --tr-line:rgba(255,224,130,.88);--tr-lane:rgba(255,212,128,.28);
+  --tr-curb-a:#ffd23f;--tr-curb-b:#1d1228;
+  border-color:#53204d;
+  background:
+    radial-gradient(ellipse at 50% -5%,rgba(255,112,67,.22),transparent 55%),
+    radial-gradient(ellipse at 50% 50%,transparent 48%,rgba(10,5,18,.62) 100%),
+    repeating-linear-gradient(90deg,#1e152e 0 28px,#261b39 28px 56px);
+  box-shadow:inset 0 0 0 2px rgba(255,166,77,.24),0 10px 26px #06040dcc;
+}
+.ma-bhd{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;padding:6px 10px;border-radius:11px;background:rgba(12,16,22,.82);border:1.5px solid rgba(255,255,255,.18);font-size:var(--s1);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.ma-start{
+  position:relative;display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-height:48px;
+  padding:6px 12px 6px 10px;margin-bottom:8px;border-radius:12px;color:#fff;
+  background:
+    linear-gradient(180deg,transparent calc(33% - .6px),var(--tr-lane) calc(33% - .6px),var(--tr-lane) calc(33% + .6px),transparent calc(33% + .6px)),
+    linear-gradient(180deg,transparent calc(66% - .6px),var(--tr-lane) calc(66% - .6px),var(--tr-lane) calc(66% + .6px),transparent calc(66% + .6px)),
+    linear-gradient(180deg,var(--tr-edge) 0%,var(--tr-hi) 50%,var(--tr-edge) 100%);
+  border:2px solid var(--tr-line);
+  box-shadow:0 4px 12px rgba(0,0,0,.35),inset 0 0 0 1px rgba(0,0,0,.18);
+  z-index:2;
+}
+.ma-start::after{content:'START';position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;font-weight:700;letter-spacing:3px;color:rgba(255,255,255,.26);pointer-events:none}
+.ma-start-lb{display:inline-flex;align-items:center;gap:4px;font-weight:700;font-size:var(--s1);letter-spacing:.8px;background:rgba(12,10,20,.78);color:#fff;padding:3px 9px;border-radius:8px;border:1.5px solid rgba(255,255,255,.45);flex:none;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+.ma-track{
+  display:grid;
+  grid-template-columns:var(--ma-turn) repeat(6,minmax(0,1fr)) var(--ma-turn);
+  grid-template-rows:var(--ma-h) var(--ma-g) var(--ma-h) var(--ma-g) var(--ma-h) var(--ma-g) var(--ma-h) var(--ma-g) var(--ma-h);
+  position:relative;
+}
+.ma-trow{
+  grid-column:2 / 8;
+  display:grid;grid-template-columns:repeat(6,minmax(0,1fr));
+  height:var(--ma-h);position:relative;z-index:2;
+  background:
+    linear-gradient(180deg,transparent 1.25%,var(--tr-line) 1.25%,var(--tr-line) 5.75%,transparent 5.75%),
+    linear-gradient(180deg,transparent 94.25%,var(--tr-line) 94.25%,var(--tr-line) 98.75%,transparent 98.75%),
+    linear-gradient(180deg,transparent calc(25% - .6px),var(--tr-lane) calc(25% - .6px),var(--tr-lane) calc(25% + .6px),transparent calc(25% + .6px)),
+    linear-gradient(180deg,transparent calc(50% - .6px),var(--tr-lane) calc(50% - .6px),var(--tr-lane) calc(50% + .6px),transparent calc(50% + .6px)),
+    linear-gradient(180deg,transparent calc(75% - .6px),var(--tr-lane) calc(75% - .6px),var(--tr-lane) calc(75% + .6px),transparent calc(75% + .6px)),
+    linear-gradient(180deg,var(--tr-edge) 0%,var(--tr-mid) 16%,var(--tr-hi) 50%,var(--tr-mid) 84%,var(--tr-edge) 100%);
+  box-shadow:0 4px 6px -2px rgba(0,0,0,.36);
+}
+.ma-turn{position:relative;z-index:1;pointer-events:none;filter:drop-shadow(0 3px 5px rgba(0,0,0,.3))}
+.ma-turn svg{display:block;width:calc(100% + 1.5px);height:100%}
+.ma-turn.r{grid-column:8}.ma-turn.r svg{margin-left:-1.5px}
+.ma-turn.l{grid-column:1}.ma-turn.l svg{transform:scaleX(-1);margin-right:-1.5px}
+.ma-entry{grid-column:1;grid-row:1;position:relative;z-index:1;pointer-events:none;filter:drop-shadow(0 3px 5px rgba(0,0,0,.28))}
+.ma-entry svg{position:absolute;left:0;top:-10px;width:calc(100% + 1.5px);height:calc(100% + 10px);display:block}
+.ma-endcap{grid-column:8;grid-row:9;position:relative;z-index:1;pointer-events:none;filter:drop-shadow(0 3px 5px rgba(0,0,0,.28))}
+.ma-endcap svg{display:block;width:calc(100% + 1.5px);height:100%;margin-left:-1.5px}
+.ma-median{grid-column:2 / 8;display:flex;align-items:center;justify-content:center;gap:12px;font-size:10px;font-weight:600;letter-spacing:1.2px;color:rgba(255,255,255,.46);text-shadow:0 1px 2px rgba(0,0,0,.45);pointer-events:none;user-select:none}
+.ma-cell{
+  position:relative;height:100%;padding:2px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+  border-right:1.5px dashed rgba(255,255,255,.36);
+  overflow:visible;transition:background-color .2s ease;
+}
+.ma-cell:last-child{border-right:none}
+.ma-cell.alt{background:rgba(0,0,0,.075)}
+.ma-cell.mile{border-right-style:solid;border-right-color:rgba(255,255,255,.68)}
+.ma-cell.corner{background:linear-gradient(180deg,rgba(255,210,63,.22),rgba(255,210,63,.08));box-shadow:inset 3px 0 0 #ffd23f,inset 0 0 14px rgba(255,210,63,.25)}
+.ma-cell.sp-star{background:radial-gradient(circle at 50% 50%,rgba(255,210,63,.28),transparent 72%)}
+.ma-cell.sp-trip{background:repeating-linear-gradient(-45deg,rgba(0,0,0,.24) 0 5px,rgba(255,114,102,.18) 5px 10px)}
+.ma-cell.sp-arr{background:linear-gradient(90deg,rgba(74,222,128,.08),rgba(74,222,128,.3),rgba(74,222,128,.08))}
+.ma-cell.sp-back{background:linear-gradient(90deg,rgba(255,110,96,.1),rgba(255,110,96,.3),rgba(255,110,96,.1))}
+.ma-cell.finish{
+  background:
+    linear-gradient(90deg,rgba(255,210,63,.22),transparent 35%,transparent 65%,rgba(255,210,63,.24)),
+    repeating-conic-gradient(#171422 0 25%,#f9f6ee 0 50%) 50% / 12px 12px;
+  border-left:2.5px solid #ffd23f;
+  box-shadow:inset 0 0 14px rgba(255,210,63,.45);
+}
+.ma-cnum{position:absolute;top:4px;left:3px;font-size:10px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;background:rgba(16,8,6,.56);color:#fff;padding:1px 4px;border-radius:4px;letter-spacing:-.2px;z-index:1;pointer-events:none}
+.ma-cell.mile .ma-cnum,.ma-cell.corner .ma-cnum{background:rgba(20,14,4,.8);color:#ffd23f;box-shadow:0 0 0 1px rgba(255,210,63,.5)}
+.ma-cdir{position:absolute;top:3px;right:3px;font-size:11px;line-height:1;color:rgba(255,255,255,.42);pointer-events:none;font-weight:700}
+.ma-csp{position:absolute;bottom:3px;left:50%;transform:translateX(-50%);font-size:9.5px;font-weight:700;line-height:1.15;padding:1px 5px;border-radius:999px;background:rgba(14,10,24,.88);color:#fff;border:1px solid rgba(255,255,255,.45);white-space:nowrap;z-index:3;pointer-events:none;box-shadow:0 2px 4px rgba(0,0,0,.45)}
+.ma-csp.star{color:#ffd23f;border-color:#ffd23f;background:rgba(36,24,4,.92)}
+.ma-csp.trip{color:#ffb0a8;border-color:#ff7266;background:rgba(46,12,12,.92)}
+.ma-csp.arr{color:#8df2b8;border-color:#5fe094;background:rgba(8,40,22,.92)}
+.ma-csp.back{color:#ffb4a8;border-color:#ff7b6b;background:rgba(48,14,14,.92)}
+.ma-csp.half{color:#ffe082;border-color:#ffd23f;background:rgba(30,22,8,.9)}
+.ma-toks{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:2px;z-index:4;max-width:100%}
+.ma-toks.crowd{gap:0}.ma-toks.crowd .ma-tok{margin:-2px}
+.ma-tok{position:relative;width:34px;height:34px;border-radius:50%;padding:0;border:2.5px solid var(--pc,#fff);background:#120f21;box-shadow:0 4px 8px rgba(0,0,0,.72),0 0 0 1px rgba(0,0,0,.35);cursor:pointer;flex:none;transition:transform .2s ease}
 .ma-tok img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
-.ma-tok.act{box-shadow:0 0 0 2.5px var(--accent),0 0 14px var(--accent);transform:scale(1.12);z-index:4}
+.ma-tok.act{box-shadow:0 0 0 2.5px var(--accent),0 0 16px var(--accent),0 4px 10px rgba(0,0,0,.75);transform:scale(1.14);z-index:5}
 .ma-tok.trip{transform:rotate(-88deg);filter:brightness(.78)}
 .ma-tok.trip::after{content:'💫';position:absolute;top:-7px;right:-6px;font-size:13px;transform:rotate(88deg)}
 .ma-tok.fin::after{content:'🏆';position:absolute;top:-7px;right:-6px;font-size:12px}
-.ma-tok.sm{width:28px;height:28px}
+.ma-tok.sm{width:26px;height:26px}
+.ma-tok.xs{width:22px;height:22px;border-width:2px}
 .ma-rbar{display:flex;gap:6px;overflow-x:auto;padding:4px 0 8px;scrollbar-width:none}.ma-rbar::-webkit-scrollbar{display:none}
 .ma-rchip{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;padding:4px 8px 4px 4px;border-radius:999px;background:var(--panel);border:1.5px solid #423970;color:var(--ink);font-size:var(--s1);cursor:pointer;white-space:nowrap}
 .ma-rchip.act{border-color:var(--accent);background:#332b5e}
@@ -662,7 +740,7 @@ body.magical-mode .slot{background:#161229}
 .ma-tok.hop{animation:maHop .65s cubic-bezier(.2,1.35,.35,1) both;z-index:5}
 .ma-tok.moving{box-shadow:0 0 0 3px #fff,0 0 18px 4px var(--accent);z-index:6}
 .ma-cell.trail{box-shadow:inset 0 0 0 2.5px #fff,0 0 14px #ffd23faa}
-.ma-cell.trail::after{content:'';position:absolute;inset:0;border-radius:8px;background:#ffd23f38;pointer-events:none;animation:maTrail .45s ease-out both}
+.ma-cell.trail::after{content:'';position:absolute;inset:2px 0;background:#ffd23f44;pointer-events:none;animation:maTrail .45s ease-out both}
 @keyframes maTrail{from{opacity:.95}to{opacity:.18}}
 .ma-mbar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 10px;margin-bottom:8px;border-radius:10px;background:linear-gradient(90deg,#33265c,#241c45);border:1.5px solid var(--accent);color:#fff;font-size:var(--s1);font-weight:600;box-shadow:0 4px 12px #0006}
 .ma-mbar button{min-height:28px;padding:2px 10px;font-size:11px;border-radius:8px}
@@ -713,7 +791,9 @@ body.magical-mode .slot{background:#161229}
 .ma-tfoot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px}
 .ma-tfoot button{min-height:40px}
 @media(max-width:600px){
-.ma-cell{min-height:56px}.ma-tok{width:28px;height:28px}.ma-tok.sm{width:24px;height:24px}
+.ma-board{--ma-h:60px;--ma-g:15px;--ma-turn:26px;padding:8px 8px 10px}
+.ma-tok{width:28px;height:28px}.ma-tok.sm{width:23px;height:23px}.ma-tok.xs{width:20px;height:20px}
+.ma-csp{font-size:9px;padding:1px 4px;bottom:2px}.ma-cnum{font-size:9.5px;top:3px;left:2px}
 }
 
 body.ninja-mode{--bg:#120f1e;--panel:#1e1931;--panel2:#2a2444;--ink:#f5f2fc;--mute:#cdc6e4;--accent:#ff6b81;--nj-gold:#f6c945;background:radial-gradient(circle at 50% 0%,#2d1e47 0%,#120f1e 68%)}
@@ -3927,36 +4007,108 @@ function magical() {
       const k = held !== null ? held : (r.finished ? 30 : r.pos);
       (byPos[k] ??= []).push(r);
     }
-    const renderTok = (r, sm = false) => {
+    const renderTok = (r, sz = '') => {
       const p = pById[r.ownerId], col = MA_PCOLORS[(p?.color ?? 0) % MA_PCOLORS.length];
       const isAct = g.status === 'play' && (g.prompt?.racerId === r.id || (!g.prompt && g.activeRacerId === r.id));
       const isMov = ma.movingIds?.has(r.id);
       const isHop = ma.hopIds?.has(r.id);
       const showFin = r.finished && !(ma.animPos && ma.animPos[r.id] !== undefined && ma.animPos[r.id] < 30);
-      return `<button class="ma-tok ${sm ? 'sm' : ''} ${isAct ? 'act' : ''} ${isMov ? 'moving' : ''} ${isHop ? 'hop' : ''} ${r.tripped ? 'trip' : ''} ${showFin ? 'fin' : ''}" style="--pc:${col}" data-rid="${esc(r.id)}" data-a="maInspect" data-v="${esc(r.id)}" title="${esc(rName(r))}（${esc(nm(r.ownerId))}）" aria-label="${esc(rName(r))}"><img src="${maImg(r.base)}" alt="${esc(MA_MAP[r.base].name)}"></button>`;
+      return `<button class="ma-tok ${sz} ${isAct ? 'act' : ''} ${isMov ? 'moving' : ''} ${isHop ? 'hop' : ''} ${r.tripped ? 'trip' : ''} ${showFin ? 'fin' : ''}" style="--pc:${col}" data-rid="${esc(r.id)}" data-a="maInspect" data-v="${esc(r.id)}" title="${esc(rName(r))}（${esc(nm(r.ownerId))}）" aria-label="${esc(rName(r))}"><img src="${maImg(r.base)}" alt="${esc(MA_MAP[r.base].name)}"></button>`;
     };
-    const startToks = (byPos[0] || []).map((r) => renderTok(r, false)).join('');
-    // 5 列 × 6 欄蛇行賽道（1..30；第 30 格 = 終點線；第 15 格標示第 2 轉角供飛船參考）
+    const startToks = (byPos[0] || []).map((r) => renderTok(r, '')).join('');
+    // 連續彎道田徑跑道（起跑入口 → 5 條直道 + 4 個 180° 彎道圓弧 → 終點衝線緩衝區；15 格＝第 2 轉角、30 格＝終點線）
     const rows = [
-      { nums: [1, 2, 3, 4, 5, 6], dir: '→' },
-      { nums: [12, 11, 10, 9, 8, 7], dir: '←' },
-      { nums: [13, 14, 15, 16, 17, 18], dir: '→' },
-      { nums: [24, 23, 22, 21, 20, 19], dir: '←' },
-      { nums: [25, 26, 27, 28, 29, 30], dir: '→' },
+      { nums: [1, 2, 3, 4, 5, 6], dir: '→', gr: 1 },
+      { nums: [12, 11, 10, 9, 8, 7], dir: '←', gr: 3 },
+      { nums: [13, 14, 15, 16, 17, 18], dir: '→', gr: 5 },
+      { nums: [24, 23, 22, 21, 20, 19], dir: '←', gr: 7 },
+      { nums: [25, 26, 27, 28, 29, 30], dir: '→', gr: 9 },
     ];
-    const trackHTML = rows.map(({ nums, dir }) => `<div class="ma-trow">${nums.map((n) => {
-      const cIdx = ((n - 1) % 5) + 1;
-      const isFin = n === 30, isCorner = n === 15;
+    const trPal = isWild
+      ? { edge: '#5b203c', mid: '#752c4d', hi: '#8b375c', line: 'rgba(255,224,130,.88)', lane: 'rgba(255,212,128,.28)', curbA: '#ffd23f', curbB: '#1d1228' }
+      : { edge: '#ad3828', mid: '#c94935', hi: '#d95740', line: 'rgba(255,255,255,.9)', lane: 'rgba(255,255,255,.34)', curbA: '#f8fafc', curbB: '#c82828' };
+    const mkTurnSvg = (idx) => `<svg viewBox="-1 0 45 90" preserveAspectRatio="none" aria-hidden="true">
+      <defs><radialGradient id="maTG${idx}" cx="0" cy="45" r="45" gradientUnits="userSpaceOnUse" gradientTransform="translate(0,45) scale(0.878,1) translate(0,-45)">
+        <stop offset="11%" stop-color="${trPal.edge}"/><stop offset="27%" stop-color="${trPal.mid}"/><stop offset="56%" stop-color="${trPal.hi}"/><stop offset="84%" stop-color="${trPal.mid}"/><stop offset="100%" stop-color="${trPal.edge}"/>
+      </radialGradient></defs>
+      <path d="M 0 1.4 A 41.2 43.6 0 0 1 0 88.6" fill="none" stroke="${trPal.curbA}" stroke-width="3.2"/>
+      <path d="M 0 1.4 A 41.2 43.6 0 0 1 0 88.6" fill="none" stroke="${trPal.curbB}" stroke-width="3.2" stroke-dasharray="7 7"/>
+      <path d="M -1 0 L 0 0 A 39.5 45 0 0 1 0 90 L -1 90 L -1 50 L 0 50 A 5 5 0 0 0 0 40 L -1 40 Z" fill="url(#maTG${idx})"/>
+      <path d="M -1 10 L 0 10 A 30.6 35 0 0 1 0 80 L -1 80" fill="none" stroke="${trPal.lane}" stroke-width="1.2"/>
+      <path d="M -1 20 L 0 20 A 22 25 0 0 1 0 70 L -1 70" fill="none" stroke="${trPal.lane}" stroke-width="1.2"/>
+      <path d="M -1 30 L 0 30 A 13.4 15 0 0 1 0 60 L -1 60" fill="none" stroke="${trPal.lane}" stroke-width="1.2"/>
+      <path d="M -1 1.4 L 0 1.4 A 38.2 43.6 0 0 1 0 88.6 L -1 88.6" fill="none" stroke="${trPal.line}" stroke-width="1.8"/>
+      <path d="M -1 38.6 L 0 38.6 A 6.2 6.4 0 0 1 0 51.4 L -1 51.4" fill="none" stroke="${trPal.line}" stroke-width="1.8"/>
+      <path d="M 16 41 L 22 48 L 28 41" fill="none" stroke="rgba(255,255,255,.72)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>`;
+    const entrySvg = `<svg viewBox="0 -10 45 50" preserveAspectRatio="none" aria-hidden="true">
+      <defs><radialGradient id="maEG" cx="45" cy="-10" r="48" gradientUnits="userSpaceOnUse">
+        <stop offset="18%" stop-color="${trPal.edge}"/><stop offset="52%" stop-color="${trPal.hi}"/><stop offset="100%" stop-color="${trPal.edge}"/>
+      </radialGradient></defs>
+      <path d="M 4 -10 L 36 -10 Q 36 0 45 0 L 45 40 L 36 40 Q 4 40 4 8 Z" fill="url(#maEG)"/>
+      <path d="M 27.5 -10 Q 27.5 10 45 10" fill="none" stroke="${trPal.lane}" stroke-width="1.2"/>
+      <path d="M 20 -10 Q 20 20 45 20" fill="none" stroke="${trPal.lane}" stroke-width="1.2"/>
+      <path d="M 12.5 -10 Q 12.5 30 45 30" fill="none" stroke="${trPal.lane}" stroke-width="1.2"/>
+      <path d="M 5.4 -10 L 5.4 8 Q 5.4 38.6 36 38.6 L 45 38.6" fill="none" stroke="${trPal.line}" stroke-width="1.8"/>
+      <path d="M 34.6 -10 Q 34.6 1.4 45 1.4" fill="none" stroke="${trPal.line}" stroke-width="1.8"/>
+      <path d="M 24 16 L 31 20 L 24 24" fill="none" stroke="rgba(255,255,255,.78)" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>`;
+    const endcapSvg = `<svg viewBox="-1 0 45 40" preserveAspectRatio="none" aria-hidden="true">
+      <defs><linearGradient id="maCG" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="${trPal.edge}"/><stop offset="16%" stop-color="${trPal.mid}"/><stop offset="50%" stop-color="${trPal.hi}"/><stop offset="84%" stop-color="${trPal.mid}"/><stop offset="100%" stop-color="${trPal.edge}"/>
+      </linearGradient></defs>
+      <path d="M -1 0 L 20 0 A 20 20 0 0 1 20 40 L -1 40 Z" fill="url(#maCG)"/>
+      <line x1="-1" y1="10" x2="26" y2="10" stroke="${trPal.lane}" stroke-width="1.2" stroke-dasharray="4 3"/>
+      <line x1="-1" y1="20" x2="29" y2="20" stroke="${trPal.lane}" stroke-width="1.2" stroke-dasharray="4 3"/>
+      <line x1="-1" y1="30" x2="26" y2="30" stroke="${trPal.lane}" stroke-width="1.2" stroke-dasharray="4 3"/>
+      <path d="M -1 1.4 L 20 1.4 A 18.6 18.6 0 0 1 20 38.6 L -1 38.6" fill="none" stroke="${trPal.line}" stroke-width="1.8"/>
+      <polygon points="18,13 20.2,17.5 25,18.2 21.5,21.5 22.3,26.2 18,24 13.7,26.2 14.5,21.5 11,18.2 15.8,17.5" fill="#ffd23f" opacity=".82"/>
+    </svg>`;
+    const medians = [
+      { gr: 2, txt: '▸ 起跑衝刺 1–6  ·  7–12 折返 ◂' },
+      { gr: 4, txt: '▸ 中段彎道 13–18（15格飛船分界）▸' },
+      { gr: 6, txt: '◂ 後半追擊 19–24  ·  準備過彎 ◂' },
+      { gr: 8, txt: '▸ 最後直線衝刺 25–30 🏁 ▸' },
+    ];
+    const turns = [
+      { cls: 'r', gr: '1 / 4' },
+      { cls: 'l', gr: '3 / 6' },
+      { cls: 'r', gr: '5 / 8' },
+      { cls: 'l', gr: '7 / 10' },
+    ];
+    const rowsHTML = rows.map(({ nums, dir, gr }) => `<div class="ma-trow" style="grid-row:${gr}">${nums.map((n) => {
+      const isFin = n === 30, isCorner = n === 15, isMile = !isFin && n % 5 === 0;
       const sp = isWild && !isFin ? MA_WILD[n] : null;
-      const toks = (byPos[n] || []).map((r) => renderTok(r, (byPos[n]?.length ?? 0) >= 3)).join('');
+      const cnt = byPos[n]?.length ?? 0;
+      const tokSz = cnt >= 4 ? 'xs' : cnt >= 2 ? 'sm' : '';
+      const toks = (byPos[n] || []).map((r) => renderTok(r, tokSz)).join('');
       const isTrail = ma.trailCells?.has(n);
-      const spBadge = isFin ? '<span class="ma-csp star">🏁 終點</span>'
-        : sp ? `<span class="ma-csp ${sp.type === 'star' ? 'star' : sp.type === 'trip' ? 'trip' : sp.delta > 0 ? 'arr' : 'back'}">${sp.label}</span>`
-        : isCorner ? '<span class="ma-csp">↩轉角</span>' : '';
-      return `<div class="ma-cell ${isFin ? 'finish' : `c${cIdx}`} ${isCorner ? 'corner' : ''} ${isTrail ? 'trail' : ''}" data-cell="${n}" aria-label="第 ${n} 格${sp ? ` ${sp.label}` : ''}">
-        <span class="ma-cnum">${n}</span>${!isFin ? `<span class="ma-cdir">${dir}</span>` : ''}
-        ${spBadge}<div class="ma-toks">${toks}</div></div>`;
+      let spCls = '', spBadge = '';
+      if (isFin) {
+        spBadge = '<span class="ma-csp star">🏁 終點</span>';
+      } else if (sp) {
+        if (sp.type === 'star') { spCls = 'sp-star'; spBadge = '<span class="ma-csp star">⭐+1</span>'; }
+        else if (sp.type === 'trip') { spCls = 'sp-trip'; spBadge = '<span class="ma-csp trip">🪨絆</span>'; }
+        else {
+          const isFwd = sp.delta > 0;
+          const goRight = (dir === '→') ? isFwd : !isFwd;
+          const val = isFwd ? `+${sp.delta}` : `${sp.delta}`;
+          const lbl = goRight ? `${val}»` : `«${val}`;
+          spCls = isFwd ? 'sp-arr' : 'sp-back';
+          spBadge = `<span class="ma-csp ${isFwd ? 'arr' : 'back'}">${lbl}</span>`;
+        }
+      } else if (isCorner) {
+        spBadge = '<span class="ma-csp half">⚡15轉角</span>';
+      }
+      return `<div class="ma-cell ${n % 2 === 0 ? 'alt' : ''} ${isFin ? 'finish' : ''} ${isMile ? 'mile' : ''} ${isCorner ? 'corner' : ''} ${spCls} ${isTrail ? 'trail' : ''}" data-cell="${n}" aria-label="第 ${n} 格${sp ? ` ${sp.label}` : ''}">
+        <span class="ma-cnum">${n}</span>${!isFin ? `<span class="ma-cdir">${dir === '→' ? '›' : '‹'}</span>` : ''}
+        <div class="ma-toks ${cnt >= 3 ? 'crowd' : ''}">${toks}</div>${spBadge}</div>`;
     }).join('')}</div>`).join('');
+    const trackHTML = `<div class="ma-entry">${entrySvg}</div>`
+      + turns.map((t, i) => `<div class="ma-turn ${t.cls}" style="grid-row:${t.gr}">${mkTurnSvg(i)}</div>`).join('')
+      + medians.map((m) => `<div class="ma-median" style="grid-row:${m.gr}">${m.txt}</div>`).join('')
+      + rowsHTML
+      + `<div class="ma-endcap">${endcapSvg}</div>`;
 
     // 場上選手狀態快覽條（點擊可看詳細能力與複製狀態）
     const racerStrip = `<div class="ma-rbar">${g.racers.map((r) => {
@@ -3970,10 +4122,10 @@ function magical() {
 
     const moveBar = ma.moveBanner ? `<div class="ma-mbar"><span>${esc(ma.moveBanner)}</span><button class="ghost" data-a="maSkipMove">⏩ 跳過</button></div>` : '';
     mainHTML = `<div class="ma-board ${isWild ? 'wild' : ''}">
-      <div class="ma-bhd"><b>${isWild ? '🌋 狂野賽道 Wild Wilds' : '🌼 溫和賽道 Mild Mile'} · 第 ${g.race}/4 場</b>
+      <div class="ma-bhd"><b>${isWild ? '🌋 狂野跑道 Wild Wilds' : '🏟️ 溫和跑道 Mild Mile'} · 第 ${g.race}/4 場</b>
         <span class="fmeta">🏆+${g.goldChip} · 🥈+${g.silverChip}</span></div>
       ${moveBar}
-      <div class="ma-start" data-cell="0"><span class="ma-start-lb">🚦 起點 0</span>${startToks || '<span style="opacity:.7;font-size:var(--s1)">全員已出發</span>'}</div>
+      <div class="ma-start" data-cell="0"><span class="ma-start-lb">🚦 起跑區 0</span><div class="ma-toks">${startToks || '<span style="opacity:.8;font-size:var(--s1)">全員已起跑 💨</span>'}</div></div>
       <div class="ma-track">${trackHTML}</div>
     </div>${racerStrip}`;
 
